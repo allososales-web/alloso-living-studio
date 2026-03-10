@@ -92,6 +92,7 @@ body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:
   background:var(--surface);border-right:1px solid var(--border);
   min-height:calc(100vh - 55px);
   display:flex;flex-direction:column;
+  overflow-y:auto;
 }
 .left-inner{padding:28px 28px 24px;flex:1;}
 .phase-label{
@@ -555,6 +556,8 @@ body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:
             </div>
           </div>
 
+        </div>
+        <div style="padding:0 28px 24px;">
           <button class="btn-pri" onclick="goPhase2()">공간 확인하기 →</button>
         </div>
       </div>
@@ -937,7 +940,7 @@ function configFit(w_cm){
 
 // Does any config of this series have at least 'fit' or 'tight'?
 function seriesFit(series){
-  const fits = series.configs.map(c=>configFit(c.w));
+  const fits = series.configs.map(c=>configFit(c.w/10));
   if(fits.includes('fit'))   return 'fit';
   if(fits.includes('tight')) return 'tight';
   return 'nofit';
@@ -978,7 +981,7 @@ function buildSofaGroupHTML(s) {
       : `<div class="sg-fit-badge fit-no">✕ 부적합</div>`;
 
     const configRows = s.configs.map(cfg=>{
-      const cf = configFit(cfg.w);
+      const cf = configFit(cfg.w/10);
       const cfNofit = cf==='nofit';
       const cfBadge = cf==='fit'
         ? `<span class="sc-fit ok">적합</span>`
@@ -1024,7 +1027,7 @@ function pickConfig(seriesId, w_cm){
   const s = getSeries(seriesId);
   if(!s) return;
   selectedSofaId = seriesId;
-  selectedSofaW  = Math.round(w_cm/10); // store in cm
+  selectedSofaW  = Math.round(w_cm/10); // store in cm (w_cm is mm)
   sofaX = Math.round((canvasRoomPxW||300) * 0.08);
   sofaY = -1;
   sofaRot = 0;
@@ -1155,6 +1158,127 @@ function setStep(s){
   });
 }
 
+
+// ════════════════════════════════════
+// CANVAS DRAW
+// ════════════════════════════════════
+function updateCanvasMeta(){
+  const el = document.getElementById('canvasMeta');
+  if(el) el.textContent = room.w && room.d ? `${room.w} × ${room.d} cm` : '—';
+}
+
+function drawCanvas(){
+  const canvas = document.getElementById('roomCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const CW = canvas.width, CH = canvas.height;
+  ctx.clearRect(0, 0, CW, CH);
+  if(!room.w || !room.d) return;
+
+  // ── Scale: fit room into canvas with padding ──
+  const PAD = 36;
+  const scaleX = (CW - PAD*2) / room.w;
+  const scaleY = (CH - PAD*2) / room.d;
+  canvasScale = Math.min(scaleX, scaleY);
+
+  const roomPxW = room.w * canvasScale;
+  const roomPxH = room.d * canvasScale;
+  canvasRoomPxW = roomPxW;
+  const ox = (CW - roomPxW) / 2;
+  const oy = (CH - roomPxH) / 2;
+  canvasOx = ox;
+
+  // ── Room fill ──
+  ctx.fillStyle = '#DDD5C0';
+  ctx.fillRect(ox, oy, roomPxW, roomPxH);
+
+  // ── Room border ──
+  ctx.strokeStyle = '#B0A890';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(ox, oy, roomPxW, roomPxH);
+
+  // ── Wall thickness hint (top wall) ──
+  ctx.fillStyle = '#C8C0A8';
+  ctx.fillRect(ox, oy, roomPxW, 5);
+
+  // ── Dimension labels ──
+  ctx.fillStyle = '#7A7668';
+  ctx.font = `${Math.max(10, canvasScale * 18)}px 'Josefin Sans', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`${room.w}cm`, ox + roomPxW/2, oy - 8);
+  ctx.save();
+  ctx.translate(ox - 10, oy + roomPxH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText(`${room.d}cm`, 0, 0);
+  ctx.restore();
+
+  // ── Sofa ──
+  if(!selectedSofaId || !selectedSofaW) return;
+  const s = getSeries(selectedSofaId);
+  if(!s) return;
+
+  const isLandscape = sofaRot === 0 || sofaRot === 180;
+  const sofaWcm = isLandscape ? selectedSofaW : s.depth;
+  const sofaDcm = isLandscape ? s.depth       : selectedSofaW;
+  const sofaPxW = sofaWcm * canvasScale;
+  const sofaPxH = sofaDcm * canvasScale;
+
+  // Default Y: snap to top wall
+  if(sofaY < 0) sofaY = oy + 5;
+
+  // Clamp sofa inside room
+  const minX = ox, maxX = ox + roomPxW - sofaPxW;
+  const minY = oy, maxY = oy + roomPxH - sofaPxH;
+  sofaX = Math.max(minX, Math.min(maxX, sofaX));
+  sofaY = Math.max(minY, Math.min(maxY, sofaY));
+
+  // ── Walking space zone (45cm in front of sofa) ──
+  const walkPx = 45 * canvasScale;
+  const zoneY  = sofaY + sofaPxH;
+  const zoneH  = Math.min(walkPx, oy + roomPxH - zoneY);
+  if(zoneH > 0){
+    ctx.fillStyle = 'rgba(58,112,80,.10)';
+    ctx.fillRect(sofaX, zoneY, sofaPxW, zoneH);
+    ctx.strokeStyle = 'rgba(58,112,80,.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,3]);
+    ctx.strokeRect(sofaX, zoneY, sofaPxW, zoneH);
+    ctx.setLineDash([]);
+  }
+
+  // ── Sofa body ──
+  const fit = configFit(sofaWcm);  // sofaWcm is cm, room.w is cm → correct
+  const sofaColor = fit === 'fit'   ? 'rgba(42,72,112,.28)'
+                  : fit === 'tight' ? 'rgba(160,120,40,.28)'
+                  :                   'rgba(160,60,50,.22)';
+  const sofaBorder = fit === 'fit'   ? 'rgba(42,72,112,.55)'
+                   : fit === 'tight' ? 'rgba(160,120,40,.55)'
+                   :                   'rgba(160,60,50,.45)';
+
+  ctx.fillStyle = sofaColor;
+  ctx.fillRect(sofaX, sofaY, sofaPxW, sofaPxH);
+  ctx.strokeStyle = sofaBorder;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(sofaX, sofaY, sofaPxW, sofaPxH);
+
+  // ── Back cushion line ──
+  ctx.strokeStyle = sofaBorder;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3,3]);
+  const backH = Math.min(14, sofaPxH * 0.25);
+  ctx.strokeRect(sofaX + 3, sofaY + 3, sofaPxW - 6, backH);
+  ctx.setLineDash([]);
+
+  // ── Sofa label ──
+  ctx.fillStyle = 'rgba(26,26,24,.65)';
+  ctx.font = `${Math.max(9, Math.min(13, sofaPxW/8))}px 'Josefin Sans', sans-serif`;
+  ctx.textAlign = 'center';
+  const labelY = sofaY + sofaPxH/2 + 4;
+  ctx.fillText(s.name, sofaX + sofaPxW/2, labelY);
+  ctx.font = `${Math.max(8, Math.min(11, sofaPxW/10))}px 'Noto Sans KR', sans-serif`;
+  ctx.fillStyle = 'rgba(26,26,24,.4)';
+  ctx.fillText(`${sofaWcm}×${sofaDcm}cm`, sofaX + sofaPxW/2, labelY + 14);
+}
 
 // ════════════════════════════════════
 // RECOMMENDATIONS
