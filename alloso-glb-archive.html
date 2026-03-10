@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Alloso · Asset Archive</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16140F;--paper:#F4F1E8;--cream:#EAE5D6;
+  --border:#C8C1AA;--muted:#8A8468;--gold:#9A7D40;--gold-lt:#C4A860;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--ink);font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:rgba(255,255,255,.82);min-height:100vh;}
+
+.header{padding:32px 40px 26px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.h-brand{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:rgba(200,168,96,.55);margin-bottom:7px;}
+.h-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;}
+.h-title em{font-style:italic;color:rgba(200,168,96,.85);}
+.h-sub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:7px;}
+.h-actions{display:flex;gap:9px;flex-wrap:wrap;}
+.btn{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(255,255,255,.14);border-radius:1px;background:transparent;color:rgba(255,255,255,.45);cursor:pointer;transition:.15s;white-space:nowrap;}
+.btn:hover{border-color:rgba(200,168,96,.5);color:rgba(200,168,96,.8);}
+.btn.green{background:rgba(28,74,42,.8);border-color:rgba(80,180,100,.4);color:rgba(120,220,140,.85);}
+.btn.green:hover{background:rgba(28,74,42,1);}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:400;}
+.btn.gold:hover{background:var(--gold-lt);}
+
+.body{max-width:1000px;margin:0 auto;padding:32px 40px 80px;}
+
+/* PIPELINE */
+.pipeline{display:flex;align-items:flex-start;gap:0;margin-bottom:32px;overflow-x:auto;}
+.pipe-step{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:110px;}
+.pipe-box{padding:9px 12px;border:1px solid rgba(255,255,255,.1);border-radius:2px;background:rgba(255,255,255,.03);text-align:center;width:100%;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);}
+.pipe-box.here{border-color:rgba(200,168,96,.45);background:rgba(200,168,96,.06);color:rgba(200,168,96,.85);}
+.pipe-label{font-size:9px;color:rgba(255,255,255,.22);text-align:center;line-height:1.5;}
+.pipe-arr{font-size:16px;color:rgba(255,255,255,.1);margin:0 3px;margin-top:11px;flex-shrink:0;}
+
+/* DROP */
+.drop-zone{border:1.5px dashed rgba(255,255,255,.14);border-radius:2px;padding:36px;text-align:center;cursor:pointer;transition:.2s;background:rgba(255,255,255,.02);margin-bottom:24px;}
+.drop-zone:hover,.drop-zone.drag{border-color:rgba(200,168,96,.5);background:rgba(200,168,96,.04);}
+.dz-icon{font-size:24px;opacity:.25;margin-bottom:10px;}
+.dz-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px;}
+.dz-sub{font-size:11px;color:rgba(255,255,255,.28);line-height:1.8;}
+.dz-note{font-size:10px;color:rgba(200,168,96,.5);margin-top:8px;}
+#glbInput{display:none;}
+
+.proc-bar{display:none;margin-bottom:18px;}
+.pb-track{height:2px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;}
+.pb-fill{height:2px;background:var(--gold);width:0%;transition:width .1s;}
+.pb-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(255,255,255,.28);margin-top:4px;text-align:center;}
+
+.sec{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.sec-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.28);}
+.sec-line{flex:1;height:1px;background:rgba(255,255,255,.06);}
+.sec-count{font-family:'DM Mono',monospace;font-size:9px;color:rgba(200,168,96,.5);}
+
+/* TABLE */
+.asset-table{width:100%;border-collapse:collapse;margin-bottom:28px;}
+.asset-table th{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.22);padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);}
+.asset-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.asset-table tr:hover td{background:rgba(255,255,255,.02);}
+.td-name{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:300;color:rgba(255,255,255,.85);}
+.td-file{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);margin-top:3px;}
+.fi{font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:1px;padding:4px 8px;color:rgba(255,255,255,.6);transition:.15s;}
+.fi:focus{outline:none;border-color:rgba(200,168,96,.45);}
+.fi.wide{width:200px;}
+.fi.url{width:240px;color:rgba(255,255,255,.45);}
+.fi.url::placeholder{color:rgba(255,255,255,.15);}
+.fi.tag{width:110px;}
+.td-dim{font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.6);}
+.td-del{cursor:pointer;font-size:12px;color:rgba(255,255,255,.18);transition:.15s;padding:4px;}
+.td-del:hover{color:rgba(220,80,60,.7);}
+.badge-glb{font-size:8px;background:rgba(139,115,85,.15);color:rgba(200,168,96,.65);padding:2px 5px;border-radius:2px;margin-left:5px;vertical-align:middle;}
+
+/* MANIFEST */
+.manifest-wrap{border:1px solid rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:24px;}
+.manifest-head{padding:9px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;}
+.manifest-label{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.25);}
+pre#manifestCode{font-family:'DM Mono',monospace;font-size:10px;color:rgba(200,168,96,.65);padding:16px;line-height:1.7;white-space:pre-wrap;max-height:280px;overflow-y:auto;}
+
+/* GUIDE */
+.guide{border:1px solid rgba(200,168,96,.18);border-radius:2px;background:rgba(200,168,96,.03);padding:22px 24px;margin-bottom:20px;}
+.guide-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(200,168,96,.6);margin-bottom:16px;}
+.guide-steps{display:flex;flex-direction:column;gap:12px;}
+.gs{display:flex;gap:14px;}
+.gs-num{font-family:'DM Mono',monospace;font-size:11px;color:rgba(200,168,96,.4);flex-shrink:0;min-width:20px;}
+.gs-text{font-size:12px;color:rgba(255,255,255,.48);line-height:1.75;}
+code{font-family:'DM Mono',monospace;font-size:10px;background:rgba(255,255,255,.06);padding:1px 6px;border-radius:2px;color:rgba(200,168,96,.75);}
+
+/* R2 */
+.r2-box{border:1px solid rgba(255,255,255,.07);border-radius:2px;padding:16px 18px;background:rgba(255,255,255,.015);}
+.r2-title{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:10px;}
+.r2-body{font-size:11.5px;color:rgba(255,255,255,.36);line-height:1.85;}
+.r2-body strong{color:rgba(255,255,255,.55);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="h-brand">Alloso</div>
+    <div class="h-title">Asset <em>Archive</em></div>
+    <div class="h-sub">GLB 자산 관리 · manifest.json 생성기</div>
+  </div>
+  <div class="h-actions">
+    <div class="btn" onclick="clearAll()">초기화</div>
+    <div class="btn" onclick="copyManifest()">JSON 복사</div>
+    <div class="btn green" onclick="downloadManifest()">↓ manifest.json 저장</div>
+    <div class="btn gold" onclick="window.open('alloso-living-studio.html')">Living Studio →</div>
+  </div>
+</div>
+
+<div class="body">
+
+  <div class="pipeline">
+    <div class="pipe-step"><div class="pipe-box here">① Archive</div><div class="pipe-label">GLB 드롭<br>치수 추출</div></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-step"><div class="pipe-box here">② manifest.json</div><div class="pipe-label">저장 후<br>GitHub 커밋</div></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-step"><div class="pipe-box">③ Netlify</div><div class="pipe-label">자동 배포<br>~30초</div></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-step"><div class="pipe-box">④ 고객</div><div class="pipe-label">Living Studio<br>소파 배치</div></div>
+  </div>
+
+  <div class="drop-zone" id="dropZone"
+       ondragover="event.preventDefault();this.classList.add('drag')"
+       ondragleave="this.classList.remove('drag')"
+       ondrop="onDrop(event)"
+       onclick="document.getElementById('glbInput').click()">
+    <div class="dz-icon">📦</div>
+    <div class="dz-title">GLB 파일 드롭</div>
+    <div class="dz-sub">여러 파일 한 번에 · 대용량 지원 · 서버 업로드 없음</div>
+    <div class="dz-note">GLB에서 W·D·H 자동 추출 — 확인 후 URL만 입력하면 완성</div>
+  </div>
+  <input type="file" id="glbInput" accept=".glb" multiple onchange="onFileSelect(this.files)">
+
+  <div class="proc-bar" id="procBar">
+    <div class="pb-track"><div class="pb-fill" id="pbFill"></div></div>
+    <div class="pb-label" id="pbLabel">처리 중…</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">자산 목록</div>
+    <div class="sec-line"></div>
+    <div class="sec-count" id="assetCount">0개</div>
+  </div>
+  <table class="asset-table">
+    <thead>
+      <tr>
+        <th>소파 이름</th>
+        <th>Sofa ID</th>
+        <th>W × D × H (mm)</th>
+        <th>GLB URL</th>
+        <th>태그</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="assetBody">
+      <tr><td colspan="6" style="text-align:center;padding:28px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.16);">GLB 파일을 드롭해 시작하세요</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sec">
+    <div class="sec-title">manifest.json 미리보기</div>
+    <div class="sec-line"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.2);" id="manifestMeta">0 assets</div>
+  </div>
+  <div class="manifest-wrap">
+    <div class="manifest-head">
+      <div class="manifest-label">manifest.json — Living Studio가 fetch합니다</div>
+      <div class="btn" onclick="copyManifest()" style="font-size:8px;padding:4px 10px;" id="copyBtn">복사</div>
+    </div>
+    <pre id="manifestCode">{
+  "version": 2,
+  "assets": []
+}</pre>
+  </div>
+
+  <div class="guide">
+    <div class="guide-title">배포 가이드 · GitHub + Netlify (무료 · 영구)</div>
+    <div class="guide-steps">
+      <div class="gs"><div class="gs-num">01</div><div class="gs-text">GLB 드롭 → 치수 확인 → GLB URL 입력 → <code>manifest.json 저장</code></div></div>
+      <div class="gs"><div class="gs-num">02</div><div class="gs-text">GitHub 저장소 루트에 <code>manifest.json</code> 커밋<br>GLB 파일은 <code>/assets/</code> 폴더 또는 Cloudflare R2에 업로드</div></div>
+      <div class="gs"><div class="gs-num">03</div><div class="gs-text">Netlify → GitHub 저장소 연결 → 자동 배포 완료<br>이후 <code>git push</code> 할 때마다 자동 반영 (~30초)</div></div>
+      <div class="gs"><div class="gs-num">04</div><div class="gs-text"><strong style="color:rgba(255,255,255,.7);">새 소파 추가:</strong> GLB 드롭 → manifest.json 저장 → GitHub push → 끝</div></div>
+    </div>
+  </div>
+
+  <div class="r2-box">
+    <div class="r2-title">GLB 파일 저장 위치</div>
+    <div class="r2-body">
+      <strong>옵션 A · GitHub /assets/ 폴더</strong> — 파일당 100MB 이하, 무료. URL: <code>/assets/sofa-name.glb</code><br>
+      <strong>옵션 B · Cloudflare R2</strong> — 무료 10GB/월, 대용량 권장. URL: <code>https://pub-xxx.r2.dev/sofa.glb</code><br>
+      manifest.json의 <code>"glb"</code> 필드에 URL을 입력하면 Living Studio가 자동 연결합니다.
+    </div>
+  </div>
+
+</div>
+
+<script>
+let assets = [];
+let nextId = 1;
+
+function parseGLB(arrayBuffer) {
+  const view  = new DataView(arrayBuffer);
+  if (view.getUint32(0, true) !== 0x46546C67) throw new Error('GLB 형식이 아닙니다');
+  const jsonLen   = view.getUint32(12, true);
+  const jsonBytes = new Uint8Array(arrayBuffer, 20, jsonLen);
+  const json  = JSON.parse(new TextDecoder().decode(jsonBytes));
+
+  let bestW = 0, bestD = 0, bestH = 0;
+  const nodeNames = [];
+
+  for (const node of (json.nodes || [])) {
+    if (node.mesh === undefined || /^cube$/i.test(node.name || '')) continue;
+    if (node.name) nodeNames.push(node.name);
+    const mesh = (json.meshes || [])[node.mesh];
+    if (!mesh) continue;
+    const sc = Array.isArray(node.scale) ? node.scale[0] : 1;
+    for (const prim of (mesh.primitives || [])) {
+      const acc = (json.accessors || [])[prim.attributes?.POSITION];
+      if (!acc?.min || !acc?.max) continue;
+      const [mnX,mnY,mnZ] = acc.min, [mxX,mxY,mxZ] = acc.max;
+      const sX = mxX-mnX, sY = mxY-mnY, sZ = mxZ-mnZ;
+      for (const f of [sc*1000, sc*100, sc*10, sc, 10000, 1000]) {
+        const W=Math.round(sX*f), D=Math.round(sZ*f), H=Math.round(sY*f);
+        if (W>=400&&W<=8000&&D>=200&&D<=4000&&H>=100&&H<=2000) {
+          if (W > bestW) { bestW=W; bestD=D; bestH=H; } break;
+        }
+      }
+    }
+  }
+  return { W: bestW, D: bestD, H: bestH, nodeNames };
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag');
+  processFiles(Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.glb')));
+}
+function onFileSelect(files) { processFiles(Array.from(files)); }
+
+async function processFiles(files) {
+  if (!files.length) return;
+  document.getElementById('procBar').style.display = 'block';
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    document.getElementById('pbFill').style.width = (i/files.length*100) + '%';
+    document.getElementById('pbLabel').textContent = file.name + ' 처리 중…';
+    try {
+      const buf  = await file.arrayBuffer();
+      const {W,D,H,nodeNames} = parseGLB(buf);
+      const base   = file.name.replace(/\.glb$/i, '');
+      const sofaId = base.toLowerCase().replace(/[\s.\-]+/g,'_').replace(/^[\d_]+/,'');
+      const node   = nodeNames.find(n => n.length>2 && !/^cube$/i.test(n) && !/^\d/.test(n));
+      const name   = node ? node.replace(/^[-.\d]+\s*/,'').trim()
+                          : base.replace(/^[-.\d_]+/,'').replace(/_/g,' ').trim();
+      assets.push({ id:nextId++, name, sofaId, W, D, H, glbUrl:'', tag:'', fileName:file.name, fileSize:file.size });
+    } catch(e) { console.warn(file.name, e.message); }
+  }
+  document.getElementById('pbFill').style.width = '100%';
+  setTimeout(() => { document.getElementById('procBar').style.display='none'; }, 600);
+  render();
+}
+
+function render() {
+  document.getElementById('assetCount').textContent = assets.length + '개';
+  const tbody = document.getElementById('assetBody');
+  if (!assets.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;font-family:\'DM Mono\',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.16);">GLB 파일을 드롭해 시작하세요</td></tr>';
+    updateManifest(); return;
+  }
+  tbody.innerHTML = assets.map(a => `
+    <tr data-id="${a.id}">
+      <td><div class="td-name">${a.name}<span class="badge-glb">GLB</span></div><div class="td-file">${a.fileName} · ${(a.fileSize/1024/1024).toFixed(1)}MB</div></td>
+      <td><input class="fi wide" value="${a.sofaId}" placeholder="sofa_id" oninput="upd(${a.id},'sofaId',this.value)"></td>
+      <td class="td-dim">${a.W} × ${a.D} × ${a.H}</td>
+      <td><input class="fi url" value="${a.glbUrl}" placeholder="/assets/${a.fileName}" oninput="upd(${a.id},'glbUrl',this.value)"></td>
+      <td><input class="fi tag" value="${a.tag}" placeholder="모던·미니멀" oninput="upd(${a.id},'tag',this.value)"></td>
+      <td class="td-del" onclick="del(${a.id})">✕</td>
+    </tr>`).join('');
+  updateManifest();
+}
+
+function upd(id, field, val) {
+  const a = assets.find(x => x.id===id);
+  if (a) { a[field] = val; updateManifest(); }
+}
+function del(id) { assets = assets.filter(a => a.id!==id); render(); }
+function clearAll() { if (!assets.length || confirm('초기화할까요?')) { assets=[]; nextId=1; render(); } }
+
+function buildManifest() {
+  return {
+    version: 2,
+    updatedAt: new Date().toISOString().split('T')[0],
+    assets: assets.map(a => ({
+      sofaId:     a.sofaId || 'unnamed',
+      name:       a.name,
+      type:       'GLB 모델',
+      tag:        a.tag || '등록 모델',
+      W: a.W, D: a.D, H: a.H,
+      glb:        a.glbUrl || `/assets/${a.fileName}`,
+      configName: '기본',
+    }))
+  };
+}
+
+function updateManifest() {
+  const m = buildManifest();
+  document.getElementById('manifestCode').textContent = JSON.stringify(m, null, 2);
+  document.getElementById('manifestMeta').textContent = m.assets.length + ' assets';
+}
+
+function copyManifest() {
+  navigator.clipboard.writeText(JSON.stringify(buildManifest(), null, 2)).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ 복사됨';
+    setTimeout(() => btn.textContent = '복사', 1500);
+  });
+}
+
+function downloadManifest() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(buildManifest(), null, 2)], {type:'application/json'}));
+  a.download = 'manifest.json';
+  a.click();
+}
+
+updateManifest();
+</script>
+</body>
+</html>

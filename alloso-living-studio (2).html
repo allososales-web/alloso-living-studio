@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alloso Living Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@100;300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F4F0;
+  --surface:#FFFFFF;
+  --card:#F0EFE9;
+  --border:#DDDBD3;
+  --border2:#B8B5AA;
+  --accent:#1A1A18;
+  --accent2:#363630;
+  --gold:#8B7355;
+  --gold-lt:#BEA882;
+  --muted:#9A9890;
+  --text:#5A5A54;
+  --text2:#2C2C28;
+  --t:#2A4870;
+  --f:#7A5830;
+  --green:#3A7050;
+  --green-bg:rgba(58,112,80,.10);
+  --amber-bg:rgba(200,140,40,.10);
+  --amber:#9A7020;
+  --red-bg:rgba(180,60,50,.08);
+  --red:#903830;
+  --sh:0 1px 3px rgba(26,26,24,.06);
+  --sh2:0 6px 24px rgba(26,26,24,.09);
+  --sh3:0 16px 48px rgba(26,26,24,.13);
+  --r:2px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);}
+body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:var(--text2);}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex-direction:column;min-height:100vh;}
+
+/* ── TOP NAV ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-left{display:flex;align-items:center;gap:14px;}
+.nav-back{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;color:var(--muted);
+  transition:all .15s;text-decoration:none;
+}
+.nav-back:hover{border-color:var(--border2);color:var(--accent);}
+.nav-divider{width:1px;height:18px;background:var(--border);}
+.nav-eyebrow{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);}
+.nav-title{
+  font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:400;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--accent);
+}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.step-pill{
+  font-family:'Josefin Sans',sans-serif;font-size:9px;font-weight:400;
+  letter-spacing:.2em;text-transform:uppercase;
+  padding:4px 12px;border-radius:20px;
+  background:var(--card);border:1px solid var(--border);color:var(--muted);
+  transition:all .3s;
+}
+.step-pill.active{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.85);}
+
+/* ── PROGRESS BAR ── */
+.progress{
+  height:3px;background:var(--border);
+  display:flex;gap:2px;overflow:hidden;
+}
+.prog-seg{flex:1;background:var(--border);transition:background .4s;}
+.prog-seg.done{background:var(--accent);}
+.prog-seg.active{background:var(--gold);}
+
+/* ── MAIN ── */
+.main{flex:1;display:grid;grid-template-columns:1fr;max-width:1200px;margin:0 auto;width:100%;padding:0;}
+@media(min-width:900px){
+  .main{grid-template-columns:360px 1fr;align-items:start;}
+}
+
+/* ── LEFT PANEL ── */
+.left{
+  background:var(--surface);border-right:1px solid var(--border);
+  min-height:calc(100vh - 55px);
+  display:flex;flex-direction:column;
+}
+.left-inner{padding:28px 28px 24px;flex:1;}
+.phase-label{
+  font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.phase-label::after{content:'';flex:1;height:1px;background:rgba(139,115,85,.2);}
+.phase-title{
+  font-family:'Josefin Sans',sans-serif;font-size:22px;font-weight:300;
+  color:var(--accent);letter-spacing:.06em;line-height:1.3;margin-bottom:6px;
+}
+.phase-desc{font-size:11.5px;color:var(--muted);line-height:1.7;margin-bottom:24px;}
+
+/* ── INPUTS ── */
+.input-block{margin-bottom:20px;}
+.input-group-label{
+  font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+  padding-bottom:6px;border-bottom:1px solid var(--border);
+}
+.input-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.input-row:last-child{margin-bottom:0;}
+.ilab{font-size:11px;color:var(--muted);width:48px;flex-shrink:0;letter-spacing:.04em;}
+.ifield{
+  flex:1;background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:10px 12px;
+  font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:300;
+  color:var(--accent);outline:none;transition:border-color .18s,background .18s;
+}
+.ifield:focus{border-color:var(--gold);background:var(--surface);}
+.ifield.err{border-color:#C04040;}
+.iunit{font-size:11px;color:var(--muted);width:22px;text-align:right;flex-shrink:0;}
+.or-divider{
+  display:flex;align-items:center;gap:10px;margin:16px 0;
+  font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;
+}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── BTN ── */
+.btn-pri{
+  width:100%;background:var(--accent);border:none;border-radius:var(--r);
+  padding:14px 20px;
+  font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:400;
+  letter-spacing:.26em;text-transform:uppercase;
+  color:rgba(255,255,255,.9);cursor:pointer;transition:opacity .2s;
+  margin-top:4px;
+}
+.btn-pri:hover{opacity:.82;}
+.btn-pri:disabled{opacity:.3;cursor:not-allowed;}
+.btn-sec{
+  width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--r);
+  padding:11px 20px;font-size:11px;color:var(--text);cursor:pointer;
+  transition:all .15s;letter-spacing:.1em;margin-top:6px;
+}
+.btn-sec:hover{border-color:var(--border2);}
+
+/* ── SOFA PICKER (left panel p2) ── */
+.sofa-list{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
+.sofa-item{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:11px 13px;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:11px;
+}
+.sofa-item:hover{border-color:var(--border2);}
+.sofa-item.sel{border-color:var(--accent);background:rgba(26,26,24,.02);}
+.sofa-item.fit{border-left:3px solid var(--green);}
+.sofa-item.tight{border-left:3px solid var(--amber);}
+.sofa-item.nofit{opacity:.38;cursor:not-allowed;pointer-events:none;}
+.si-body{flex:1;}
+.si-name{
+  font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+}
+.si-dim{font-size:10px;color:var(--muted);margin-top:1px;}
+.si-price{font-size:10.5px;color:var(--gold);margin-top:2px;}
+.si-badge{
+  font-size:8.5px;padding:2px 7px;border-radius:20px;flex-shrink:0;letter-spacing:.08em;
+}
+.fit-ok{background:var(--green-bg);color:var(--green);border:1px solid rgba(58,112,80,.2);}
+.fit-tight{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(155,110,30,.2);}
+.fit-no{background:var(--red-bg);color:var(--red);border:1px solid rgba(180,60,50,.15);}
+
+/* sofa size selector */
+.size-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.sz-chip{
+  font-size:9.5px;padding:3px 9px;border-radius:20px;cursor:pointer;
+  background:var(--card);border:1px solid var(--border);color:var(--muted);transition:all .15s;
+}
+.sz-chip:hover{border-color:var(--border2);}
+.sz-chip.sel{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── RIGHT PANEL ── */
+.right{
+  padding:24px;display:flex;flex-direction:column;gap:18px;
+  background:var(--bg);
+}
+
+/* canvas area */
+.canvas-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;box-shadow:var(--sh);
+}
+.canvas-header{
+  padding:12px 16px 10px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.canvas-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
+.canvas-meta{font-size:10px;color:var(--text);}
+.canvas-body{padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+#roomCanvas{
+  border:1.5px solid var(--border2);border-radius:var(--r);
+  display:block;cursor:grab;background:#FAFAF8;
+  box-shadow:var(--sh2);max-width:100%;
+}
+#roomCanvas:active{cursor:grabbing;}
+.canvas-legend{
+  display:flex;gap:16px;font-size:9.5px;color:var(--muted);
+  flex-wrap:wrap;justify-content:center;
+}
+.leg-item{display:flex;align-items:center;gap:5px;}
+.leg-swatch{width:11px;height:11px;border-radius:1px;flex-shrink:0;}
+
+/* dim badge overlay */
+.dim-overlay{position:relative;width:fit-content;}
+.dim-badge{
+  position:absolute;background:var(--accent);color:rgba(255,255,255,.9);
+  font-family:'Josefin Sans',sans-serif;font-size:8.5px;
+  padding:2px 7px;border-radius:20px;pointer-events:none;white-space:nowrap;
+}
+
+/* info card */
+.info-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 18px;box-shadow:var(--sh);
+}
+.info-card-title{
+  font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.info-item{}
+.info-item-label{font-size:9.5px;color:var(--muted);margin-bottom:3px;}
+.info-item-val{
+  font-family:'Josefin Sans',sans-serif;font-size:16px;font-weight:300;
+  color:var(--accent);letter-spacing:.04em;
+}
+.info-item-sub{font-size:9.5px;color:var(--muted);margin-top:1px;}
+.stat-ok{color:var(--green);}
+.stat-warn{color:var(--amber);}
+.stat-bad{color:var(--red);}
+
+/* ── PHASE 3: AI Recommendations ── */
+.rec-section{display:flex;flex-direction:column;gap:10px;}
+.rec-header{
+  font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:2px;padding:0 2px;
+}
+.rec-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;display:flex;gap:13px;align-items:flex-start;
+  box-shadow:var(--sh);transition:all .2s;animation:fadeUp .3s ease both;
+}
+.rec-card:hover{box-shadow:var(--sh2);border-color:var(--border2);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.rec-rank{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:400;
+  letter-spacing:.08em;
+}
+.rec-rank.r1{background:var(--accent);color:rgba(200,184,128,.9);}
+.rec-rank.r2{background:var(--card2,#E8E6E0);color:var(--accent);border:1px solid var(--border);}
+.rec-rank.r3{background:var(--card);color:var(--muted);border:1px solid var(--border);}
+.rec-body{flex:1;}
+.rec-name{
+  font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:400;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;
+}
+.rec-why{font-size:11px;color:var(--text);line-height:1.6;}
+.rec-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.rec-tag{
+  font-size:9px;padding:2px 8px;border-radius:20px;letter-spacing:.06em;
+  background:var(--card);border:1px solid var(--border);color:var(--muted);
+}
+.rec-price{font-size:11px;color:var(--gold);margin-top:5px;}
+.rec-actions{display:flex;gap:6px;flex-direction:column;align-self:center;}
+.rec-btn-pri{
+  background:var(--accent);border:none;border-radius:var(--r);
+  padding:7px 13px;font-size:10px;color:rgba(255,255,255,.9);
+  cursor:pointer;letter-spacing:.1em;white-space:nowrap;transition:opacity .15s;
+}
+.rec-btn-pri:hover{opacity:.8;}
+.rec-btn-sec{
+  background:transparent;border:1px solid var(--border);border-radius:var(--r);
+  padding:6px 13px;font-size:10px;color:var(--text);
+  cursor:pointer;letter-spacing:.1em;white-space:nowrap;transition:border-color .15s;
+}
+.rec-btn-sec:hover{border-color:var(--border2);}
+
+/* ── PHASE SCREENS ── */
+.phase-screen{display:none;}
+.phase-screen.active{display:contents;}
+
+/* ── COMPLETE SCREEN ── */
+.complete-wrap{
+  grid-column:1/-1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:48px 24px;gap:16px;text-align:center;
+  animation:fadeUp .4s ease both;
+}
+.complete-mark{
+  font-size:36px;color:var(--gold);margin-bottom:4px;
+  animation:pulse 2s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+.complete-title{
+  font-family:'Josefin Sans',sans-serif;font-size:26px;font-weight:300;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--accent);
+}
+.complete-sub{font-size:12px;color:var(--muted);line-height:1.8;max-width:360px;}
+.complete-summary{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px 24px;width:100%;max-width:400px;
+  display:flex;flex-direction:column;gap:10px;text-align:left;
+}
+.cs-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.cs-row:last-child{border-bottom:none;padding-bottom:0;}
+.cs-label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.cs-val{
+  font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:400;
+  color:var(--accent);letter-spacing:.06em;
+}
+.complete-actions{display:flex;gap:10px;width:100%;max-width:400px;}
+.ca-btn{
+  flex:1;padding:13px;border-radius:var(--r);font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .15s;border:none;
+}
+.ca-pri{background:var(--accent);color:rgba(255,255,255,.9);}
+.ca-pri:hover{opacity:.82;}
+.ca-sec{background:transparent;border:1px solid var(--border);color:var(--text);}
+.ca-sec:hover{border-color:var(--border2);}
+
+/* ── TOOLTIPS ── */
+.tooltip{
+  position:fixed;background:var(--accent);color:rgba(255,255,255,.9);
+  font-size:10.5px;padding:5px 11px;border-radius:var(--r);
+  pointer-events:none;z-index:999;opacity:0;transition:opacity .2s;
+  white-space:nowrap;box-shadow:var(--sh2);letter-spacing:.04em;
+}
+.tooltip.show{opacity:1;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:899px){
+  .left{border-right:none;border-bottom:1px solid var(--border);}
+  .right{padding:16px;}
+  .info-grid{grid-template-columns:1fr 1fr 1fr;}
+  .nav{padding:0 16px;}
+}
+
+/* ── CANVAS CONTROLS ── */
+.canvas-controls{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:10px 16px;
+  background:var(--card);border-top:1px solid var(--border);
+}
+.ctrl-group{display:flex;align-items:center;gap:5px;}
+.ctrl-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-right:4px;}
+
+/* D-pad */
+.dpad{display:grid;grid-template-columns:repeat(3,28px);grid-template-rows:repeat(3,28px);gap:2px;}
+.dp{
+  width:28px;height:28px;border-radius:2px;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:13px;color:var(--text2);
+  transition:all .1s;user-select:none;
+  -webkit-user-select:none;
+}
+.dp:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.dp:active{transform:scale(.88);}
+.dp.blank{background:transparent;border-color:transparent;cursor:default;}
+.dp.blank:hover{background:transparent;border-color:transparent;}
+
+/* Rotate buttons */
+.rot-btn{
+  width:32px;height:32px;border-radius:2px;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;color:var(--text2);
+  transition:all .1s;user-select:none;
+}
+.rot-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.rot-btn:active{transform:scale(.88);}
+
+/* Rotation indicator */
+.rot-indicator{
+  font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.14em;
+  color:var(--muted);padding:4px 8px;
+  background:var(--surface);border:1px solid var(--border);border-radius:2px;
+  min-width:40px;text-align:center;
+}
+
+/* Step size toggle */
+.step-toggle{display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+.st-opt{
+  padding:4px 8px;font-size:9.5px;color:var(--muted);cursor:pointer;
+  background:var(--surface);border:none;transition:all .12s;letter-spacing:.06em;
+}
+.st-opt.active{background:var(--accent);color:#fff;}
+
+/* Canvas hint overlay */
+.canvas-hint{
+  font-size:9.5px;color:var(--muted);letter-spacing:.06em;
+  display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:center;
+  padding:0 0 2px;
+}
+.hint-key{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:2px;padding:1px 5px;font-size:8.5px;
+  font-family:'Josefin Sans',sans-serif;color:var(--accent);letter-spacing:.08em;
+}
+
+
+/* ── SOFA ACCORDION ── */
+.sofa-sec-label{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 4px 4px;margin-bottom:4px;
+}
+.sofa-group{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);
+  overflow:hidden;transition:border-color .18s;
+}
+.sofa-group.has-sel{border-color:var(--accent);}
+.sofa-group.nofit{ opacity:.35; pointer-events:none; }
+
+.sg-header{
+  padding:11px 13px 10px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  transition:background .15s;user-select:none;
+}
+.sg-header:hover{background:var(--card);}
+.sg-arrow{
+  font-size:11px;color:var(--muted);flex-shrink:0;
+  transition:transform .2s;
+}
+.sofa-group.open .sg-arrow{transform:rotate(90deg);}
+.sg-body{flex:1;}
+.sg-name{
+  font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+}
+.sg-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+.sg-fit-badge{
+  font-size:8.5px;padding:2px 7px;border-radius:20px;flex-shrink:0;letter-spacing:.08em;
+}
+
+/* config sub-items */
+.sg-configs{
+  display:none;border-top:1px solid var(--border);
+  background:var(--card);
+}
+.sofa-group.open .sg-configs{display:block;}
+.sg-config{
+  padding:8px 13px 8px 22px;
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;border-bottom:1px solid var(--border);
+  transition:background .12s;
+}
+.sg-config:last-child{border-bottom:none;}
+.sg-config:hover{background:rgba(26,26,24,.04);}
+.sg-config.sel{background:rgba(26,26,24,.05);}
+.sg-config.sel .sc-check{display:flex;}
+.sg-config.nofit{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.sc-bullet{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--border2);flex-shrink:0;transition:background .15s;
+}
+.sg-config.sel .sc-bullet{ background:var(--accent); }
+.sc-name{
+  font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent2);flex-shrink:0;min-width:54px;
+}
+.sc-w{font-size:10px;color:var(--muted);flex:1;}
+.sc-fit{font-size:9px;letter-spacing:.06em;border-radius:20px;padding:1px 7px;flex-shrink:0;}
+.sc-fit.ok{background:var(--green-bg);color:var(--green);}
+.sc-fit.tight{background:var(--amber-bg);color:var(--amber);}
+.sc-check{
+  width:14px;height:14px;border-radius:50%;background:var(--accent);
+  flex-shrink:0;display:none;align-items:center;justify-content:center;
+  font-size:7px;color:#fff;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-left">
+      <a class="nav-back" href="alloso-tf-final.html" title="홈으로">←</a>
+      <div class="nav-divider"></div>
+      <div>
+        <div class="nav-eyebrow">Alloso · Feature</div>
+        <div class="nav-title">Living Studio</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a href="alloso-glb-archive.html" target="_blank" id="dbAssetBadge"
+         style="display:none;font-size:9px;letter-spacing:.14em;font-family:'Josefin Sans',sans-serif;text-transform:uppercase;background:rgba(139,115,85,.12);color:var(--gold);padding:4px 10px;border-radius:20px;text-decoration:none;border:1px solid rgba(139,115,85,.25);">GLB</a>
+      <div class="step-pill" id="navStep">Step 1 of 3</div>
+    </div>
+  </nav>
+
+  <!-- PROGRESS -->
+  <div class="progress">
+    <div class="prog-seg active" id="ps0"></div>
+    <div class="prog-seg" id="ps1"></div>
+    <div class="prog-seg" id="ps2"></div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main" id="mainGrid">
+
+    <!-- ══════════════════════════════
+         PHASE 1 — Room Input
+    ══════════════════════════════ -->
+    <div class="phase-screen active" id="phase1">
+
+      <div class="left">
+        <div class="left-inner">
+          <div class="phase-label">01 — 공간 입력</div>
+          <div class="phase-title">거실 크기를<br>알려주세요</div>
+          <div class="phase-desc">정확하지 않아도 괜찮아요. 대략적인 크기로도 어울리는 소파를 찾아드려요.</div>
+
+          <div class="input-block">
+            <div class="input-group-label">거실 치수</div>
+            <div class="input-row">
+              <div class="ilab">가로폭</div>
+              <input class="ifield" id="roomW" type="number" placeholder="예: 420" min="200" max="1000">
+              <div class="iunit">cm</div>
+            </div>
+            <div class="input-row">
+              <div class="ilab">깊이</div>
+              <input class="ifield" id="roomD" type="number" placeholder="예: 350" min="150" max="1000">
+              <div class="iunit">cm</div>
+            </div>
+          </div>
+
+          <div class="or-divider">또는</div>
+
+          <div class="input-block">
+            <div class="input-group-label">평수로 입력</div>
+            <div class="input-row">
+              <div class="ilab">거실 평수</div>
+              <input class="ifield" id="roomPyung" type="number" placeholder="예: 15" min="5" max="60" oninput="pyungToSize()">
+              <div class="iunit">평</div>
+            </div>
+          </div>
+
+          <button class="btn-pri" onclick="goPhase2()">공간 확인하기 →</button>
+        </div>
+      </div>
+
+      <!-- Right: empty placeholder -->
+      <div class="right" style="align-items:center;justify-content:center;min-height:360px;">
+        <div style="text-align:center;color:var(--muted);">
+          <div style="font-size:36px;margin-bottom:12px;opacity:.3;">⬜</div>
+          <div style="font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;opacity:.4;">거실 치수를 입력하면<br>플로어플랜이 표시돼요</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         PHASE 2 — Floor Plan + Sofa
+    ══════════════════════════════ -->
+    <div class="phase-screen" id="phase2">
+
+      <div class="left">
+        <div class="left-inner">
+          <div class="phase-label">02 — 소파 선택</div>
+          <div class="phase-title">소파를 선택하고<br>배치해보세요</div>
+          <div class="phase-desc">공간에 맞는 소파가 초록으로 표시돼요. 드래그로 위치도 조정할 수 있어요.</div>
+
+          <div style="margin-bottom:10px;">
+            <div class="input-group-label">소파 시리즈</div>
+          </div>
+          <div class="sofa-list" id="sofaList"></div>
+          <div id="sizeChipsWrap" style="display:none;margin-bottom:0;">
+            <div class="input-group-label" style="margin-bottom:8px;">폭 선택</div>
+            <div class="size-chips" id="sizeChips"></div>
+          </div>
+        </div>
+        <div style="padding:0 28px 24px;">
+          <button class="btn-pri" id="toPhase3Btn" onclick="goPhase3()" disabled>AI 추천 보기 →</button>
+          <button class="btn-sec" onclick="goPhase1()">← 공간 다시 입력</button>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="canvas-card">
+          <div class="canvas-header">
+            <div class="canvas-title">Floor Plan · 1:1 Scale</div>
+            <div class="canvas-meta" id="canvasMeta">—</div>
+          </div>
+          <div class="canvas-body">
+            <div class="dim-overlay">
+              <canvas id="roomCanvas" width="560" height="380"></canvas>
+            </div>
+            <div class="canvas-hint">
+              <span>드래그로 이동</span>
+              <span class="hint-key">↑↓←→</span>
+              <span>키보드</span>
+              <span class="hint-key">R</span>
+              <span>회전</span>
+            </div>
+          </div>
+          <!-- CONTROLS TOOLBAR -->
+          <div class="canvas-controls" id="canvasControls" style="display:none;">
+            <!-- D-pad -->
+            <div class="ctrl-group">
+              <div class="dpad">
+                <div class="dp blank"></div>
+                <div class="dp" onclick="moveSofa(0,-1)" title="위로">↑</div>
+                <div class="dp blank"></div>
+                <div class="dp" onclick="moveSofa(-1,0)" title="왼쪽">←</div>
+                <div class="dp blank" style="background:var(--card);border-color:var(--border);cursor:default;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--muted);">이동</div>
+                <div class="dp" onclick="moveSofa(1,0)" title="오른쪽">→</div>
+                <div class="dp blank"></div>
+                <div class="dp" onclick="moveSofa(0,1)" title="아래로">↓</div>
+                <div class="dp blank"></div>
+              </div>
+            </div>
+            <!-- Step size -->
+            <div class="ctrl-group" style="flex-direction:column;gap:4px;">
+              <div style="font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">이동 단위</div>
+              <div class="step-toggle">
+                <div class="st-opt" id="step10" onclick="setStep(10)">10</div>
+                <div class="st-opt active" id="step30" onclick="setStep(30)">30</div>
+                <div class="st-opt" id="step50" onclick="setStep(50)">50cm</div>
+              </div>
+            </div>
+            <!-- Rotate -->
+            <div class="ctrl-group" style="flex-direction:column;gap:4px;align-items:center;">
+              <div style="font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">회전</div>
+              <div style="display:flex;gap:5px;align-items:center;">
+                <div class="rot-btn" onclick="rotateSofa(-90)" title="반시계 90°">↺</div>
+                <div class="rot-indicator" id="rotIndicator">0°</div>
+                <div class="rot-btn" onclick="rotateSofa(90)" title="시계 90°">↻</div>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div class="ctrl-group" style="flex-direction:column;gap:5px;align-self:flex-start;">
+              <div class="canvas-legend" style="flex-direction:column;gap:5px;">
+                <div class="leg-item"><div class="leg-swatch" style="background:#DDD5C0;border:1px solid #B0A890;"></div>거실 공간</div>
+                <div class="leg-item"><div class="leg-swatch" style="background:rgba(42,72,112,.25);border:1px solid rgba(42,72,112,.45);"></div>소파</div>
+                <div class="leg-item"><div class="leg-swatch" style="background:rgba(58,112,80,.12);border:1px dashed rgba(58,112,80,.4);"></div>동선 45cm</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card" id="spaceStat" style="display:none;">
+          <div class="info-card-title">공간 분석</div>
+          <div class="info-grid" id="spaceGrid"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         PHASE 3 — Recommendations
+    ══════════════════════════════ -->
+    <div class="phase-screen" id="phase3">
+
+      <div class="left">
+        <div class="left-inner">
+          <div class="phase-label">03 — AI 추천</div>
+          <div class="phase-title" id="p3Title">공간 기반<br>소파 추천</div>
+          <div class="phase-desc" id="p3Desc"></div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;">
+            <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">입력 공간</div>
+            <div style="display:flex;gap:20px;">
+              <div>
+                <div style="font-size:9.5px;color:var(--muted);margin-bottom:2px;">가로</div>
+                <div style="font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);" id="p3W">—</div>
+              </div>
+              <div>
+                <div style="font-size:9.5px;color:var(--muted);margin-bottom:2px;">깊이</div>
+                <div style="font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);" id="p3D">—</div>
+              </div>
+              <div>
+                <div style="font-size:9.5px;color:var(--muted);margin-bottom:2px;">면적</div>
+                <div style="font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);" id="p3Sqm">—</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-pri" onclick="goComplete()">상담으로 연결하기 →</button>
+          <button class="btn-sec" onclick="goPhase2()">← 소파 다시 선택</button>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="rec-section" id="recSection"></div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         COMPLETE
+    ══════════════════════════════ -->
+    <div class="phase-screen" id="phaseComplete">
+      <div class="complete-wrap">
+        <div class="complete-mark">✦</div>
+        <div class="complete-title">Perfect Fit</div>
+        <div class="complete-sub" id="completeSub">공간에 맞는 소파를 찾았어요.<br>상담을 통해 소재와 컬러까지 완성해보세요.</div>
+        <div class="complete-summary" id="completeSummary"></div>
+        <div class="complete-actions">
+          <button class="ca-btn ca-pri" onclick="location.href='alloso-tf-final.html'">소파 상담 시작하기 →</button>
+          <button class="ca-btn ca-sec" onclick="resetAll()">다시 시작</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// MANIFEST LOADER
+// /manifest.json 을 fetch → SOFA_CATALOG 상단에 주입
+// GitHub → Netlify 배포 구조에서 영구적으로 동작
+// 새 GLB 추가 = manifest.json 수정 + push → 자동 반영
+// ════════════════════════════════════════════════════════
+async function loadManifest() {
+  try {
+    const res = await fetch('./manifest.json', { cache: 'no-cache' });
+    if (!res.ok) return; // manifest 없으면 기본 카탈로그만 사용
+    const manifest = await res.json();
+    const assets = manifest.assets || [];
+
+    assets.forEach(a => {
+      if (!a.sofaId || !a.W || !a.D) return;
+      // 이미 하드코딩 카탈로그에 있으면 GLB URL만 업데이트
+      const existing = SOFA_CATALOG.find(s => s.id === a.sofaId);
+      if (existing) {
+        existing.glbUrl = a.glb || null;
+        existing.isGLB  = true;
+        return;
+      }
+      // 새 모델 → 카탈로그 최상단에 삽입
+      SOFA_CATALOG.unshift({
+        id:      a.sofaId,
+        name:    (a.name || a.sofaId).toUpperCase(),
+        nameKo:  a.name || a.sofaId,
+        type:    a.type  || 'GLB 모델',
+        depth:   Math.round(a.D / 10),   // mm → cm
+        tag:     a.tag   || '등록 모델',
+        isGLB:   true,
+        glbUrl:  a.glb   || null,
+        configs: (a.configs || []).length
+          ? a.configs
+          : [{ name: a.configName || '기본', w: a.W }],
+      });
+    });
+
+    updateGlbBadge();
+  } catch(e) { /* 네트워크 오류 시 기본 카탈로그로 동작 */ }
+}
+
+function updateGlbBadge() {
+  const n = SOFA_CATALOG.filter(s => s.isGLB).length;
+  const badge = document.getElementById('dbAssetBadge');
+  if (!badge) return;
+  badge.textContent = `GLB ${n}개`;
+  badge.style.display = n > 0 ? 'inline-flex' : 'none';
+}
+
+// ════════════════════════════════════
+// STATE
+// ════════════════════════════════════
+let room = {w:0, d:0};
+let selectedSofaId = null;
+let selectedSofaW = null;
+let sofaX = 40;    // px from room left edge
+let sofaY = -1;    // px from room top edge (-1 = snap to wall default)
+let sofaRot = 0;   // 0, 90, 180, 270 degrees
+let moveStep = 30; // cm per d-pad press
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let dragStartSofaX = 0;
+let dragStartSofaY = 0;
+let canvasScale = 1;
+let canvasOx = 0;
+let canvasRoomPxW = 0;
+
+// ─── Sofa Catalog (series + configs) ───
+const SOFA_CATALOG = [
+  {id:"regina",   name:"REGINA",      nameKo:"레지나",     type:"다리형 소파",     depth:104, tag:"클래식·고급",
+   configs:[{name:"2인", w:2200},{name:"3인", w:3070}]},
+  {id:"bonum_op", name:"BONUM OP",    nameKo:"보눔 OP",    type:"오픈암 소파",     depth:106, tag:"모던·오픈암",
+   configs:[{name:"2인", w:2320},{name:"3인", w:3200}]},
+  {id:"bonum_fu", name:"BONUM FU",    nameKo:"보눔 FU",    type:"풀세트 모듈",     depth:106, tag:"모던·모듈",
+   configs:[{name:"2인", w:2270},{name:"2.5인", w:2520},{name:"3인", w:3200},{name:"3.5인", w:3420}]},
+  {id:"capone",   name:"CAPONE",      nameKo:"카포네",     type:"쿠션백 소파",     depth:98,  tag:"쿠션백·내추럴",
+   configs:[{name:"2인", w:2200},{name:"3인", w:3140}]},
+  {id:"capone_g", name:"CAPONE GRAND",nameKo:"카포네 그랑", type:"대형 섹셔널",    depth:112, tag:"섹셔널·패밀리",
+   configs:[{name:"섹셔널 A", w:2310},{name:"섹셔널 B", w:3065},{name:"코너", w:3080}]},
+  {id:"sati",     name:"SATI",        nameKo:"사티",       type:"모던 소파",       depth:98,  tag:"모던·미니멀",
+   configs:[{name:"2인", w:2200},{name:"3인", w:2800},{name:"3.5인", w:3100}]},
+  {id:"sati_m",   name:"SATI MOTION", nameKo:"사티 모션",  type:"전동 리클라이너", depth:108, tag:"리클라이너",
+   configs:[{name:"전동 2인", w:2080}]},
+  {id:"querencia",name:"QUERENCIA",   nameKo:"케렌시아",   type:"로우 모듈",       depth:110, tag:"럭셔리·로우",
+   configs:[{name:"2인 A", w:2050},{name:"2인 B", w:2120},{name:"3인", w:3000},{name:"3.5인", w:3150}]},
+  {id:"vard",     name:"VARD",        nameKo:"바드",       type:"스칸디나비안",    depth:88,  tag:"스칸디·컴팩트",
+   configs:[{name:"1인", w:1800},{name:"2인", w:1900},{name:"3인", w:2600}]},
+  {id:"stan",     name:"STAN",        nameKo:"스탠",       type:"대형 모듈",       depth:120, tag:"대형·프리미엄",
+   configs:[{name:"섹셔널 A", w:2580},{name:"섹셔널 B", w:3580},{name:"코너 A", w:3620},{name:"풀세트", w:4780}]},
+  {id:"bihar",    name:"BIHAR",       nameKo:"비하르",     type:"로우 모듈",       depth:102, tag:"로우·내추럴",
+   configs:[{name:"2인", w:2160},{name:"3인", w:2880},{name:"4인", w:3600}]},
+  {id:"everyday", name:"EVERYDAY",    nameKo:"에브리데이", type:"캐주얼 소파",     depth:100, tag:"캐주얼·패밀리",
+   configs:[{name:"2인", w:2160},{name:"2.5인", w:2680},{name:"3인", w:2960}]},
+  {id:"holiday",  name:"HOLIDAY",     nameKo:"홀리데이",   type:"가족 소파",       depth:102, tag:"패밀리·포근",
+   configs:[{name:"2인", w:2080},{name:"3인", w:2770},{name:"3.5인", w:3250}]},
+];
+
+// Flat lookup helpers
+function getSeries(id){ return SOFA_CATALOG.find(s=>s.id===id); }
+function getConfig(seriesId, configName){ const s=getSeries(seriesId); return s?.configs.find(c=>c.name===configName); }
+
+// Legacy SOFAS shim (for drawCanvas & recs)
+function currentSofa(){
+  if(!selectedSofaId) return null;
+  const s = getSeries(selectedSofaId);
+  if(!s) return null;
+  return { id:s.id, name:s.name, nameKo:s.nameKo, tag:s.tag, type:s.type,
+           d:s.depth, w:selectedSofaW||s.configs[0].w };
+}
+
+// ════
+
+// ════════════════════════════════════
+// PHASE NAVIGATION
+// ════════════════════════════════════
+function showPhase(id){
+  ['phase1','phase2','phase3','phaseComplete'].forEach(p=>{
+    document.getElementById(p).className = 'phase-screen' + (p===id ? ' active' : '');
+  });
+  const steps = {phase1:0,phase2:1,phase3:2,phaseComplete:2};
+  const cur = steps[id] ?? 0;
+  const labels = {phase1:'Step 1 of 3',phase2:'Step 2 of 3',phase3:'Step 3 of 3',phaseComplete:'완료'};
+  document.getElementById('navStep').textContent = labels[id] || '';
+  for(let i=0;i<3;i++){
+    const el = document.getElementById('ps'+i);
+    if(!el) continue;
+    el.className = 'prog-seg' + (i < cur ? ' done' : i===cur ? ' active' : '');
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goPhase1(){ showPhase('phase1'); }
+
+function goPhase2(){
+  let w = parseFloat(document.getElementById('roomW').value);
+  let d = parseFloat(document.getElementById('roomD').value);
+  if(!w || !d){
+    ['roomW','roomD'].forEach(id=>{
+      if(!parseFloat(document.getElementById(id).value)){
+        document.getElementById(id).classList.add('err');
+        setTimeout(()=>document.getElementById(id).classList.remove('err'),1500);
+      }
+    });
+    return;
+  }
+  room = {w,d};
+  buildSofaList();
+  updateCanvasMeta();
+  showPhase('phase2');
+  setTimeout(drawCanvas, 60);
+}
+
+function goPhase3(){
+  if(!selectedSofaId) return;
+  const sofa = getSeries(selectedSofaId);
+  document.getElementById('p3Title').textContent = sofa ? `${sofa.name}\n추천 구성` : 'AI 추천';
+  document.getElementById('p3Title').style.whiteSpace='pre-line';
+  document.getElementById('p3Desc').textContent = `${room.w}×${room.d}cm 거실 기준 AI 분석 결과예요. 세 가지 추천안을 비교해보세요.`;
+  document.getElementById('p3W').textContent = room.w+'cm';
+  document.getElementById('p3D').textContent = room.d+'cm';
+  document.getElementById('p3Sqm').textContent = ((room.w*room.d)/10000).toFixed(1)+'㎡';
+  buildRecs();
+  showPhase('phase3');
+}
+
+function goComplete(){
+  buildCompleteSummary();
+  showPhase('phaseComplete');
+}
+
+function resetAll(){
+  room={w:0,d:0}; selectedSofaId=null; selectedSofaW=null; sofaX=40; sofaY=-1; sofaRot=0;
+  document.getElementById('roomW').value='';
+  document.getElementById('roomD').value='';
+  document.getElementById('roomPyung').value='';
+  showPhase('phase1');
+}
+
+// ════════════════════════════════════
+// ROOM SIZE HELPERS
+// ════════════════════════════════════
+function pyungToSize(){
+  const p = parseFloat(document.getElementById('roomPyung').value);
+  if(!p || p<=0) return;
+  const sqm = p * 3.3 * 0.52;
+  const sw = Math.sqrt(sqm) * 100;
+  document.getElementById('roomW').value = Math.round(sw * 1.28);
+  document.getElementById('roomD').value = Math.round(sw * 0.92);
+}
+
+// ════════════════════════════════════
+// SOFA LIST
+// ════════════════════════════════════
+// ════════════════════════════════════
+// SOFA LIST — accordion tree
+// ════════════════════════════════════
+
+// Config fit vs room width
+function configFit(w_cm){
+  const ratio = w_cm / room.w;
+  if(ratio <= 0.70) return 'fit';
+  if(ratio <= 0.82) return 'tight';
+  return 'nofit';
+}
+
+// Does any config of this series have at least 'fit' or 'tight'?
+function seriesFit(series){
+  const fits = series.configs.map(c=>configFit(c.w));
+  if(fits.includes('fit'))   return 'fit';
+  if(fits.includes('tight')) return 'tight';
+  return 'nofit';
+}
+
+function buildSofaList(){
+  const list = document.getElementById('sofaList');
+
+  // GLB 자산 섹션 헤더 (있을 때만)
+  const glbItems = SOFA_CATALOG.filter(s => s.isGLB);
+  const catalogItems = SOFA_CATALOG.filter(s => !s.isGLB);
+
+  let html = '';
+
+  if (glbItems.length) {
+    html += `<div class="sofa-sec-label">
+      <span style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-family:'Josefin Sans',sans-serif;">GLB 등록 모델</span>
+      <a href="alloso-glb-archive.html" target="_blank" style="font-size:9px;color:var(--muted);text-decoration:none;letter-spacing:.08em;">관리 →</a>
+    </div>`;
+    html += glbItems.map(s => buildSofaGroupHTML(s)).join('');
+    html += `<div style="height:1px;background:var(--border);margin:10px 0;"></div>
+      <div class="sofa-sec-label"><span style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-family:'Josefin Sans',sans-serif;">기본 카탈로그</span></div>`;
+  }
+
+  html += catalogItems.map(s => buildSofaGroupHTML(s)).join('');
+  list.innerHTML = html;
+}
+
+function buildSofaGroupHTML(s) {
+    const sf = seriesFit(s);
+    const nofit = sf === 'nofit';
+    const minW = Math.min(...s.configs.map(c=>c.w));
+    const maxW = Math.max(...s.configs.map(c=>c.w));
+    const sfBadge = sf==='fit'
+      ? `<div class="sg-fit-badge fit-ok">✓ 적합</div>`
+      : sf==='tight'
+      ? `<div class="sg-fit-badge fit-tight">△ 주의</div>`
+      : `<div class="sg-fit-badge fit-no">✕ 부적합</div>`;
+
+    const configRows = s.configs.map(cfg=>{
+      const cf = configFit(cfg.w);
+      const cfNofit = cf==='nofit';
+      const cfBadge = cf==='fit'
+        ? `<span class="sc-fit ok">적합</span>`
+        : cf==='tight'
+        ? `<span class="sc-fit tight">주의</span>`
+        : '';
+      const isSelConfig = (selectedSofaId===s.id && selectedSofaW===cfg.w);
+      return `<div class="sg-config${cfNofit?' nofit':''}${isSelConfig?' sel':''}"
+        onclick="pickConfig('${s.id}',${cfg.w})">
+        <div class="sc-bullet"></div>
+        <div class="sc-name">${cfg.name}</div>
+        <div class="sc-w">${cfg.w/10}cm × ${s.depth}D</div>
+        ${cfBadge}
+        <div class="sc-check">✓</div>
+      </div>`;
+    }).join('');
+
+    const isOpen = selectedSofaId === s.id;
+    const glbMark = s.isGLB ? `<span style="font-size:8px;letter-spacing:.06em;background:rgba(139,115,85,.12);color:var(--gold);padding:1px 5px;border-radius:2px;margin-left:4px;">GLB</span>` : '';
+    return `<div class="sofa-group${nofit?' nofit':''}${isOpen?' open has-sel':''}" id="sg_${s.id}">
+      <div class="sg-header" onclick="toggleGroup('${s.id}')">
+        <div class="sg-arrow">›</div>
+        <div class="sg-body">
+          <div class="sg-name">${s.name}${glbMark}</div>
+          <div class="sg-meta">${minW/10}–${maxW/10}cm · ${s.type}</div>
+        </div>
+        ${sfBadge}
+      </div>
+      <div class="sg-configs">${configRows}</div>
+    </div>`;
+}
+
+function toggleGroup(id){
+  const el = document.getElementById('sg_'+id);
+  if(!el) return;
+  const isOpen = el.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.sofa-group').forEach(g=>g.classList.remove('open'));
+  if(!isOpen) el.classList.add('open');
+}
+
+function pickConfig(seriesId, w_cm){
+  const s = getSeries(seriesId);
+  if(!s) return;
+  selectedSofaId = seriesId;
+  selectedSofaW  = Math.round(w_cm/10); // store in cm
+  sofaX = Math.round((canvasRoomPxW||300) * 0.08);
+  sofaY = -1;
+  sofaRot = 0;
+
+  // Rebuild list to update sel state + keep group open
+  buildSofaList();
+  const grp = document.getElementById('sg_'+seriesId);
+  if(grp){ grp.classList.add('open','has-sel'); }
+
+  document.getElementById('sizeChipsWrap').style.display='none';
+  document.getElementById('toPhase3Btn').disabled = false;
+  document.getElementById('canvasControls').style.display='flex';
+  document.getElementById('rotIndicator').textContent='0°';
+  drawCanvas();
+  updateSpaceStats();
+}
+
+function updateSpaceStats(){
+  if(!selectedSofaId || !selectedSofaW) return;
+  const s = getSeries(selectedSofaId);
+  if(!s) return;
+  const isLandscape = sofaRot===0 || sofaRot===180;
+  const effW = isLandscape ? selectedSofaW : s.depth;
+  const effD = isLandscape ? s.depth : selectedSofaW;
+  const ratio = Math.round(effW/room.w*100);
+  const front = room.d - effD - 30;
+  const ratioOk = ratio >= 54 && ratio <= 74;
+  const frontOk = front >= 45;
+
+  document.getElementById('spaceStat').style.display='block';
+  document.getElementById('spaceGrid').innerHTML = `
+    <div class="info-item">
+      <div class="info-item-label">소파/거실 비율</div>
+      <div class="info-item-val ${ratioOk?'stat-ok':'stat-warn'}">${ratio}%</div>
+      <div class="info-item-sub">${ratioOk?'이상적':'권장 54–74%'}</div>
+    </div>
+    <div class="info-item">
+      <div class="info-item-label">전면 동선</div>
+      <div class="info-item-val ${frontOk?'stat-ok':'stat-warn'}">${front}cm</div>
+      <div class="info-item-sub">${frontOk?'충분':'최소 45cm 필요'}</div>
+    </div>
+    <div class="info-item">
+      <div class="info-item-label">소파 깊이</div>
+      <div class="info-item-val">${s.depth}cm</div>
+      <div class="info-item-sub">좌석 깊이</div>
+    </div>
+    <div class="info-item">
+      <div class="info-item-label">여유 공간</div>
+      <div class="info-item-val">${room.w - effW}cm</div>
+      <div class="info-item-sub">좌우 여백 합계</div>
+    </div>`;
+}
+
+
+// ── Canvas drag (2D) + keyboard ──
+(function setupDrag(){
+  window.addEventListener('load', async ()=>{
+    // ── manifest.json 로드 (없으면 기본 카탈로그) ──
+    await loadManifest();
+
+    const canvas = document.getElementById('roomCanvas');
+    if(!canvas) return;
+
+    // Mouse drag
+    canvas.addEventListener('mousedown', e=>{
+      if(!selectedSofaId) return;
+      e.preventDefault();
+      isDragging=true;
+      dragStartX=e.clientX; dragStartY=e.clientY;
+      dragStartSofaX=sofaX; dragStartSofaY=sofaY;
+    });
+    canvas.addEventListener('touchstart',e=>{
+      if(!selectedSofaId||e.touches.length!==1) return;
+      isDragging=true;
+      dragStartX=e.touches[0].clientX; dragStartY=e.touches[0].clientY;
+      dragStartSofaX=sofaX; dragStartSofaY=sofaY;
+    },{passive:true});
+    const onMove=(cx,cy)=>{
+      if(!isDragging) return;
+      sofaX = dragStartSofaX + (cx-dragStartX);
+      sofaY = dragStartSofaY + (cy-dragStartY);
+      drawCanvas(); updateSpaceStats();
+    };
+    canvas.addEventListener('mousemove',e=>onMove(e.clientX,e.clientY));
+    canvas.addEventListener('touchmove',e=>onMove(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+    const end=()=>{isDragging=false;};
+    canvas.addEventListener('mouseup',end);
+    canvas.addEventListener('touchend',end);
+    document.addEventListener('mouseup',end);
+
+    // Keyboard
+    document.addEventListener('keydown', e=>{
+      if(!selectedSofaId) return;
+      const stepPx = moveStep * canvasScale;
+      if(e.key==='ArrowLeft')  { e.preventDefault(); sofaX-=stepPx; drawCanvas(); updateSpaceStats(); }
+      if(e.key==='ArrowRight') { e.preventDefault(); sofaX+=stepPx; drawCanvas(); updateSpaceStats(); }
+      if(e.key==='ArrowUp')    { e.preventDefault(); sofaY-=stepPx; drawCanvas(); updateSpaceStats(); }
+      if(e.key==='ArrowDown')  { e.preventDefault(); sofaY+=stepPx; drawCanvas(); updateSpaceStats(); }
+      if(e.key==='r'||e.key==='R') { rotateSofa(90); }
+    });
+  });
+})();
+
+function moveSofa(dx, dy){
+  if(!selectedSofaId) return;
+  const stepPx = moveStep * canvasScale;
+  sofaX += dx * stepPx;
+  sofaY += dy * stepPx;
+  drawCanvas(); updateSpaceStats();
+}
+
+function rotateSofa(deg){
+  sofaRot = ((sofaRot + deg) % 360 + 360) % 360;
+  // Only snap to 0/90/180/270
+  sofaRot = Math.round(sofaRot/90)*90 % 360;
+  // Reset Y so sofa doesn't clip after rotation
+  sofaY = -1;
+  drawCanvas(); updateSpaceStats();
+  const el=document.getElementById('rotIndicator');
+  if(el) el.textContent=sofaRot+'°';
+}
+
+function setStep(s){
+  moveStep=s;
+  [10,30,50].forEach(v=>{
+    const el=document.getElementById('step'+v);
+    if(el) el.className='st-opt'+(v===s?' active':'');
+  });
+}
+
+
+// ════════════════════════════════════
+// RECOMMENDATIONS
+// ════════════════════════════════════
+const REC_REASONS = {
+  sati:      ['거실 폭 대비 비율이 이상적이에요', '날렵한 프레임으로 공간이 넓어 보여요', '깊이가 얕아 동선 확보가 여유로워요'],
+  regina:    ['클래식한 실루엣이 공간에 격을 더해요', '아치형 다리로 바닥이 트여 보여요', '폭 다양성이 공간에 잘 맞아요'],
+  bonum:     ['모듈 구성으로 공간에 유연하게 맞춰요', '개방형 암이 거실을 넓어 보이게 해요', '구성에 따라 폭 조절이 가장 자유로워요'],
+  vard:      ['컴팩트한 크기로 여백이 충분히 확보돼요', '원목 다리로 바닥이 시각적으로 넓어져요', '소공간·정사각 거실에 특히 잘 어울려요'],
+  querencia: ['낮은 높이로 공간이 더 넓어 보여요', '로우 프로파일이 개방감을 극대화해요', '깊은 시트로 공간 활용도가 높아요'],
+  capone:    ['포근한 쿠션백이 거실에 따뜻함을 더해요', '비율 면에서 공간에 딱 맞는 크기예요', '내추럴 톤이 다양한 인테리어와 어울려요'],
+  bihar:     ['로우 실루엣으로 개방감이 극대화돼요', '모듈 구성으로 거실 형태에 맞게 변형 가능해요', '전면 동선 확보가 가장 여유로워요'],
+  stan:      ['대형 거실의 스케일을 완성하는 플래그십이에요', '섹셔널 구성으로 거실 전체를 채울 수 있어요', '하이엔드 소재와 가장 잘 어울리는 시리즈예요'],
+};
+
+function buildRecs(){
+  const {w, d} = room;
+  const scored = SOFA_CATALOG
+    .map(s=>{
+      const fits = s.configs.filter(cfg=> cfg.w/10 <= w * 0.72);
+      if(!fits.length) return null;
+      const bestCfg = fits[fits.length-1];
+      const bestW = bestCfg.w/10; // convert mm→cm
+      const ratio = bestW/w;
+      let score = 0;
+      if(ratio>=0.60&&ratio<=0.68) score+=5;
+      else if(ratio>=0.55&&ratio<=0.72) score+=3;
+      else score+=1;
+      if(s.depth <= d * 0.32) score+=3;
+      else if(s.depth <= d * 0.38) score+=2;
+      if(selectedSofaId===s.id) score+=4; // boost selected
+      return {...s, bestW, bestCfgName:bestCfg.name, score, ratio};
+    })
+    .filter(Boolean)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,3);
+
+  const section = document.getElementById('recSection');
+  if(!section) return;
+  section.innerHTML = `<div class="rec-header">${scored.length}개 시리즈 추천 · ${w}×${d}cm 기준</div>` +
+    scored.map((s,i)=>{
+      const reasons = REC_REASONS[s.id] || ['공간 비율에 잘 맞아요','이상적인 배치가 가능해요','적합한 선택이에요'];
+      const ratioVal = Math.round(s.ratio*100);
+      return `<div class="rec-card" style="animation-delay:${i*0.12}s">
+        <div class="rec-rank r${i+1}">${i===0?'★':i+1}</div>
+        <div class="rec-body">
+          <div class="rec-name">${s.name}</div>
+          <div class="rec-why">${s.bestW}cm — ${reasons[0]}</div>
+          <div class="rec-tags">
+            <div class="rec-tag">${s.tag}</div>
+            <div class="rec-tag">비율 ${ratioVal}%</div>
+            <div class="rec-tag">깊이 ${s.depth}cm</div>
+          </div>
+          <div class="rec-price">${s.bestCfgName} · ${s.bestW}cm</div>
+        </div>
+        <div class="rec-actions">
+          <button class="rec-btn-pri" onclick="window.open('https://www.alloso.co.kr/product/list','_blank')">쇼핑몰 →</button>
+          <button class="rec-btn-sec" onclick="pickAndBack('${s.id}')">배치 보기</button>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function pickAndBack(id){
+  const s = getSeries(id);
+  if(!s) return;
+  const fits = s.configs.filter(cfg=> cfg.w/10 <= room.w * 0.72);
+  const bestW = fits.length ? fits[fits.length-1].w/10 : s.configs[0].w/10;
+  pickConfig(id, bestW * 10);
+  goPhase2();
+}
+
+// ════════════════════════════════════
+// COMPLETE SUMMARY
+// ════════════════════════════════════
+function buildCompleteSummary(){
+  const sofa = selectedSofaId ? getSeries(selectedSofaId) : null;
+  const rows = [
+    {label:'거실 공간',   val: room.w+'×'+room.d+'cm'},
+    {label:'추천 소파',   val: sofa ? sofa.name+' '+Math.round(selectedSofaW/10)+'cm' : '—'},
+    {label:'배치 비율',   val: sofa ? Math.round(selectedSofaW/room.w*100)+'%' : '—'},
+    {label:'전면 동선',   val: sofa ? (room.d-sofa.d-30)+'cm' : '—'},
+  ];
+  document.getElementById('completeSummary').innerHTML =
+    rows.map(r=>`<div class="cs-row"><span class="cs-label">${r.label}</span><span class="cs-val">${r.val}</span></div>`).join('');
+}
+</script>
+</body>
+</html>
