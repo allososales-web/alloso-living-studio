@@ -149,14 +149,14 @@ body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:
 .b-tight{background:var(--amber-bg);color:var(--amber);}
 
 .s2-body{display:grid;grid-template-columns:1fr 272px;flex:1;}
-.cv-area{border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.cv-area{border-right:1px solid var(--border);display:flex;flex-direction:column;flex:1;min-height:0;}
 .cv-header{padding:9px 16px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .cv-title{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
 .cv-meta{font-size:10px;color:var(--text);}
 .view-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
 .vt-btn{padding:3px 11px;font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;background:var(--surface);border:none;color:var(--muted);cursor:pointer;transition:all .13s;}
 .vt-btn.on{background:var(--accent);color:rgba(255,255,255,.9);}
-.cv-body{flex:1;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--bg);}
+.cv-body{flex:1;min-height:0;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--bg);}
 #roomCanvas{border:1.5px solid var(--border2);border-radius:var(--r);display:block;cursor:grab;background:#FAFAF8;max-width:100%;}
 #roomCanvas:active{cursor:grabbing;}
 .cv-hint{display:flex;gap:8px;align-items:center;font-size:9px;color:var(--muted);}
@@ -440,7 +440,7 @@ body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:
     <div class="cv-area">
       <div class="cv-header"><div class="cv-title">Floor Plan · 1:1 Scale</div><div style="display:flex;align-items:center;gap:8px;"><div class="save-btn" onclick="saveImg()" title="이미지 저장">↓ 저장</div><div class="cv-meta" id="cvMeta">—</div><div class="view-toggle" id="viewToggle" style="display:none;"><div class="vt-btn on" id="btn2d" onclick="setView('2d')">2D</div><div class="vt-btn" id="btn3d" onclick="setView('3d')">3D</div></div></div></div>
       <div class="cv-body" id="view2d"><canvas id="roomCanvas" width="560" height="360"></canvas><div class="cv-hint"><span>드래그로 이동</span><span class="hint-k">↑↓←→</span><span>키보드</span><span class="hint-k">R</span><span>회전</span></div></div>
-      <div id="view3d" style="display:none;flex-direction:column;flex:1;min-height:0;background:var(--bg);"><div id="v3dWrap" style="position:relative;width:100%;height:100%;min-height:320px;flex:1;overflow:hidden;"><div id="v3dHint" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:Josefin Sans,sans-serif;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);opacity:.7;pointer-events:none;">드래그로 회전</div></div></div>
+      <div id="view3d" style="display:none;flex-direction:column;flex:1;min-height:0;height:100%;background:var(--bg);"><div id="v3dWrap" style="position:relative;width:100%;height:100%;min-height:320px;flex:1;overflow:hidden;"><div id="v3dHint" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:Josefin Sans,sans-serif;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);opacity:.7;pointer-events:none;">드래그로 회전</div></div></div>
       <div class="cv-controls" id="cvCtrl">
         <div class="ctrl-g"><div class="dpad"><div class="dp blank"></div><div class="dp" onclick="mv(0,-1)">↑</div><div class="dp blank"></div><div class="dp" onclick="mv(-1,0)">←</div><div class="dp blank" style="background:var(--card);border-color:var(--border);cursor:default;font-size:8px;color:var(--muted);display:flex;align-items:center;justify-content:center;">이동</div><div class="dp" onclick="mv(1,0)">→</div><div class="dp blank"></div><div class="dp" onclick="mv(0,1)">↓</div><div class="dp blank"></div></div></div>
         <div class="ctrl-g" style="flex-direction:column;gap:3px;"><div style="font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">단위</div><div class="step-tog"><div class="st-o" id="s10" onclick="setStep(10)">10</div><div class="st-o on" id="s30" onclick="setStep(30)">30</div><div class="st-o" id="s50" onclick="setStep(50)">50cm</div></div></div>
@@ -579,7 +579,10 @@ function drawCanvas(){const canvas=document.getElementById('roomCanvas');if(!can
 function mv(dx,dy){if(!selId||!cvScale)return;const px=moveStep*cvScale;sofaX+=dx*px;sofaY+=dy*px;drawCanvas();updateStats();}
 function rot(deg){sofaRot=(sofaRot+deg+360)%360;document.getElementById('rotInd').textContent=sofaRot+'°';drawCanvas();updateStats();}
 function setStep(v){moveStep=v;['s10','s30','s50'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',parseInt(el.textContent)===v||el.textContent===v+'cm');});}
-function setView(mode){curView=mode;document.getElementById('btn2d').classList.toggle('on',mode==='2d');document.getElementById('btn3d').classList.toggle('on',mode==='3d');document.getElementById('view2d').style.display=mode==='2d'?'flex':'none';document.getElementById('view3d').style.display=mode==='3d'?'flex':'none';document.getElementById('cvCtrl').style.display=mode==='2d'&&selId?'flex':'none';if(mode==='3d'&&selId){requestAnimationFrame(()=>requestAnimationFrame(()=>init3D()));}if(mode==='2d'&&t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}}
+function setView(mode){curView=mode;document.getElementById('btn2d').classList.toggle('on',mode==='2d');document.getElementById('btn3d').classList.toggle('on',mode==='3d');document.getElementById('view2d').style.display=mode==='2d'?'flex':'none';document.getElementById('view3d').style.display=mode==='3d'?'flex':'none';document.getElementById('cvCtrl').style.display=mode==='2d'&&selId?'flex':'none';if(mode==='3d'&&selId){
+    // display:flex 전환 후 레이아웃 확정까지 대기
+    setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>init3D())), 50);
+  }if(mode==='2d'&&t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}}
 
 /* ════════════════════════════════════
    THREE.JS 3D SOFA VIEWER — v3 GLB
@@ -810,11 +813,19 @@ async function init3D(){
   const oldCanvas=container.querySelector('canvas');
   if(oldCanvas)oldCanvas.remove();
 
-  // 컨테이너가 아직 렌더링 안 됐을 경우 부모 참조
-  const W=container.offsetWidth||container.parentElement?.offsetWidth||640;
-  const H=Math.max(container.offsetHeight||0, 320);
+  // 레이아웃 강제 flush 후 크기 계산
+  container.style.minHeight='320px';
+  const cvArea = document.querySelector('.cv-body') || document.getElementById('view3d');
+  const W = container.offsetWidth || cvArea?.offsetWidth || window.innerWidth * 0.65 || 640;
+  const H = Math.max(container.offsetHeight, container.parentElement?.offsetHeight || 0, 320);
 
   // Renderer
+  console.log('[3D] container size:', W, 'x', H, '| container el:', container.id);
+  if(W === 0 || H === 0){
+    console.warn('[3D] Container has zero size - retrying in 100ms');
+    setTimeout(init3D, 100);
+    return;
+  }
   t3Renderer=new THREE.WebGLRenderer({antialias:true, alpha:false});
   t3Renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   t3Renderer.setSize(W,H);
@@ -847,7 +858,10 @@ async function init3D(){
 
   // GLB 로드 시도
   const glbList=GLB_MAP[selId];
-  if(glbList && typeof THREE.GLTFLoader!=='undefined'){
+  // GLB 시도 (실패 시 절차적 소파 자동 표시)
+  const canGLB = glbList && typeof THREE.GLTFLoader !== 'undefined';
+  console.log('[3D] selId:', selId, '| GLB available:', canGLB, '| GLTFLoader:', typeof THREE.GLTFLoader);
+  if(canGLB){
     showGLBSpinner(container, true);
     try{
       const loader=new THREE.GLTFLoader();
