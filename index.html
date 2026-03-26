@@ -2777,60 +2777,19 @@ async function sendMessage(text){
   chatHistory.push({role:'user', content:text});
   showTyping();
 
-  // 현재 플로우 컨텍스트 주입 (wizard 진행 중일 때)
-  let contextNote = '';
-  if(inFlow && consultant){
-    const parts = [];
-    if(ans.sqm) parts.push('거실 '+ans.sqm+'㎡');
-    if(ans.usage) parts.push({daily_long:'매일 장시간',daily_short:'하루 1-2시간',guest:'손님 접대',kids:'아이 놀이터'}[ans.usage]||ans.usage);
-    if(ans.scene) parts.push({morning:'아침 커피',movie:'가족 영화',nap:'낮잠',gather:'친구 모임'}[ans.scene]||ans.scene);
-    if(ans.vibe) parts.push({nordic:'북유럽',modern:'뉴욕 모던',jeju:'제주',hotel:'파리 호텔'}[ans.vibe]||ans.vibe);
-    if(ans.series) parts.push('관심 소파: '+ans.series);
-    if(parts.length) contextNote = '\n[현재 상담 맥락: '+parts.join(' / ')+']';
-  }
+  // 짧은 딜레이로 자연스러운 타이핑 효과
+  await new Promise(r => setTimeout(r, 400 + Math.random() * 400));
 
-  const ALMA_SYSTEM = CHAT_SYSTEM + (contextNote || '');
+  hideTyping();
 
-  try {
-    let msgs = chatHistory.slice(-12);
-    if(contextNote && msgs.length > 0){
-      msgs = [...msgs];
-      msgs[0] = {role: msgs[0].role, content: msgs[0].content + contextNote};
-    }
+  // 로컬 FAQ 엔진으로 즉시 응답 (API 불필요)
+  const reply = getDemoReply(text);
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: ALMA_SYSTEM,
-        messages: msgs
-      })
-    });
+  chatHistory.push({role:'assistant', content:reply});
+  appendBotMsg(reply);
 
-    const data = await res.json();
-    hideTyping();
-
-    let reply = '';
-    if(data.content && data.content[0] && data.content[0].text){
-      reply = data.content[0].text;
-    } else {
-      reply = getDemoReply(text);
-    }
-
-    chatHistory.push({role:'assistant', content:reply});
-    appendBotMsg(reply);
-
-    const panel = document.getElementById('chatPanel');
-    if(!panel.classList.contains('open')){ chatUnread++; updateFabBadge(); }
-
-  } catch(err){
-    hideTyping();
-    const fallback = getDemoReply(text);
-    chatHistory.push({role:'assistant', content:fallback});
-    appendBotMsg(fallback);
-  }
+  const panel = document.getElementById('chatPanel');
+  if(!panel.classList.contains('open')){ chatUnread++; updateFabBadge(); }
 
   chatLoading = false;
   document.getElementById('chatSend').disabled = false;

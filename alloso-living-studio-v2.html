@@ -674,9 +674,11 @@ function buildSofaMeshes(group){
   if(!selId){
     s = {name:'SATI', depth:100};
     useW = 220;
+    console.log('[3D] Building demo SATI sofa (no selId)');
   } else {
-    s = getSeries(selId); if(!s)return;
+    s = getSeries(selId); if(!s){ console.warn('[3D] getSeries returned null for:', selId); return; }
     useW = selW;
+    console.log('[3D] Building procedural sofa:', s.name, useW+'cm');
   }
   const sofaW=useW/100, sofaD=s.depth/100;
   const norm=2.0/sofaW, W=sofaW*norm, D=sofaD*norm;
@@ -820,10 +822,15 @@ function showGLBSpinner(container, show){
 /* ── init3D (메인 진입점) ── */
 let _init3DRetry = 0;
 async function init3D(){
-  if(typeof THREE==='undefined')return;
+  if(typeof THREE==='undefined'){
+    console.warn('[3D] THREE.js not loaded');
+    show3DFallback('3D 라이브러리를 불러올 수 없습니다');
+    return;
+  }
   const container=document.getElementById('v3dWrap');
   if(!container)return;
 
+  try {
   // 기존 정리
   if(t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}
   const oldCanvas=container.querySelector('canvas');
@@ -872,10 +879,12 @@ async function init3D(){
   // Camera
   t3Camera=new THREE.PerspectiveCamera(36,finalW/finalH,0.05,30);
   updateT3Cam();
+  console.log('[3D] Renderer+Scene+Camera created OK');
 
   // 방 + 조명
   buildRoom(t3Scene);
   buildLighting(t3Scene);
+  console.log('[3D] Room+Lighting built OK');
 
   // 소파 그룹
   const sofaGroup=new THREE.Group();
@@ -891,25 +900,27 @@ async function init3D(){
     showGLBSpinner(container, true);
     try{
       const loader=new THREE.GLTFLoader();
-      // 타임아웃 15초 — GLB 로드 실패 시 절차적 소파로 전환
+      // 타임아웃 8초 — GLB 로드 실패 시 절차적 소파로 전환
       const loadWithTimeout = (item) => new Promise((res, rej) => {
-        const timer = setTimeout(() => rej(new Error('GLB load timeout: ' + item.f)), 15000);
-        loader.load(glbURL(item.f), g => { clearTimeout(timer); res(g.scene); }, null, e => { clearTimeout(timer); rej(e); });
+        const timer = setTimeout(() => rej(new Error('GLB load timeout: ' + item.f)), 8000);
+        loader.load(glbURL(item.f), g => { clearTimeout(timer); console.log('[3D] GLB loaded:', item.f); res(g.scene); }, null, e => { clearTimeout(timer); rej(e); });
       });
       const scenes=await Promise.all(glbList.map(loadWithTimeout));
       showGLBSpinner(container, false);
       arrangeGLBs(scenes, sofaGroup);
+      console.log('[3D] GLB arranged successfully');
       // 카메라 거리 GLB 크기 기반 조정
       const cb=new THREE.Box3().setFromObject(sofaGroup);
       const cs=cb.getSize(new THREE.Vector3());
       t3Radius=Math.max(2.8, Math.min(5.5, Math.max(cs.x,cs.z)*1.8));
       updateT3Cam();
     }catch(e){
-      console.warn('GLB load failed, using procedural:', e);
+      console.warn('[3D] GLB load failed, using procedural sofa:', e.message);
       showGLBSpinner(container, false);
       buildSofaMeshes(sofaGroup);
     }
   } else {
+    console.log('[3D] No GLB map for selId, using procedural sofa. selId:', selId);
     buildSofaMeshes(sofaGroup);
   }
 
@@ -954,12 +965,30 @@ async function init3D(){
   }
 
   // 애니메이션 루프
+  console.log('[3D] Starting animation loop');
   function animate(){
     t3AnimId=requestAnimationFrame(animate);
     if(!t3Drag && Date.now()-t3LastInteract>3000){t3Theta+=0.18;updateT3Cam();}
     t3Renderer.render(t3Scene,t3Camera);
   }
   animate();
+
+  } catch(e) {
+    console.error('[3D] init3D failed:', e);
+    show3DFallback('3D 렌더링 중 오류가 발생했습니다');
+  }
+}
+
+function show3DFallback(msg){
+  const container=document.getElementById('v3dWrap');
+  if(!container)return;
+  const oldFb=container.querySelector('.v3d-fallback');
+  if(oldFb)return;
+  const fb=document.createElement('div');
+  fb.className='v3d-fallback';
+  fb.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--bg,#F5F4F0);z-index:5;';
+  fb.innerHTML='<div style="width:120px;height:80px;border:2px solid var(--border,#DDDBD3);border-radius:8px;display:flex;align-items:center;justify-content:center;"><div style="width:80px;height:30px;background:var(--border,#DDDBD3);border-radius:4px;"></div></div><div style="font-family:Josefin Sans,sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted,#9A9890);">'+msg+'</div><div style="font-size:11px;color:var(--text,#5A5A54);text-align:center;line-height:1.7;">2D 평면도에서 소파 배치를 확인하세요<br><button onclick="setView(\'2d\');this.closest(\'.v3d-fallback\').remove();" style="margin-top:8px;padding:8px 20px;background:var(--accent,#1A1A18);color:rgba(255,255,255,.9);border:none;border-radius:2px;font-size:11px;cursor:pointer;">2D 보기 →</button></div>';
+  container.appendChild(fb);
 }
 
 function build3D(){init3D();}
