@@ -959,6 +959,8 @@ async function init3D(){
       buildSofaMeshes(t3SofaGroup);
     }
     t3CachedSelId = selId;
+    // 초기 마감재 색상 적용
+    updateSofaMaterial();
   } else {
     // 캐시된 소파 재사용 — 씬에 추가만
     t3Scene.add(t3SofaGroup);
@@ -1075,22 +1077,49 @@ function updateT3Cam(){
 /* ── 환경만 리빌드 (바닥/벽 색상 변경 시 — GLB 재로드 없음) ── */
 function rebuild3DEnv(){
   if(!t3Scene||!t3Renderer)return;
-  // 소파 그룹 제외하고 모든 씬 자식 제거
   const keep = t3SofaGroup;
   t3Scene.children.slice().forEach(c=>{ if(c!==keep) t3Scene.remove(c); });
-  // 배경색 갱신
   const rgb=hexToRGB(wallC.hex);
   const bgColor=new THREE.Color(rgb.r,rgb.g,rgb.b);
   t3Scene.background=bgColor;
   t3Scene.fog=new THREE.FogExp2(bgColor,0.035);
-  // 방 + 조명 재생성
   buildRoom(t3Scene);
   buildLighting(t3Scene);
 }
 
+/* ── 소파 마감재 색상 적용 (GLB 재로드 없이 즉시 반영) ── */
+function updateSofaMaterial(){
+  if(!t3SofaGroup)return;
+  const baseColor = new THREE.Color(hexToThree(matC.hex));
+  const darkColor = new THREE.Color(darkenHex(matC.hex,0.12));
+  const lightColor = new THREE.Color(lightenHex(matC.hex,0.06));
+  let meshIdx = 0;
+  t3SofaGroup.traverse(function(child){
+    if(!child.isMesh)return;
+    // 원래 GLB 머티리얼의 밝기를 보존하면서 마감재 색상 적용
+    const origLum = child.material.color ? child.material.color.getHSL({}).l : 0.5;
+    const newMat = child.material.clone();
+    // 밝기에 따라 base/dark/light 블렌드
+    if(origLum > 0.6) newMat.color.copy(lightColor);
+    else if(origLum < 0.3) newMat.color.copy(darkColor);
+    else newMat.color.copy(baseColor);
+    newMat.needsUpdate = true;
+    child.material = newMat;
+    meshIdx++;
+  });
+  console.log('[3D] Material updated to:', matC.name, '| meshes:', meshIdx);
+  // 오버레이 라벨도 갱신
+  const overlay=document.querySelector('#v3dWrap .v3d-overlay');
+  if(overlay && selId){
+    const ovS=getSeries(selId);
+    const isGLB=!!(GLB_MAP[selId] && typeof THREE.GLTFLoader!=='undefined');
+    if(ovS) overlay.innerHTML=ovS.name+' · '+selW+'cm · '+matC.name+(isGLB?'<span style="margin-left:8px;opacity:.5;font-size:8px;">GLB</span>':'');
+  }
+}
+
 function setFloor(id){floorC=FLOOR_C.find(c=>c.id===id)||floorC;document.getElementById('floorName').textContent=floorC.name;document.querySelectorAll('#floorChips .chip').forEach((el,i)=>el.classList.toggle('on',FLOOR_C[i].id===id));const l=document.getElementById('legFloor');if(l)l.style.background=floorC.hex;drawCanvas();if(curView==='3d'&&t3Scene)rebuild3DEnv();}
 function setWall(id){wallC=WALL_C.find(c=>c.id===id)||wallC;document.getElementById('wallName').textContent=wallC.name;document.querySelectorAll('#wallChips .chip').forEach((el,i)=>el.classList.toggle('on',WALL_C[i].id===id));drawCanvas();if(curView==='3d'&&t3Scene)rebuild3DEnv();}
-function setMat(id){matC=MAT_C.find(m=>m.id===id)||matC;document.getElementById('matName').textContent=matC.name;document.querySelectorAll('#matGrid .mat-sw').forEach((el,i)=>el.classList.toggle('on',MAT_C[i].id===id));if(selId)updateSelPanel();if(curView==='3d'&&t3Scene&&selId){t3CachedSelId=null;init3D();}}
+function setMat(id){matC=MAT_C.find(m=>m.id===id)||matC;document.getElementById('matName').textContent=matC.name;document.querySelectorAll('#matGrid .mat-sw').forEach((el,i)=>el.classList.toggle('on',MAT_C[i].id===id));if(selId)updateSelPanel();if(curView==='3d'&&t3SofaGroup)updateSofaMaterial();}
 
 
 /* ════════════════════════════════════
