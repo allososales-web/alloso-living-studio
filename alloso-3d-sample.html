@@ -6,178 +6,155 @@
 <title>Alloso · 3D View</title>
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@100;300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
 <script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js","three/examples/jsm/loaders/GLTFLoader":"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js"}}
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"}}
 </script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--bg:#F2EFE9;--surface:#FAFAF8;--border:#E0DDD5;--accent:#1A1A18;--gold:#8B7355;--muted:#9A9890;}
 body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-
-nav{height:50px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;}
-.nav-brand{font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:300;letter-spacing:.28em;color:var(--accent);}
-.nav-sub{font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:.26em;color:var(--gold);margin-top:2px;}
-
+nav{height:50px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;padding:0 24px;flex-shrink:0;}
+.nb{font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:300;letter-spacing:.28em;color:var(--accent);}
+.ns{font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:.26em;color:var(--gold);margin-top:2px;}
 .main{display:flex;flex:1;min-height:0;}
 #wrap{flex:1;position:relative;min-height:0;overflow:hidden;background:#E8E4DE;}
 #wrap canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;}
-
-/* OVERLAY */
-.v3d-lbl{position:absolute;top:16px;left:20px;z-index:3;pointer-events:none;}
-.v3d-n{font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:300;letter-spacing:.1em;color:rgba(255,255,255,.92);text-shadow:0 1px 12px rgba(0,0,0,.4);}
-.v3d-s{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:3px;}
-.glb-badge{display:none;align-items:center;gap:5px;margin-top:8px;background:rgba(139,115,85,.2);border:1px solid rgba(196,168,130,.28);border-radius:3px;padding:3px 9px;font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:.18em;color:rgba(255,255,255,.65);}
-.glb-dot{width:5px;height:5px;border-radius:50%;background:#A8E6A0;flex-shrink:0;}
-
+.lbl{position:absolute;top:16px;left:20px;z-index:3;pointer-events:none;}
+.ln{font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:300;letter-spacing:.1em;color:rgba(255,255,255,.92);text-shadow:0 1px 12px rgba(0,0,0,.4);}
+.ls{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:3px;}
+.badge{display:none;align-items:center;gap:5px;margin-top:8px;background:rgba(139,115,85,.2);border:1px solid rgba(196,168,130,.28);border-radius:3px;padding:3px 9px;font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:.18em;color:rgba(255,255,255,.65);}
+.bdot{width:5px;height:5px;border-radius:50%;background:#A8E6A0;}
 .hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;background:rgba(26,26,24,.48);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:6px 16px;pointer-events:none;}
 .hi{font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);}
 .hs{width:1px;height:9px;background:rgba(255,255,255,.15);}
-
 .rbt{position:absolute;top:16px;right:16px;z-index:3;width:34px;height:34px;border-radius:50%;background:rgba(26,26,24,.45);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;}
-.rbt.on{background:rgba(139,115,85,.55);border-color:rgba(196,168,130,.35);}
-
-/* LOADING */
-#loadBox{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(242,239,233,.92);backdrop-filter:blur(4px);transition:opacity .45s;}
+.rbt.on{background:rgba(139,115,85,.55);}
+#lb{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(242,239,233,.92);backdrop-filter:blur(4px);transition:opacity .45s;}
 .spin{width:28px;height:28px;border:2px solid rgba(139,115,85,.15);border-top-color:var(--gold);border-radius:50%;animation:sp .72s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg);}}
 .lt{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);}
 .lf{font-size:9px;color:var(--muted);margin-top:-6px;max-width:240px;text-align:center;line-height:1.6;}
-
-/* SIDE */
 .side{width:220px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
 .ss{padding:14px 16px;border-bottom:1px solid var(--border);}
 .sl{font-family:'Josefin Sans',sans-serif;font-size:7.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-
 .ml{display:flex;flex-direction:column;gap:2px;}
-.mr{padding:7px 10px;border-radius:4px;cursor:pointer;border:1px solid transparent;transition:.14s;display:flex;align-items:center;gap:8px;}
+.mr{padding:7px 10px;border-radius:4px;cursor:pointer;border:1px solid transparent;transition:.14s;display:flex;align-items:center;}
 .mr:hover{background:#F0EDE7;}
 .mr.on{background:var(--accent);}
-.mr-tx .mn{font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.07em;font-weight:300;}
-.mr-tx .ms{font-size:9px;color:var(--muted);margin-top:1px;}
-.mr.on .mn,.mr.on .ms{color:rgba(255,255,255,.8);}
-.mr-num{font-family:'Josefin Sans',sans-serif;font-size:9px;color:var(--muted);margin-left:auto;}
-.mr.on .mr-num{color:rgba(255,255,255,.45);}
-
-.chip-row{display:flex;gap:6px;flex-wrap:wrap;}
+.mn{font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.07em;font-weight:300;}
+.ms{font-size:9px;color:var(--muted);margin-top:1px;}
+.mr.on .mn,.mr.on .ms{color:rgba(255,255,255,.85);}
+.mp{font-family:'Josefin Sans',sans-serif;font-size:9px;color:var(--muted);margin-left:auto;}
+.mr.on .mp{color:rgba(255,255,255,.4);}
+.cr{display:flex;gap:6px;flex-wrap:wrap;}
 .wc{width:26px;height:20px;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:.14s;}
 .wc.on{border-color:var(--accent);}
 .wc:hover{transform:scale(1.08);}
-
 .ig{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .ib{background:var(--bg);border-radius:4px;padding:8px 10px;}
-.ibv{font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:300;color:var(--accent);}
+.ibv{font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:300;color:var(--accent);}
 .ibl{font-size:9px;color:var(--muted);margin-top:1px;}
-.pr{font-family:'Josefin Sans',sans-serif;font-size:18px;font-weight:300;color:var(--accent);margin-top:10px;}
-.ps{font-size:9px;color:var(--muted);margin-top:2px;}
 </style>
 </head>
 <body>
-<nav>
-  <div><div class="nav-brand">ALLOSO</div><div class="nav-sub">Living Studio · 3D View</div></div>
-</nav>
+<nav><div><div class="nb">ALLOSO</div><div class="ns">3D View</div></div></nav>
 <div class="main">
   <div id="wrap">
-    <div id="loadBox">
-      <div class="spin"></div>
+    <div id="lb">
+      <div class="spin" id="sp"></div>
       <div class="lt" id="lt">잠시만 기다려주세요</div>
-      <div class="lf" id="lf">좌측 목록에서<br>소파를 선택하세요</div>
+      <div class="lf" id="lf">소파를 선택하세요</div>
     </div>
-    <div class="v3d-lbl">
-      <div class="v3d-n" id="vn">—</div>
-      <div class="v3d-s" id="vs"></div>
-      <div class="glb-badge" id="badge"><span class="glb-dot"></span>실제 GLB 모델</div>
+    <div class="lbl">
+      <div class="ln" id="vn">—</div>
+      <div class="ls" id="vs"></div>
+      <div class="badge" id="badge"><span class="bdot"></span>실제 GLB 모델</div>
     </div>
-    <button class="rbt on" id="rbt" onclick="toggleRot()">↻</button>
+    <button class="rbt on" id="rbt">↻</button>
     <div class="hint">
       <div class="hi">⟳ 드래그 회전</div><div class="hs"></div>
       <div class="hi">⊕ 스크롤 줌</div>
     </div>
   </div>
-
   <div class="side">
     <div class="ss"><div class="sl">소파 모델</div><div class="ml" id="ml"></div></div>
     <div class="ss" id="iSec" style="display:none">
       <div class="sl">모델 정보</div>
       <div class="ig">
-        <div class="ib"><div class="ibv" id="iSeries">—</div><div class="ibl">시리즈</div></div>
-        <div class="ib"><div class="ibv" id="iSize">—</div><div class="ibl">참고 가격</div></div>
+        <div class="ib"><div class="ibv" id="iS">—</div><div class="ibl">시리즈</div></div>
+        <div class="ib"><div class="ibv" id="iP">—</div><div class="ibl">참고 가격</div></div>
       </div>
     </div>
     <div class="ss">
-      <div class="sl">바닥</div>
-      <div class="chip-row" id="fc"></div>
+      <div class="sl">바닥</div><div class="cr" id="fc"></div>
       <div style="font-size:9px;color:var(--muted);margin-top:6px;" id="fn">오크 원목</div>
     </div>
     <div class="ss">
-      <div class="sl">벽</div>
-      <div class="chip-row" id="wc"></div>
+      <div class="sl">벽</div><div class="cr" id="wc"></div>
       <div style="font-size:9px;color:var(--muted);margin-top:6px;" id="wn">순백</div>
     </div>
   </div>
 </div>
 
-
-<script type="module" id="mainScript">
+<script type="module">
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-const R2='https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/Alloso%20series%20%28glb%29/';
-// URL 생성: 파일명을 percent-encode
+const R2 = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/Alloso%20series%20%28glb%29/';
+const glbURL = f => R2 + encodeURIComponent(f);
 
-const url=f=>{
-  // encodeURIComponent + 점(.) 복원
-  return R2 + encodeURIComponent(f).replace(/%2E/gi,'.');
-};
-
-const MODELS=[
-  {id:'sati_l',   f:'02.사티 와이드 1인 좌.glb',    n:'SATI 와이드 1인 좌',   s:'사티',      p:'288만원~'},
-  {id:'sati_r',   f:'02.사티 와이드 1인 우.glb',    n:'SATI 와이드 1인 우',   s:'사티',      p:'288만원~'},
-  {id:'que_s',    f:'03.케렌시아 싱글.glb',         n:'QUERENCIA 싱글',       s:'케렌시아',  p:'418만원~'},
-  {id:'que_ot',   f:'03.케렌시아 오토만.glb',       n:'QUERENCIA 오토만',     s:'케렌시아',  p:''},
-  {id:'bon_l',    f:'04.보눔 1인 좌.glb',           n:'BONUM 1인 좌',         s:'보눔',      p:'318만원~'},
-  {id:'bon_r',    f:'04.보눔 1인 우.glb',           n:'BONUM 1인 우',         s:'보눔',      p:'318만원~'},
-  {id:'bon_rl',   f:'05.보눔 1인라운지 좌.glb',     n:'BONUM 라운지 좌',      s:'보눔FU',    p:'338만원~'},
-  {id:'bon_rt',   f:'05.보눔 1인터미널 우.glb',     n:'BONUM 터미널 우',      s:'보눔FU',    p:'338만원~'},
-  {id:'bon_al',   f:'05.보눔 알리스.glb',           n:'BONUM 알리스',         s:'보눔FU',    p:''},
-  {id:'vard_db',  f:'06.바드 데이베드.glb',         n:'VARD 데이베드',        s:'바드',      p:'178만원~'},
-  {id:'bihar_a',  f:'10.비하르 암리스.glb',         n:'BIHAR 암리스',         s:'비하르',    p:'338만원~'},
-  {id:'bihar_r',  f:'10.비하르 1인 우.glb',         n:'BIHAR 1인 우',         s:'비하르',    p:'338만원~'},
-  {id:'hol_wl',   f:'11.홀리데이 와이드 2인 좌.glb',n:'HOLIDAY 와이드 2인 좌',s:'홀리데이', p:'268만원~'},
-  {id:'hol_tl',   f:'11.홀리데이 터미널 좌.glb',   n:'HOLIDAY 터미널 좌',    s:'홀리데이',  p:''},
-  {id:'hol_tr',   f:'11.홀리데이 터미널 우.glb',   n:'HOLIDAY 터미널 우',    s:'홀리데이',  p:''},
-  {id:'cap_l',    f:'12.카포네그랑 1인 좌.glb',    n:'CAPONE GRAND 1인 좌',  s:'카포네그랑',p:'618만원~'},
-  {id:'cap_r',    f:'12.카포네그랑 2인 우.glb',    n:'CAPONE GRAND 2인 우',  s:'카포네그랑',p:''},
+const MODELS = [
+  {id:'sati_l', f:'02.사티 와이드 1인 좌.glb',     n:'SATI 와이드 1인 좌',    s:'사티',       p:'288만원~'},
+  {id:'sati_r', f:'02.사티 와이드 1인 우.glb',     n:'SATI 와이드 1인 우',    s:'사티',       p:'288만원~'},
+  {id:'que_s',  f:'03.케렌시아 싱글.glb',          n:'QUERENCIA 싱글',        s:'케렌시아',   p:'418만원~'},
+  {id:'que_o',  f:'03.케렌시아 오토만.glb',        n:'QUERENCIA 오토만',      s:'케렌시아',   p:''},
+  {id:'bon_l',  f:'04.보눔 1인 좌.glb',            n:'BONUM 1인 좌',          s:'보눔',       p:'318만원~'},
+  {id:'bon_r',  f:'04.보눔 1인 우.glb',            n:'BONUM 1인 우',          s:'보눔',       p:'318만원~'},
+  {id:'bon_rl', f:'05.보눔 1인라운지 좌.glb',      n:'BONUM 라운지 좌',       s:'보눔FU',     p:'338만원~'},
+  {id:'bon_rt', f:'05.보눔 1인터미널 우.glb',      n:'BONUM 터미널 우',       s:'보눔FU',     p:'338만원~'},
+  {id:'bon_al', f:'05.보눔 알리스.glb',            n:'BONUM 알리스',          s:'보눔FU',     p:''},
+  {id:'vard',   f:'06.바드 데이베드.glb',          n:'VARD 데이베드',         s:'바드',       p:'178만원~'},
+  {id:'bih_a',  f:'10.비하르 암리스.glb',          n:'BIHAR 암리스',          s:'비하르',     p:'338만원~'},
+  {id:'bih_r',  f:'10.비하르 1인 우.glb',          n:'BIHAR 1인 우',          s:'비하르',     p:'338만원~'},
+  {id:'hol_w',  f:'11.홀리데이 와이드 2인 좌.glb', n:'HOLIDAY 와이드 2인 좌', s:'홀리데이',   p:'268만원~'},
+  {id:'hol_l',  f:'11.홀리데이 터미널 좌.glb',    n:'HOLIDAY 터미널 좌',     s:'홀리데이',   p:''},
+  {id:'hol_r',  f:'11.홀리데이 터미널 우.glb',    n:'HOLIDAY 터미널 우',     s:'홀리데이',   p:''},
+  {id:'cap_l',  f:'12.카포네그랑 1인 좌.glb',     n:'CAPONE GRAND 1인 좌',   s:'카포네그랑', p:'618만원~'},
+  {id:'cap_r',  f:'12.카포네그랑 2인 우.glb',     n:'CAPONE GRAND 2인 우',   s:'카포네그랑', p:''},
 ];
 
-const FLOOR=[{id:'oak',hex:'#C8A878',n:'오크 원목'},{id:'walnut',hex:'#6A4A30',n:'월넛'},{id:'marble',hex:'#E8E4DC',n:'화이트 마블'},{id:'dark',hex:'#3A3028',n:'다크 원목'},{id:'tile',hex:'#D8CEB8',n:'베이지 타일'}];
+const FLOOR=[{id:'oak',hex:'#C8A878',n:'오크 원목'},{id:'wal',hex:'#6A4A30',n:'월넛'},{id:'mar',hex:'#E8E4DC',n:'화이트 마블'},{id:'drk',hex:'#3A3028',n:'다크 원목'},{id:'til',hex:'#D8CEB8',n:'베이지 타일'}];
 const WALL=[{id:'wh',hex:'#FAFAF8',n:'순백'},{id:'wa',hex:'#F0EBE0',n:'웜화이트'},{id:'gr',hex:'#D8D4CC',n:'라이트그레이'},{id:'sg',hex:'#C8D4C8',n:'세이지'},{id:'ch',hex:'#484850',n:'딥차콜'}];
 
-let floorC=FLOOR[0],wallC=WALL[0];
-let autoRot=true,selId=null,curModel=null;
-let scene,cam,ren,animId,theta=28,phi=24,r=3.2,drag=false,lx=0,ly=0,lastI=0;
+let floorC=FLOOR[0], wallC=WALL[0], selId=null, curModel=null;
+let autoRot=true, drag=false, lx=0, ly=0, lastI=0, theta=28, phi=24, r=3.2;
+let scene, cam, ren;
 
 const h3=h=>parseInt(h.replace('#',''),16);
 const hRGB=h=>{h=h.replace('#','');return{r:parseInt(h.slice(0,2),16)/255,g:parseInt(h.slice(2,4),16)/255,b:parseInt(h.slice(4,6),16)/255};};
 const drk=(h,a)=>{const x=h.replace('#',''),c=v=>Math.max(0,Math.min(255,v));return(c(parseInt(x.slice(0,2),16)-Math.round(255*a))<<16)|(c(parseInt(x.slice(2,4),16)-Math.round(255*a))<<8)|c(parseInt(x.slice(4,6),16)-Math.round(255*a));};
 const lgt=(h,a)=>{const x=h.replace('#',''),c=v=>Math.max(0,Math.min(255,v));return(c(parseInt(x.slice(0,2),16)+Math.round(255*a))<<16)|(c(parseInt(x.slice(2,4),16)+Math.round(255*a))<<8)|c(parseInt(x.slice(4,6),16)+Math.round(255*a));};
-const mat=(col,ro=0.82,me=0)=>new THREE.MeshStandardMaterial({color:col,roughness:ro,metalness:me});
+const smat=(col,ro=0.82,me=0)=>new THREE.MeshStandardMaterial({color:col,roughness:ro,metalness:me});
+
+function updateCam(){
+  if(!cam)return;
+  const th=theta*Math.PI/180,ph=phi*Math.PI/180;
+  cam.position.set(Math.sin(th)*Math.cos(ph)*r,Math.sin(ph)*r,Math.cos(th)*Math.cos(ph)*r);
+  cam.lookAt(0,.3,0);
+}
 
 function buildEnv(){
-  // Floor
-  const fl=new THREE.Mesh(new THREE.PlaneGeometry(14,14),mat(h3(floorC.hex),.88));
+  const rgb=hRGB(wallC.hex),bg=new THREE.Color(rgb.r,rgb.g,rgb.b);
+  scene.background=bg; scene.fog=new THREE.FogExp2(bg,.025);
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(14,14),smat(h3(floorC.hex),.88));
   fl.rotation.x=-Math.PI/2; fl.receiveShadow=true; scene.add(fl);
   const pk=new THREE.MeshStandardMaterial({color:drk(floorC.hex,.055),roughness:.95});
   for(let i=-6;i<=6;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(.003,14),pk);p.rotation.x=-Math.PI/2;p.position.set(i*.48,.001,0);scene.add(p);}
-  // Walls
-  const wm=mat(h3(wallC.hex),.92);
+  const wm=smat(h3(wallC.hex),.92);
   const bw=new THREE.Mesh(new THREE.PlaneGeometry(14,7),wm);bw.position.set(0,3.5,-5.5);bw.receiveShadow=true;scene.add(bw);
   const lw=new THREE.Mesh(new THREE.PlaneGeometry(14,7),wm);lw.position.set(-5.5,3.5,0);lw.rotation.y=Math.PI/2;lw.receiveShadow=true;scene.add(lw);
-  // Skirting
-  const sk=new THREE.Mesh(new THREE.BoxGeometry(14,.07,.04),mat(drk(wallC.hex,.07),.85));sk.position.set(0,.035,-5.48);scene.add(sk);
-  // Ceiling
-  const ce=new THREE.Mesh(new THREE.PlaneGeometry(14,14),mat(lgt(wallC.hex,.03),.96));ce.rotation.x=Math.PI/2;ce.position.set(0,5.5,0);scene.add(ce);
-  // Rug
-  const rg=new THREE.Mesh(new THREE.PlaneGeometry(3.8,2.6),mat(drk(floorC.hex,.04),.98));rg.rotation.x=-Math.PI/2;rg.position.set(0,.003,.5);scene.add(rg);
+  const sk=new THREE.Mesh(new THREE.BoxGeometry(14,.07,.04),smat(drk(wallC.hex,.07),.85));sk.position.set(0,.035,-5.48);scene.add(sk);
+  const ce=new THREE.Mesh(new THREE.PlaneGeometry(14,14),smat(lgt(wallC.hex,.03),.96));ce.rotation.x=Math.PI/2;ce.position.set(0,5.5,0);scene.add(ce);
+  const rg=new THREE.Mesh(new THREE.PlaneGeometry(3.8,2.6),smat(drk(floorC.hex,.04),.98));rg.rotation.x=-Math.PI/2;rg.position.set(0,.003,.5);scene.add(rg);
 }
 
 function buildLights(){
@@ -187,50 +164,55 @@ function buildLights(){
   const ri=new THREE.DirectionalLight(0xFFFFFF,.14);ri.position.set(0,2,-6);scene.add(ri);
 }
 
-function setBG(){
-  const rgb=hRGB(wallC.hex),col=new THREE.Color(rgb.r,rgb.g,rgb.b);
-  scene.background=col;scene.fog=new THREE.FogExp2(col,.025);
-}
-
 function rebuildEnv(){
-  if(!scene)return;
   scene.children.slice().forEach(c=>{if(c!==curModel)scene.remove(c);});
-  setBG();buildEnv();buildLights();
+  buildEnv(); buildLights();
 }
 
-function updateCam(){
-  if(!cam)return;
-  const th=theta*Math.PI/180,ph=phi*Math.PI/180;
-  cam.position.set(Math.sin(th)*Math.cos(ph)*r,Math.sin(ph)*r,Math.cos(th)*Math.cos(ph)*r);
-  cam.lookAt(0,.3,0);
+function initScene(){
+  const wrap=document.getElementById('wrap');
+  scene=new THREE.Scene();
+  cam=new THREE.PerspectiveCamera(36,wrap.offsetWidth/wrap.offsetHeight,.05,30);
+  updateCam();
+  ren=new THREE.WebGLRenderer({antialias:true});
+  ren.setPixelRatio(Math.min(devicePixelRatio,2));
+  ren.setSize(wrap.offsetWidth,wrap.offsetHeight);
+  ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
+  ren.toneMapping=THREE.ACESFilmicToneMapping; ren.toneMappingExposure=1.05;
+  ren.domElement.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;display:block;';
+  wrap.insertBefore(ren.domElement,wrap.firstChild);
+  buildEnv(); buildLights();
+  const el=ren.domElement;
+  el.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;autoRot=false;document.getElementById('rbt').classList.remove('on');lastI=Date.now();});
+  window.addEventListener('mouseup',()=>{drag=false;lastI=Date.now();});
+  el.addEventListener('mousemove',e=>{if(!drag)return;theta-=(e.clientX-lx)*.5;phi=Math.max(5,Math.min(70,phi-(e.clientY-ly)*.3));lx=e.clientX;ly=e.clientY;updateCam();});
+  el.addEventListener('wheel',e=>{r=Math.max(1.4,Math.min(8,r+e.deltaY*.004));updateCam();},{passive:true});
+  el.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;autoRot=false;}},{passive:true});
+  el.addEventListener('touchmove',e=>{if(!drag||e.touches.length!==1)return;theta-=(e.touches[0].clientX-lx)*.5;phi=Math.max(5,Math.min(70,phi-(e.touches[0].clientY-ly)*.3));lx=e.touches[0].clientX;ly=e.touches[0].clientY;updateCam();},{passive:true});
+  el.addEventListener('touchend',()=>{drag=false;lastI=Date.now();});
+  new ResizeObserver(()=>{const nW=wrap.offsetWidth,nH=wrap.offsetHeight;if(nW>0&&nH>0){ren.setSize(nW,nH);cam.aspect=nW/nH;cam.updateProjectionMatrix();}}).observe(wrap);
+  (function loop(){requestAnimationFrame(loop);if(!drag&&(autoRot||Date.now()-lastI>4000))theta+=.14;updateCam();ren.render(scene,cam);})();
+  // 초기 loadbox 정리
+  const lb=document.getElementById('lb');
+  lb.style.background='transparent';
+  document.getElementById('sp').style.display='none';
+  document.getElementById('lt').textContent='';
+  document.getElementById('lf').textContent='소파를 선택하세요';
 }
-
-function toggleRot(){autoRot=!autoRot;document.getElementById('rbt').classList.toggle('on',autoRot);lastI=0;}
 
 async function loadModel(m){
   selId=m.id; buildList();
-  // Spinner
-  const lb=document.getElementById('loadBox');
-  lb.style.opacity='1';lb.style.display='flex';lb.style.background='rgba(242,239,233,.92)';
+  const lb=document.getElementById('lb');
+  lb.style.background='rgba(242,239,233,.92)'; lb.style.opacity='1'; lb.style.display='flex';
+  document.getElementById('sp').style.display='block';
   document.getElementById('lt').textContent='GLB 로딩 중';
   document.getElementById('lf').textContent=m.f;
   document.getElementById('badge').style.display='none';
   if(curModel){scene.remove(curModel);curModel=null;}
-
   try{
-    // CORS pre-check
-    const testURL=url(m.f);
-    try{
-      const head=await fetch(testURL,{method:'HEAD',mode:'cors'});
-      if(!head.ok) throw new Error('HTTP '+head.status+' '+head.statusText);
-    }catch(corsErr){
-      throw new Error('URL 접근 불가 (CORS/네트워크): '+corsErr.message+'\n'+testURL);
-    }
     const loader=new GLTFLoader();
-    const glbURL=url(m.f);
-    console.log('Loading GLB:', glbURL);
-    const gltf=await new Promise((res,rej)=>loader.load(glbURL,res,
-      e=>{if(e.total&&e.total>0)document.getElementById('lf').textContent=Math.round(e.loaded/e.total*100)+'% 로드 중…';else document.getElementById('lf').textContent='로딩 중…';},
+    const gltf=await new Promise((res,rej)=>loader.load(glbURL(m.f),res,
+      e=>{if(e.total>0)document.getElementById('lf').textContent=Math.round(e.loaded/e.total*100)+'% 로드 중…';},
       rej
     ));
     const obj=gltf.scene;
@@ -244,80 +226,43 @@ async function loadModel(m){
     obj.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
     curModel=obj; scene.add(curModel);
     r=Math.max(2.5,Math.min(6,sz.x*sc*1.7)); updateCam();
-    // Labels
     document.getElementById('vn').textContent=m.n;
     document.getElementById('vs').textContent=m.s+(m.p?' · '+m.p:'');
-    const badge=document.getElementById('badge');badge.style.display='inline-flex';
+    document.getElementById('badge').style.display='inline-flex';
     document.getElementById('iSec').style.display='block';
-    document.getElementById('iSeries').textContent=m.s;
-    document.getElementById('iSize').textContent=m.p||'—';
-    lb.style.opacity='0';setTimeout(()=>lb.style.display='none',450);
+    document.getElementById('iS').textContent=m.s;
+    document.getElementById('iP').textContent=m.p||'—';
+    lb.style.opacity='0';
+    setTimeout(()=>{lb.style.display='none';lb.style.background='transparent';document.getElementById('sp').style.display='none';},450);
   }catch(e){
-    const msg = e?.message || (e instanceof ProgressEvent ? 'Network/CORS 오류' : String(e));
     document.getElementById('lt').textContent='❌ 로드 실패';
-    document.getElementById('lf').innerHTML='<span style="color:#C04040">'+msg+'</span><br><span style="font-size:8px;word-break:break-all;opacity:.7">'+glbURL+'</span>';
-    console.error('GLB load error:', e, 'URL:', glbURL);
+    document.getElementById('lf').textContent=m.f+'\n'+String(e);
+    console.error(e);
   }
-}
-
-function initThree(){
-  const wrap=document.getElementById('wrap');
-  const W=wrap.offsetWidth||800,H=wrap.offsetHeight||500;
-  ren=new THREE.WebGLRenderer({antialias:true});
-  ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.setSize(W,H);
-  ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
-  ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.05;
-  ren.domElement.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;display:block;';
-  wrap.insertBefore(ren.domElement,wrap.firstChild);
-  scene=new THREE.Scene();setBG();
-  cam=new THREE.PerspectiveCamera(36,W/H,.05,30);updateCam();
-  buildEnv();buildLights();
-  const el=ren.domElement;
-  const dn=(x,y)=>{drag=true;lx=x;ly=y;autoRot=false;document.getElementById('rbt').classList.remove('on');lastI=Date.now();};
-  const mv=(x,y)=>{if(!drag)return;theta-=(x-lx)*.5;phi=Math.max(5,Math.min(70,phi-(y-ly)*.3));lx=x;ly=y;updateCam();};
-  const up=()=>{drag=false;lastI=Date.now();};
-  el.addEventListener('mousedown',e=>dn(e.clientX,e.clientY));
-  window.addEventListener('mouseup',up);
-  el.addEventListener('mousemove',e=>mv(e.clientX,e.clientY));
-  el.addEventListener('wheel',e=>{r=Math.max(1.4,Math.min(8,r+e.deltaY*.004));updateCam();},{passive:true});
-  el.addEventListener('touchstart',e=>{if(e.touches.length===1)dn(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
-  el.addEventListener('touchmove',e=>{if(e.touches.length===1)mv(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
-  el.addEventListener('touchend',up);
-  new ResizeObserver(()=>{const nW=wrap.offsetWidth,nH=wrap.offsetHeight;if(nW>0&&nH>0){ren.setSize(nW,nH);cam.aspect=nW/nH;cam.updateProjectionMatrix();}}).observe(wrap);
-  (function anim(){animId=requestAnimationFrame(anim);if(!drag&&(autoRot||Date.now()-lastI>4000))theta+=.14;updateCam();ren.render(scene,cam);})();
-  // 초기 loadBox 정리
-  const lb=document.getElementById('loadBox');
-  lb.style.background='transparent';lb.querySelector('.spin').style.display='none';
-  document.getElementById('lt').textContent='';
-  document.getElementById('lf').textContent='소파를 선택하세요';
 }
 
 function buildList(){
   document.getElementById('ml').innerHTML=MODELS.map((m,i)=>`
-    <div class="mr${m.id===selId?' on':''}" onclick="loadModel(MODELS[${i}])">
-      <div class="mr-tx"><div class="mn">${m.n}</div><div class="ms">${m.s}</div></div>
-      ${m.p?`<div class="mr-num">${m.p}</div>`:''}
+    <div class="mr${m.id===selId?' on':''}" onclick="window._pick(${i})">
+      <div><div class="mn">${m.n}</div><div class="ms">${m.s}</div></div>
+      ${m.p?`<div class="mp">${m.p}</div>`:''}
     </div>`).join('');
 }
-function buildFC(){document.getElementById('fc').innerHTML=FLOOR.map(f=>`<div class="wc${f.id===floorC.id?' on':''}" style="background:${f.hex}" title="${f.n}" onclick="pF('${f.id}')"></div>`).join('');}
-function buildWC(){document.getElementById('wc').innerHTML=WALL.map(w=>`<div class="wc${w.id===wallC.id?' on':''}" style="background:${w.hex};border-color:${w.id==='wh'?'#ddd':'transparent'}" title="${w.n}" onclick="pW('${w.id}')"></div>`).join('');}
-function pF(id){floorC=FLOOR.find(f=>f.id===id)||floorC;document.getElementById('fn').textContent=floorC.n;buildFC();rebuildEnv();}
-function pW(id){wallC=WALL.find(w=>w.id===id)||wallC;document.getElementById('wn').textContent=wallC.n;buildWC();rebuildEnv();}
+function buildFC(){document.getElementById('fc').innerHTML=FLOOR.map(f=>`<div class="wc${f.id===floorC.id?' on':''}" style="background:${f.hex}" title="${f.n}" onclick="window._pF('${f.id}')"></div>`).join('');}
+function buildWC(){document.getElementById('wc').innerHTML=WALL.map(w=>`<div class="wc${w.id===wallC.id?' on':''}" style="background:${w.hex};${w.id==='wh'?'border-color:#ccc;':''}" title="${w.n}" onclick="window._pW('${w.id}')"></div>`).join('');}
 
-window.addEventListener('DOMContentLoaded',()=>{
-  buildList();buildFC();buildWC();
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    initThree();
-    setTimeout(()=>loadModel(MODELS[0]),100);
-  }));
-});
+// onclick 전역 노출
+window._pick=i=>loadModel(MODELS[i]);
+window._pF=id=>{floorC=FLOOR.find(f=>f.id===id)||floorC;document.getElementById('fn').textContent=floorC.n;buildFC();rebuildEnv();};
+window._pW=id=>{wallC=WALL.find(w=>w.id===id)||wallC;document.getElementById('wn').textContent=wallC.n;buildWC();rebuildEnv();};
+document.getElementById('rbt').onclick=()=>{autoRot=!autoRot;document.getElementById('rbt').classList.toggle('on',autoRot);lastI=0;};
 
-// ES Module → 전역 노출 (onclick 접근용)
-window.loadModel = loadModel;
-window.toggleRot = toggleRot;
-window.pF = pF;
-window.pW = pW;
-window.MODELS = MODELS;
+// INIT
+buildList(); buildFC(); buildWC();
+requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  initScene();
+  setTimeout(()=>loadModel(MODELS[0]),150);
+}));
 </script>
 </body>
 </html>

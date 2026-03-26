@@ -742,16 +742,28 @@ body{
 .chat-send:disabled{opacity:.35;cursor:not-allowed;}
 
 /* ══ FAB ══ */
+/* ── ALMA FAB ── */
 .chat-fab{
   position:absolute;bottom:72px;right:14px;z-index:40;
-  width:42px;height:42px;border-radius:50%;
-  background:var(--accent);border:none;cursor:pointer;
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,#8B7355 0%,#C4A882 100%);
+  border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 16px rgba(42,37,32,.22);
-  transition:all .2s;animation:fabIn .3s cubic-bezier(.4,0,.2,1) both;
+  box-shadow:0 4px 18px rgba(139,115,85,.38),0 2px 6px rgba(0,0,0,.14);
+  transition:all .22s;
 }
-.chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(42,37,32,.28);}
-.chat-fab-icon{font-size:17px;line-height:1;}
+.chat-fab:hover{transform:scale(1.07) translateY(-1px);box-shadow:0 8px 24px rgba(139,115,85,.44);}
+.chat-fab-inner{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+}
+.chat-fab-av{
+  font-family:'Josefin Sans',sans-serif;font-size:16px;font-weight:300;
+  letter-spacing:.1em;color:rgba(255,255,255,.95);line-height:1;
+}
+.chat-fab-dot{
+  width:5px;height:5px;border-radius:50%;background:#A8E6A0;
+  box-shadow:0 0 0 2px rgba(168,230,160,.3);
+}
 .chat-fab-badge{
   position:absolute;top:-2px;right:-2px;
   min-width:16px;height:16px;border-radius:8px;
@@ -759,6 +771,19 @@ body{
   display:flex;align-items:center;justify-content:center;
   border:2px solid var(--surface);padding:0 3px;
 }
+/* ALMA FAB label tooltip */
+.chat-fab-label{
+  position:absolute;right:56px;top:50%;transform:translateY(-50%);
+  background:var(--accent);color:rgba(255,255,255,.9);
+  font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.14em;
+  padding:5px 10px;border-radius:4px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .18s;
+}
+.chat-fab-label::after{
+  content:'';position:absolute;left:100%;top:50%;transform:translateY(-50%);
+  border:4px solid transparent;border-left-color:var(--accent);
+}
+.chat-fab:hover .chat-fab-label{opacity:1;}
 @keyframes fabIn{from{opacity:0;transform:scale(.5);}to{opacity:1;transform:scale(1);}}
 
 /* ══ HOME SCREEN ══ */
@@ -908,7 +933,7 @@ body{
 .tc.sel.space .tc-badge{background:var(--t-accent);}
 .tc.sel.life  .tc-badge{background:var(--f-accent);}
 
-/* ══ LIVING STUDIO PANEL ══ */
+/* ══ STUDIO PANEL ══ */
 .studio-panel{
   position:absolute;inset:0;z-index:60;
   background:var(--surface);
@@ -1067,6 +1092,8 @@ body{
   <div class="hdr" id="hdr">
     <div class="hdr-left">
       <div class="hdr-av" id="hdrAv"><span style="font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;color:#C8B880;letter-spacing:.1em;">A</span></div>
+
+
       <div>
         <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyODAgNTIiIHdpZHRoPSIxNjgiIGhlaWdodD0iMzIiPgogIDx0ZXh0IHg9IjE0MCIgeT0iMzciIGZvbnQtZmFtaWx5PSInSm9zZWZpbiBTYW5zJywnQ2VudHVyeSBHb3RoaWMnLEFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iY3VycmVudENvbG9yIj5BTExPU088L3RleHQ+Cjwvc3ZnPg==" class="hdr-logo" alt="ALLOSO" style="height:16px;opacity:.92;">
         <div class="hdr-consultant" id="hdrSub">소파 상담</div>
@@ -1119,11 +1146,17 @@ body{
 
   <!-- ══ CHAT PANEL ══ -->
   <div class="overlay-panel" id="chatPanel">
-    <div class="op-hdr" style="padding:11px 16px 10px;">
-      <div class="op-back" onclick="closeOverlay('chatPanel')">←</div>
+    <div class="op-hdr" style="padding:11px 16px 10px;background:var(--accent);">
+      <div class="op-back" onclick="closeOverlay('chatPanel')" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.7);">←</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8B7355,#C4A882);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:300;letter-spacing:.1em;color:rgba(255,255,255,.92);">A</span>
+      </div>
       <div class="op-title-wrap" style="flex:1;">
-        <div class="op-label">AI Assistant</div>
-        <div class="op-title" style="font-size:17px;">자유 문의</div>
+        <div style="font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:300;letter-spacing:.22em;color:rgba(255,255,255,.92);">Alloso Advisor</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:4px;margin-top:1px;">
+          <span style="width:5px;height:5px;border-radius:50%;background:#A8E6A0;display:inline-block;"></span>
+          Alloso Interior Director · AI
+        </div>
       </div>
       <div class="chat-status-dot" id="chatStatusDot"></div>
     </div>
@@ -1140,11 +1173,117 @@ body{
     </div>
   </div>
 
-  <!-- ══ CHAT FAB (wizard 중 표시) ══ -->
-  <div class="chat-fab" id="chatFab" onclick="openChat()" style="display:none">
-    <span class="chat-fab-icon">💬</span>
+  <!-- ══ ALMA FAB (항상 표시) ══ -->
+  <div class="chat-fab" id="chatFab" onclick="openChat()">
+    <div class="chat-fab-inner">
+      <div class="chat-fab-av">A</div>
+
+
+      <div class="chat-fab-dot"></div>
+    </div>
+    <div class="chat-fab-label">AI 어드바이저</div>
     <span class="chat-fab-badge" id="chatFabBadge" style="display:none"></span>
   </div>
+
+  <!-- ══ STUDIO PANEL ══ -->
+  <div class="studio-panel" id="studioPanel">
+    <div class="sp-bar">
+      <div class="sp-back" onclick="closeStudio()">←</div>
+      <div class="sp-title-wrap">
+        <div class="sp-eye">Alloso · Feature</div>
+        <div class="sp-title">Studio</div>
+      </div>
+      <div class="sp-phase" id="spPhaseLabel">STEP 1</div>
+    </div>
+    <div class="sp-steps" id="spSteps">
+      <div class="sp-step active" id="st0"></div>
+      <div class="sp-step" id="st1"></div>
+      <div class="sp-step" id="st2"></div>
+      <div class="sp-step" id="st3"></div>
+    </div>
+    <div class="sp-body" id="spBody">
+
+      <!-- PHASE 0: Room Input -->
+      <div class="sp-phase-screen active" id="sp0">
+        <div style="padding:20px 16px 12px;">
+          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">01 — 공간 입력</div>
+          <div style="font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);letter-spacing:.06em;margin-bottom:6px;">거실 크기를 알려주세요</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">정확하지 않아도 괜찮아요. 대략적인 크기로도 어울리는 소파를 찾아드려요.</div>
+        </div>
+        <div class="sp-input-group">
+          <div style="font-size:10px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;text-transform:uppercase;">거실 치수</div>
+          <div class="sp-input-row" style="margin-bottom:8px;">
+            <div class="sp-input-label">가로폭</div>
+            <input class="sp-input" id="roomW" type="number" placeholder="예: 420" min="200" max="1000">
+            <div class="sp-unit">cm</div>
+          </div>
+          <div class="sp-input-row">
+            <div class="sp-input-label">깊이</div>
+            <input class="sp-input" id="roomD" type="number" placeholder="예: 350" min="200" max="1000">
+            <div class="sp-unit">cm</div>
+          </div>
+        </div>
+        <div class="sp-input-group">
+          <div style="font-size:10px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;text-transform:uppercase;">또는 평수로 입력</div>
+          <div class="sp-input-row">
+            <div class="sp-input-label">거실 평수</div>
+            <input class="sp-input" id="roomPyung" type="number" placeholder="예: 15" min="5" max="60" oninput="pyungToSize()">
+            <div class="sp-unit">평</div>
+          </div>
+        </div>
+        <div style="padding:14px 16px 20px;">
+          <button onclick="goToSP(1)" style="width:100%;background:var(--accent);border:none;border-radius:2px;padding:14px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;" id="sp0Btn">공간 확인하기 →</button>
+        </div>
+      </div>
+
+      <!-- PHASE 1: Floor Plan Canvas -->
+      <div class="sp-phase-screen" id="sp1">
+        <div style="padding:16px 16px 8px;">
+          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">02 — 배치 확인</div>
+          <div style="font-family:'Josefin Sans',sans-serif;font-size:15px;font-weight:300;color:var(--accent);letter-spacing:.06em;">소파를 선택하고 배치해보세요</div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="roomCanvas" width="330" height="240"></canvas>
+          <div style="display:flex;gap:14px;font-size:9.5px;color:var(--muted);">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#DDD5C0;display:inline-block;border:1px solid #C4C2BC;"></span> 거실</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:rgba(42,72,112,.25);display:inline-block;border:1px solid rgba(42,72,112,.4);"></span> 소파</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:rgba(74,138,96,.15);display:inline-block;border:1px dashed rgba(74,138,96,.5);"></span> 동선</span>
+          </div>
+        </div>
+        <div class="sofa-grid" id="spSofaGrid"></div>
+        <div style="padding:0 16px 14px;" id="spSofaInfo"></div>
+      </div>
+
+      <!-- PHASE 2: AI Recommendation -->
+      <div class="sp-phase-screen" id="sp2">
+        <div style="padding:16px 16px 12px;">
+          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">03 — AI 추천</div>
+          <div style="font-family:'Josefin Sans',sans-serif;font-size:15px;font-weight:300;color:var(--accent);letter-spacing:.06em;margin-bottom:4px;" id="recTitle">공간에 맞는 소파</div>
+          <div style="font-size:10.5px;color:var(--muted);" id="recSub"></div>
+        </div>
+        <div id="recList" style="padding:0 0 8px;"></div>
+      </div>
+
+      <!-- PHASE 3: Complete -->
+      <div class="sp-phase-screen" id="sp3">
+        <div style="padding:36px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div style="font-size:28px;">✦</div>
+          <div style="font-family:'Josefin Sans',sans-serif;font-size:18px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);">Perfect Fit</div>
+          <div id="spFinalSummary" style="font-size:11px;color:var(--muted);line-height:1.75;text-align:center;max-width:260px;"></div>
+          <div style="width:100%;background:var(--border);height:1px;margin:8px 0;"></div>
+          <div style="font-size:10px;color:var(--muted);">다음 단계로 상담을 계속하거나<br>쇼룸에서 실물을 확인해보세요.</div>
+          <button onclick="startFlowFromStudio()" style="margin-top:6px;width:100%;background:var(--accent);border:none;border-radius:2px;padding:13px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;">소파 상담 시작하기 →</button>
+          <button onclick="openCare(); closeStudio();" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:2px;padding:11px;font-size:10.5px;color:var(--muted);cursor:pointer;letter-spacing:.08em;">Alloso Care 보기</button>
+        </div>
+      </div>
+
+    </div><!-- /sp-body -->
+    <div class="sp-cta" id="spCta">
+      <button class="sp-cta-sec" id="spPrev" onclick="spNav(-1)" style="display:none;">← 이전</button>
+      <button class="sp-cta-pri" id="spNext" onclick="spNav(1)">다음 →</button>
+    </div>
+  </div><!-- /studio-panel -->
+
 </div>
 
 <script>
@@ -1283,7 +1422,7 @@ function restart(){
   consultant=null; curStep=0;
   updateHdr(null);
   setRibbon(false); setNavbar(false);
-  document.getElementById('chatFab').style.display='none';
+  // chatFab always visible
   renderWelcome();
 }
 
@@ -1303,10 +1442,10 @@ function renderWelcome(){
       <div class="home-hero-tag">나의 공간에 어울리는 소파,<br>Alloso와 함께 찾아보세요</div>
     </div>
 
-    <!-- LIVING STUDIO HERO BTN -->
-    <button class="studio-btn" onclick="location.href='alloso-living-studio.html'">
+    <!-- STUDIO HERO BTN -->
+    <button class="studio-btn" onclick="location.href='alloso-living-studio-v2.html'">
       <div class="sb-eyebrow">Key Feature · New</div>
-      <div class="sb-title">ALLOSO <span>LIVING</span> STUDIO</div>
+      <div class="sb-title">ALLOSO <span>STUDIO</span></div>
       <div class="sb-desc">우리 집 거실에 소파를 직접 배치해보세요<br>AI가 공간에 맞는 소파를 추천해드려요</div>
       <div class="sb-arrow">›</div>
     </button>
@@ -1418,7 +1557,7 @@ function startFlow(){
   buildRibbon();
   setRibbon(true);
   setNavbar(true);
-  document.getElementById('chatFab').style.display='flex';
+  // chatFab always visible
   renderStep(curStep);
 }
 
@@ -2407,11 +2546,11 @@ function initChatWelcome(){
   const msgs = document.getElementById('chatMsgs');
   msgs.innerHTML = `
     <div class="chat-welcome">
-      <div class="cw-av">A</div>
-      <div class="cw-name">Alloso 어드바이저</div>
-      <div class="cw-desc">소파에 대해 무엇이든 편하게 물어보세요.<br>소재·사이즈·가격·관리법 모두 답해드릴게요.</div>
+      <div class="cw-av" style="background:linear-gradient(135deg,#8B7355,#C4A882);font-family:'Josefin Sans',sans-serif;font-size:16px;font-weight:300;letter-spacing:.1em;color:rgba(255,255,255,.92);">A</div>
+      <div class="cw-name" style="font-family:'Josefin Sans',sans-serif;letter-spacing:.16em;">Alloso Advisor</div>
+      <div class="cw-desc">Alloso Interior Director · AI<br>소파에 대해 무엇이든 편하게 물어보세요.</div>
     </div>`;
-  appendBotMsg('안녕하세요 👋 Alloso 어드바이저예요.\n궁금한 점을 자유롭게 물어봐 주세요. FAQ나 케어 가이드에서 더 자세한 내용을 확인하실 수도 있어요.');
+  appendBotMsg('안녕하세요. Alloso 인테리어 어드바이저예요.\n\n소파 소재·사이즈·가격·관리법부터 공간 스타일링까지 도와드릴게요. 상담 중이라면 현재 단계 기준으로 맞춤 답변도 드려요.');
   renderChips();
 }
 
@@ -2531,36 +2670,57 @@ async function sendMessage(text){
 
   appendUserMsg(text);
   chatHistory.push({role:'user', content:text});
-
   showTyping();
 
-  // Context injection: add current wizard state if in flow
+  // 현재 플로우 컨텍스트 주입 (wizard 진행 중일 때)
   let contextNote = '';
   if(inFlow && consultant){
     const parts = [];
-    if(ans.sqm) parts.push(`거실 ${ans.sqm}㎡`);
+    if(ans.sqm) parts.push('거실 '+ans.sqm+'㎡');
     if(ans.usage) parts.push({daily_long:'매일 장시간',daily_short:'하루 1-2시간',guest:'손님 접대',kids:'아이 놀이터'}[ans.usage]||ans.usage);
     if(ans.scene) parts.push({morning:'아침 커피',movie:'가족 영화',nap:'낮잠',gather:'친구 모임'}[ans.scene]||ans.scene);
     if(ans.vibe) parts.push({nordic:'북유럽',modern:'뉴욕 모던',jeju:'제주',hotel:'파리 호텔'}[ans.vibe]||ans.vibe);
-    if(ans.series) parts.push(`관심 소파: ${ans.series}`);
-    if(parts.length) contextNote = `\n[현재 상담 맥락: ${parts.join(' / ')}]`;
+    if(ans.series) parts.push('관심 소파: '+ans.series);
+    if(parts.length) contextNote = '\n[현재 상담 맥락: '+parts.join(' / ')+']';
   }
 
-  try {
-    let reply = '';
+  const ALMA_SYSTEM = `당신은 Alloso 브랜드의 인테리어 디렉터 AI 어드바이저입니다.
+페르소나: 감각적·트렌디한 인테리어 전문가. 따뜻하지만 절제된 어조. 짧고 임팩트 있는 문장.
+브랜드: 하이엔드 소파 브랜드 Alloso (퍼시스그룹).
+주요 시리즈: 레지나(클래식 다리형), 보눔OP/FU(모던·모듈), 카포네(쿠션백), 사티(모던 미니멀), 사티모션(전동 리클라이너), 케렌시아(로우 모듈), 바드(스칸디), 스탠(대형 럭셔리), 비하르(로우 내추럴), 에브리데이/홀리데이(캐주얼·가족).
+소재: 에센셜 패브릭(노르딕·솔라 워터프루프), 프리미엄 패브릭(아크레·스칼렛), 디자인 패브릭(부클레·릴레이트/Kvadrat), 에센셜 레더(소프트 프리모), 프리미엄 레더(드리밍헤비/Montebello), 하이엔드 레더(베지탄·단테).
+쇼룸: 청담(플래그십), 성수, 부산동구산, 용산, 기흥.
+배송: 주문제작 10-15일, 무료배송(제주·도서 추가).
+응답: 한국어, 200자 이내, 가격은 만원 단위.`;
 
-    // Build context note from current wizard state
-    const msgs_to_send = chatHistory.slice(-12).map((m, i) => {
-      if(i === 0 && contextNote && m.role === 'user')
-        return {role:'user', content: m.content + contextNote};
-      return m;
+  try {
+    let msgs = chatHistory.slice(-12);
+    if(contextNote && msgs.length > 0){
+      msgs = [...msgs];
+      msgs[0] = {role: msgs[0].role, content: msgs[0].content + contextNote};
+    }
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: ALMA_SYSTEM,
+        messages: msgs
+      })
     });
 
-    // Small natural delay then keyword-based smart reply
-    await new Promise(r => setTimeout(r, 250 + Math.random()*150));
-    reply = getDemoReply(text);
-
+    const data = await res.json();
     hideTyping();
+
+    let reply = '';
+    if(data.content && data.content[0]){
+      reply = data.content[0].text;
+    } else {
+      reply = '잠시 후 다시 시도해주세요.';
+    }
+
     chatHistory.push({role:'assistant', content:reply});
     appendBotMsg(reply);
 
@@ -2569,7 +2729,7 @@ async function sendMessage(text){
 
   } catch(err){
     hideTyping();
-    appendBotMsg('잠시 오류가 발생했어요. 다시 시도해주세요.');
+    appendBotMsg('연결이 원활하지 않아요. 잠시 후 다시 시도해주세요.');
   }
 
   chatLoading = false;
@@ -2646,7 +2806,7 @@ function getDemoReply(text){
 }
 
 // ════════════════════════════════════
-// LIVING STUDIO ENGINE
+// STUDIO ENGINE
 // ════════════════════════════════════
 let studioStep = 0;
 let studioRoom = {w:0, d:0}; // cm
@@ -2966,7 +3126,9 @@ function buildRecommendations(){
         <div class="rec-price">${s.price}</div>
       </div>
       <div class="rec-cta" onclick="window.open('https://www.alloso.co.kr','_blank')">보러가기</div>
-    </div>`).join('');
+    </div>
+
+`).join('');
 }
 
 function buildFinalSummary(){
@@ -2984,101 +3146,3 @@ function buildFinalSummary(){
 </body>
 </html>
 
-  <!-- ══ LIVING STUDIO PANEL ══ -->
-  <div class="studio-panel" id="studioPanel">
-    <div class="sp-bar">
-      <div class="sp-back" onclick="closeStudio()">←</div>
-      <div class="sp-title-wrap">
-        <div class="sp-eye">Alloso · Feature</div>
-        <div class="sp-title">Living Studio</div>
-      </div>
-      <div class="sp-phase" id="spPhaseLabel">STEP 1</div>
-    </div>
-    <div class="sp-steps" id="spSteps">
-      <div class="sp-step active" id="st0"></div>
-      <div class="sp-step" id="st1"></div>
-      <div class="sp-step" id="st2"></div>
-      <div class="sp-step" id="st3"></div>
-    </div>
-    <div class="sp-body" id="spBody">
-
-      <!-- PHASE 0: Room Input -->
-      <div class="sp-phase-screen active" id="sp0">
-        <div style="padding:20px 16px 12px;">
-          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">01 — 공간 입력</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);letter-spacing:.06em;margin-bottom:6px;">거실 크기를 알려주세요</div>
-          <div style="font-size:11px;color:var(--muted);line-height:1.6;">정확하지 않아도 괜찮아요. 대략적인 크기로도 어울리는 소파를 찾아드려요.</div>
-        </div>
-        <div class="sp-input-group">
-          <div style="font-size:10px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;text-transform:uppercase;">거실 치수</div>
-          <div class="sp-input-row" style="margin-bottom:8px;">
-            <div class="sp-input-label">가로폭</div>
-            <input class="sp-input" id="roomW" type="number" placeholder="예: 420" min="200" max="1000">
-            <div class="sp-unit">cm</div>
-          </div>
-          <div class="sp-input-row">
-            <div class="sp-input-label">깊이</div>
-            <input class="sp-input" id="roomD" type="number" placeholder="예: 350" min="200" max="1000">
-            <div class="sp-unit">cm</div>
-          </div>
-        </div>
-        <div class="sp-input-group">
-          <div style="font-size:10px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;text-transform:uppercase;">또는 평수로 입력</div>
-          <div class="sp-input-row">
-            <div class="sp-input-label">거실 평수</div>
-            <input class="sp-input" id="roomPyung" type="number" placeholder="예: 15" min="5" max="60" oninput="pyungToSize()">
-            <div class="sp-unit">평</div>
-          </div>
-        </div>
-        <div style="padding:14px 16px 20px;">
-          <button onclick="goToSP(1)" style="width:100%;background:var(--accent);border:none;border-radius:2px;padding:14px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;" id="sp0Btn">공간 확인하기 →</button>
-        </div>
-      </div>
-
-      <!-- PHASE 1: Floor Plan Canvas -->
-      <div class="sp-phase-screen" id="sp1">
-        <div style="padding:16px 16px 8px;">
-          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">02 — 배치 확인</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:15px;font-weight:300;color:var(--accent);letter-spacing:.06em;">소파를 선택하고 배치해보세요</div>
-        </div>
-        <div class="canvas-wrap">
-          <canvas id="roomCanvas" width="330" height="240"></canvas>
-          <div style="display:flex;gap:14px;font-size:9.5px;color:var(--muted);">
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#DDD5C0;display:inline-block;border:1px solid #C4C2BC;"></span> 거실</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:rgba(42,72,112,.25);display:inline-block;border:1px solid rgba(42,72,112,.4);"></span> 소파</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:rgba(74,138,96,.15);display:inline-block;border:1px dashed rgba(74,138,96,.5);"></span> 동선</span>
-          </div>
-        </div>
-        <div class="sofa-grid" id="spSofaGrid"></div>
-        <div style="padding:0 16px 14px;" id="spSofaInfo"></div>
-      </div>
-
-      <!-- PHASE 2: AI Recommendation -->
-      <div class="sp-phase-screen" id="sp2">
-        <div style="padding:16px 16px 12px;">
-          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">03 — AI 추천</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:15px;font-weight:300;color:var(--accent);letter-spacing:.06em;margin-bottom:4px;" id="recTitle">공간에 맞는 소파</div>
-          <div style="font-size:10.5px;color:var(--muted);" id="recSub"></div>
-        </div>
-        <div id="recList" style="padding:0 0 8px;"></div>
-      </div>
-
-      <!-- PHASE 3: Complete -->
-      <div class="sp-phase-screen" id="sp3">
-        <div style="padding:36px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <div style="font-size:28px;">✦</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:18px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);">Perfect Fit</div>
-          <div id="spFinalSummary" style="font-size:11px;color:var(--muted);line-height:1.75;text-align:center;max-width:260px;"></div>
-          <div style="width:100%;background:var(--border);height:1px;margin:8px 0;"></div>
-          <div style="font-size:10px;color:var(--muted);">다음 단계로 상담을 계속하거나<br>쇼룸에서 실물을 확인해보세요.</div>
-          <button onclick="startFlowFromStudio()" style="margin-top:6px;width:100%;background:var(--accent);border:none;border-radius:2px;padding:13px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;">소파 상담 시작하기 →</button>
-          <button onclick="openCare(); closeStudio();" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:2px;padding:11px;font-size:10.5px;color:var(--muted);cursor:pointer;letter-spacing:.08em;">Alloso Care 보기</button>
-        </div>
-      </div>
-
-    </div><!-- /sp-body -->
-    <div class="sp-cta" id="spCta">
-      <button class="sp-cta-sec" id="spPrev" onclick="spNav(-1)" style="display:none;">← 이전</button>
-      <button class="sp-cta-pri" id="spNext" onclick="spNav(1)">다음 →</button>
-    </div>
-  </div><!-- /studio-panel -->
