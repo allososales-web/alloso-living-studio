@@ -474,6 +474,8 @@ body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:
 let room={w:0,d:0},selId=null,selW=null,sofaX=0,sofaY=-1,sofaRot=0,moveStep=30;
 let cvScale=1,cvOx=0,cvRoomPxW=0,dragging=false,dsx=0,dsy=0,dssX=0,dssY=0,curView='2d';
 const CATALOG=[
+  {id:'sati_1p',name:'SATI 1P',ko:'사티 1인',type:'1인 소파',depth:80,tag:'모던·미니멀·1인',configs:[{name:'1인',w:846,p:178}]},
+  {id:'sati',name:'SATI',ko:'사티',type:'모던',depth:98,tag:'모던·미니멀',configs:[{name:'1인',w:846,p:178},{name:'2인',w:2200,p:288},{name:'3인',w:2800,p:368},{name:'3.5인',w:3100,p:408}]},
   {id:'regina',name:'REGINA',ko:'레지나',type:'다리형',depth:104,tag:'클래식·고급',configs:[{name:'2인',w:2200,p:578},{name:'3인',w:3070,p:778}]},
   {id:'bonum_op',name:'BONUM OP',ko:'보눔 OP',type:'오픈암',depth:106,tag:'모던·오픈암',configs:[{name:'2인',w:2320,p:318},{name:'3인',w:3200,p:438}]},
   {id:'bonum_fu',name:'BONUM FU',ko:'보눔 FU',type:'풀세트',depth:106,tag:'모던·모듈',configs:[{name:'2인',w:2270,p:338},{name:'2.5인',w:2520,p:378},{name:'3인',w:3200,p:458},{name:'3.5인',w:3420,p:508}]},
@@ -603,6 +605,7 @@ function glbURL(name){ return GLB_BASE + encodeURIComponent(name); }
 
 /* 소파 ID → GLB 파일 배열 (우+좌 순서로 나란히 배치) */
 const GLB_MAP = {
+  'sati_1p':  [{f:'사티1인.glb'}],
   'sati':     [{f:'02.사티 와이드 1인 좌.glb'}, {f:'02.사티 와이드 1인 우.glb'}],
   'querencia':[{f:'03.케렌시아 싱글.glb'}],
   'bonum_op': [{f:'04.보눔 1인 좌.glb'}, {f:'04.보눔 1인 우.glb'}],
@@ -757,7 +760,7 @@ function buildRoom(scene){
   const lw=new THREE.Mesh(new THREE.PlaneGeometry(12,6),wallMat);lw.position.set(-5,3,0);lw.rotation.y=Math.PI/2;lw.receiveShadow=true;scene.add(lw);
   // 걸레받이
   const bm=mkMat(darkenHex(wallC.hex,0.06),0.8);
-  scene.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(12,.07,.04),bm),{position:new THREE.Vector3(0,.035,-4.98)}));
+  const baseboard=new THREE.Mesh(new THREE.BoxGeometry(12,.07,.04),bm);baseboard.position.set(0,.035,-4.98);scene.add(baseboard);
   // 천장
   const cm=mkMat(lightenHex(wallC.hex,0.04),0.95);
   const ceil=new THREE.Mesh(new THREE.PlaneGeometry(12,12),cm);ceil.rotation.x=Math.PI/2;ceil.position.set(0,5,0);scene.add(ceil);
@@ -835,6 +838,9 @@ async function init3D(){
   if(t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}
   const oldCanvas=container.querySelector('canvas');
   if(oldCanvas)oldCanvas.remove();
+  const oldFb=container.querySelector('.v3d-fallback');
+  if(oldFb)oldFb.remove();
+  console.log('[3D] Step 1: Cleanup OK');
 
   // 레이아웃 강제 flush 후 크기 계산
   container.style.minHeight='320px';
@@ -975,7 +981,7 @@ async function init3D(){
 
   } catch(e) {
     console.error('[3D] init3D failed:', e);
-    show3DFallback('3D 렌더링 중 오류가 발생했습니다');
+    show3DFallback('3D 렌더링 오류: ' + (e.message || e));
   }
 }
 
@@ -983,11 +989,14 @@ function show3DFallback(msg){
   const container=document.getElementById('v3dWrap');
   if(!container)return;
   const oldFb=container.querySelector('.v3d-fallback');
-  if(oldFb)return;
+  if(oldFb)oldFb.remove();
   const fb=document.createElement('div');
   fb.className='v3d-fallback';
-  fb.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--bg,#F5F4F0);z-index:5;';
-  fb.innerHTML='<div style="width:120px;height:80px;border:2px solid var(--border,#DDDBD3);border-radius:8px;display:flex;align-items:center;justify-content:center;"><div style="width:80px;height:30px;background:var(--border,#DDDBD3);border-radius:4px;"></div></div><div style="font-family:Josefin Sans,sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted,#9A9890);">'+msg+'</div><div style="font-size:11px;color:var(--text,#5A5A54);text-align:center;line-height:1.7;">2D 평면도에서 소파 배치를 확인하세요<br><button onclick="setView(\'2d\');this.closest(\'.v3d-fallback\').remove();" style="margin-top:8px;padding:8px 20px;background:var(--accent,#1A1A18);color:rgba(255,255,255,.9);border:none;border-radius:2px;font-size:11px;cursor:pointer;">2D 보기 →</button></div>';
+  fb.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg,#F5F4F0);z-index:5;';
+  fb.innerHTML='<div style="width:120px;height:80px;border:2px solid var(--border,#DDDBD3);border-radius:8px;display:flex;align-items:center;justify-content:center;"><div style="width:80px;height:30px;background:var(--border,#DDDBD3);border-radius:4px;"></div></div>'
+    +'<div style="font-size:11px;color:var(--text,#5A5A54);text-align:center;line-height:1.7;max-width:400px;padding:0 20px;word-break:break-all;">'+msg+'</div>'
+    +'<div style="display:flex;gap:10px;margin-top:4px;"><button onclick="setView(\'2d\');this.closest(\'.v3d-fallback\').remove();" style="padding:8px 20px;background:var(--accent,#1A1A18);color:rgba(255,255,255,.9);border:none;border-radius:2px;font-size:11px;cursor:pointer;">2D 보기 →</button>'
+    +'<button onclick="this.closest(\'.v3d-fallback\').remove();_init3DRetry=0;init3D();" style="padding:8px 20px;background:transparent;border:1px solid var(--border,#DDDBD3);border-radius:2px;font-size:11px;cursor:pointer;color:var(--text,#5A5A54);">다시 시도</button></div>';
   container.appendChild(fb);
 }
 
