@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alloso · Studio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// GLTFLoader 동적 로더 — 여러 CDN 시도
+window._glbLoaderReady = new Promise(async function(resolve){
+  const urls = [
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js',
+    'https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js'
+  ];
+  for(const url of urls){
+    if(typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined'){
+      console.log('[Alloso] GLTFLoader already loaded');
+      resolve(true); return;
+    }
+    try {
+      await new Promise(function(res, rej){
+        var s = document.createElement('script');
+        s.src = url;
+        s.onload = function(){ 
+          if(typeof THREE.GLTFLoader !== 'undefined'){ console.log('[Alloso] GLTFLoader loaded from:', url); res(); }
+          else rej('GLTFLoader not defined after load');
+        };
+        s.onerror = function(){ rej('Network error'); };
+        document.head.appendChild(s);
+      });
+      resolve(true); return;
+    } catch(e){ console.warn('[Alloso] GLTFLoader CDN failed:', url, e); }
+  }
+  console.warn('[Alloso] All GLTFLoader CDNs failed — procedural sofa will be used');
+  resolve(false);
+});
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@100;300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F4F0;--surface:#FFF;--card:#F0EFE9;--card2:#E8E6E0;
+  --border:#DDDBD3;--border2:#B8B5AA;
+  --accent:#1A1A18;--gold:#8B7355;--gold-lt:#C4A882;
+  --muted:#9A9890;--text:#5A5A54;--text2:#2C2C28;
+  --green:#3A7050;--green-bg:rgba(58,112,80,.10);
+  --amber:#9A7020;--amber-bg:rgba(200,140,40,.10);
+  --red:#903830;
+  --sh1:0 1px 4px rgba(26,26,24,.07);--sh2:0 6px 24px rgba(26,26,24,.10);--r:2px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);}
+body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:var(--text2);}
+
+.nav{position:sticky;top:0;z-index:100;height:50px;padding:0 28px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.nav-eyebrow{font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);}
+.nav-title{font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);}
+.nav-step{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
+
+.step-bar{height:42px;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;}
+.sn{display:flex;align-items:center;gap:8px;padding:0 4px;cursor:default;}
+.sn.done{cursor:pointer;}
+.sn.done:hover .sn-dot{border-color:var(--gold-lt);}
+.sn-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Josefin Sans',sans-serif;font-size:9px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .18s;}
+.sn.done .sn-dot{background:var(--card);border-color:var(--border2);color:var(--text);}
+.sn.active .sn-dot{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.9);}
+.sn-lbl{font-family:'Josefin Sans',sans-serif;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+.sn.active .sn-lbl{color:var(--accent);}
+.sn.done .sn-lbl{color:var(--text);}
+.sn-line{flex:1;height:1px;background:var(--border);margin:0 10px;max-width:32px;}
+.sn-line.done{background:var(--border2);}
+
+.screen{display:none;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── S1 ── */
+#s1{flex-direction:row;height:calc(100vh - 92px);}
+.s1-left{width:300px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.s1-scroll{flex:1;overflow-y:auto;padding:24px 22px 16px;}
+.phase-kicker{font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.phase-kicker::after{content:'';flex:1;height:1px;background:rgba(139,115,85,.25);}
+.phase-title{font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:300;color:var(--accent);letter-spacing:.05em;line-height:1.35;margin-bottom:5px;}
+.phase-desc{font-size:11px;color:var(--muted);line-height:1.75;margin-bottom:20px;}
+.range-tabs{display:flex;gap:4px;margin-bottom:8px;}
+.range-tab{padding:3px 11px;font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .13s;}
+.range-tab.on{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.9);}
+.range-tab:hover:not(.on){border-color:var(--border2);}
+.apt-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.apt-card{border:1.5px solid var(--border);border-radius:var(--r);padding:9px 10px;cursor:pointer;transition:all .15s;background:var(--surface);position:relative;}
+.apt-card:hover{border-color:var(--border2);background:var(--card);}
+.apt-card.on{border-color:var(--accent);}
+.apt-card.on::after{content:'✓';position:absolute;top:5px;right:8px;font-size:9px;color:var(--accent);}
+.apt-pyeong{font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:.05em;color:var(--accent);margin-bottom:2px;}
+.apt-name{font-size:8.5px;color:var(--muted);margin-bottom:3px;}
+.apt-dim{font-size:9px;color:var(--muted);}
+.divider{display:flex;align-items:center;gap:10px;margin:14px 0;font-size:8.5px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.irow{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ilab{font-size:10.5px;color:var(--muted);width:42px;flex-shrink:0;}
+.ifield{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:8px 10px;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:300;color:var(--accent);outline:none;transition:border-color .15s;}
+.ifield:focus{border-color:var(--gold);}
+.iunit{font-size:10.5px;color:var(--muted);width:22px;flex-shrink:0;}
+.s1-cta{padding:12px 22px 20px;border-top:1px solid var(--border);}
+.btn-pri{width:100%;background:var(--accent);border:none;border-radius:var(--r);padding:13px 20px;font-family:'Josefin Sans',sans-serif;font-size:10.5px;font-weight:400;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;transition:opacity .18s;display:block;text-align:center;margin-bottom:7px;}
+.btn-pri:hover{opacity:.82;}
+.btn-pri:disabled{opacity:.28;cursor:not-allowed;}
+.btn-sec{width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--r);padding:9px 20px;font-size:11px;color:var(--text);cursor:pointer;transition:all .14s;letter-spacing:.08em;}
+.btn-sec:hover{border-color:var(--border2);}
+
+/* ── S1 RIGHT TABS ── */
+.s1-right{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.s1-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;flex-shrink:0;}
+.s1-tab{padding:12px 16px 11px;font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.s1-tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+.s1-tab:hover:not(.on){color:var(--text);}
+.pref-cnt{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--gold);color:#fff;font-size:8px;opacity:0;transform:scale(0);transition:all .2s;}
+.pref-cnt.vis{opacity:1;transform:scale(1);}
+.s1-pane{display:none;flex:1;overflow:hidden;}
+.s1-pane.on{display:flex;flex-direction:column;}
+
+/* Floor plan pane */
+.fp-header{padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.fp-htitle{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.fp-hmeta{font-size:10px;color:var(--text);}
+.fp-layout-bar{padding:8px 18px;background:var(--surface);border-bottom:1px solid var(--border);display:none;flex-shrink:0;}
+.fp-layout-bar.show{display:block;}
+.layout-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.layout-tab{padding:3px 9px;font-family:'Josefin Sans',sans-serif;font-size:8.5px;letter-spacing:.1em;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .13s;}
+.layout-tab.on{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.9);}
+.fp-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;}
+#p1Canvas{display:block;border-radius:var(--r);max-width:100%;max-height:100%;}
+.fp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:.3;}
+.fp-empty-icon{font-size:44px;}
+.fp-empty-txt{font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;text-align:center;line-height:2;}
+.fp-legend{padding:10px 18px;background:var(--surface);border-top:1px solid var(--border);display:none;flex-shrink:0;}
+.fp-legend.show{display:block;}
+.leg-row{display:flex;gap:14px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted);}
+.leg-sw{width:11px;height:11px;border-radius:1px;flex-shrink:0;}
+
+/* Preference pane */
+.pref-pane-inner{flex:1;overflow-y:auto;padding:28px 36px;display:grid;grid-template-columns:1fr 1fr;gap:24px 40px;align-content:start;}
+.pq-label{font-size:8px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.pq-label::after{content:'';flex:1;height:1px;background:rgba(139,115,85,.2);}
+.pq-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.pq-chip{padding:5px 13px;font-size:10.5px;letter-spacing:.03em;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text2);cursor:pointer;transition:all .14s;white-space:nowrap;}
+.pq-chip:hover{border-color:var(--gold-lt);color:var(--accent);}
+.pq-chip.on{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.92);}
+.pref-footer{padding:14px 36px 20px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+.pref-summary{font-size:10px;color:var(--gold);letter-spacing:.04em;}
+.pref-reset{font-size:9px;color:var(--muted);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:color .13s;font-family:'Josefin Sans',sans-serif;}
+.pref-reset:hover{color:var(--text);}
+
+/* ── S2 ── */
+#s2{min-height:calc(100vh - 92px);}
+.ai-hero{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;flex-shrink:0;}
+.hero-kicker{font-size:8px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;display:flex;align-items:center;gap:10px;}
+.hero-kicker::after{content:'';flex:1;height:1px;background:rgba(139,115,85,.2);}
+.hero-sub{font-size:11px;color:var(--muted);margin-bottom:12px;}
+.rec-row{display:flex;gap:10px;}
+.rec-card{flex:1;border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;cursor:pointer;transition:all .17s;background:var(--surface);display:flex;align-items:center;gap:10px;position:relative;overflow:hidden;}
+.rec-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border);transition:background .17s;}
+.rec-card:hover{border-color:var(--border2);box-shadow:var(--sh2);}
+.rec-card.on{border-color:var(--accent);}
+.rec-card.on::before{background:var(--accent);}
+.rec-rank{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Josefin Sans',sans-serif;font-size:9px;}
+.rk1{background:var(--accent);color:rgba(210,190,140,.9);}
+.rk2{background:var(--card2);border:1px solid var(--border);color:var(--accent);}
+.rk3{background:var(--card);border:1px solid var(--border);color:var(--muted);}
+.rec-thumb{width:66px;height:40px;flex-shrink:0;border-radius:var(--r);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
+.rec-thumb svg{width:58px;height:34px;}
+.rec-info{flex:1;min-width:0;}
+.rec-name{font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);}
+.rec-ko{font-size:9.5px;color:var(--muted);margin-top:1px;}
+.rec-sz{font-size:9px;color:var(--muted);}
+.rec-why{font-size:8.5px;color:var(--gold);margin-top:2px;}
+.rec-badge{font-size:8px;padding:2px 8px;border-radius:10px;font-family:'Josefin Sans',sans-serif;letter-spacing:.08em;flex-shrink:0;}
+.b-fit{background:var(--green-bg);color:var(--green);}
+.b-tight{background:var(--amber-bg);color:var(--amber);}
+
+.s2-body{display:grid;grid-template-columns:1fr 272px;flex:1;}
+.cv-area{border-right:1px solid var(--border);display:flex;flex-direction:column;flex:1;min-height:0;}
+.cv-header{padding:9px 16px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.cv-title{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.cv-meta{font-size:10px;color:var(--text);}
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.vt-btn{padding:3px 11px;font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;background:var(--surface);border:none;color:var(--muted);cursor:pointer;transition:all .13s;}
+.vt-btn.on{background:var(--accent);color:rgba(255,255,255,.9);}
+.cv-body{flex:1;min-height:0;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--bg);}
+#roomCanvas{border:1.5px solid var(--border2);border-radius:var(--r);display:block;cursor:grab;background:#FAFAF8;max-width:100%;}
+#roomCanvas:active{cursor:grabbing;}
+.cv-hint{display:flex;gap:8px;align-items:center;font-size:9px;color:var(--muted);}
+.hint-k{background:var(--card2);border:1px solid var(--border2);border-radius:2px;padding:1px 6px;font-family:'Josefin Sans',sans-serif;font-size:8.5px;}
+.cv-controls{padding:8px 16px;border-top:1px solid var(--border);background:var(--surface);display:none;gap:14px;align-items:center;flex-wrap:wrap;flex-shrink:0;}
+.ctrl-g{display:flex;align-items:center;gap:6px;}
+.dpad{display:grid;grid-template-columns:repeat(3,21px);gap:2px;}
+.dp{width:21px;height:21px;border:1px solid var(--border);border-radius:2px;background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text);transition:all .11s;}
+.dp:hover{border-color:var(--border2);}
+.dp.blank{background:transparent;border-color:transparent;cursor:default;}
+.step-tog{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.st-o{padding:3px 8px;font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.1em;cursor:pointer;color:var(--muted);transition:all .11s;background:var(--surface);}
+.st-o.on{background:var(--accent);color:rgba(255,255,255,.9);}
+.rot-btn{width:24px;height:24px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text);transition:all .11s;}
+.rot-btn:hover{border-color:var(--border2);}
+.rot-ind{font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--muted);min-width:28px;text-align:center;}
+.cv-legend{display:flex;gap:12px;align-items:center;}
+.cv-leg{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted);}
+.cv-leg-sw{width:11px;height:11px;border-radius:1px;flex-shrink:0;}
+
+.s2-panel{background:var(--surface);overflow-y:auto;display:flex;flex-direction:column;}
+.p-section{padding:14px 17px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.p-title{font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;}
+.sel-empty{color:var(--muted);font-size:11px;line-height:1.7;opacity:.7;}
+.sel-name{font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;}
+.sel-sub{font-size:10px;color:var(--muted);margin-bottom:10px;}
+.spec-ok{color:var(--green);}
+.spec-warn{color:var(--amber);}
+.chip-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;}
+.chip{width:23px;height:23px;border-radius:2px;cursor:pointer;border:2px solid transparent;transition:all .12s;box-shadow:inset 0 0 0 1px rgba(0,0,0,.07);}
+.chip:hover{transform:scale(1.1);}
+.chip.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.chip-name{font-size:9px;color:var(--gold);}
+.mat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;}
+.mat-sw{aspect-ratio:1;border-radius:2px;cursor:pointer;border:2px solid transparent;transition:all .12s;}
+.mat-sw:hover{transform:scale(1.1);}
+.mat-sw.on{border-color:var(--accent);}
+.p-cta{padding:14px 17px;margin-top:auto;flex-shrink:0;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.stat{background:var(--card);border-radius:var(--r);padding:8px 9px;}
+.stat-lbl{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.stat-val{font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:300;color:var(--accent);}
+.stat-sub{font-size:8.5px;color:var(--muted);margin-top:1px;}
+
+.slider-wrap{border-top:2px solid var(--border);background:var(--surface);flex-shrink:0;max-height:260px;overflow-y:auto;}
+.slider-wrap::-webkit-scrollbar{width:3px;}
+.slider-wrap::-webkit-scrollbar-thumb{background:var(--border2);}
+.slider-head{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 6px;position:sticky;top:0;background:var(--surface);z-index:2;}
+.slider-lbl{font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+.slider-count{font-size:9px;color:var(--muted);}
+.slider-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;padding:0 16px 14px;}
+.slide{cursor:pointer;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all .15s;background:var(--surface);}
+.slide:hover{border-color:var(--border2);box-shadow:var(--sh1);}
+.slide.on{border-color:var(--accent);}
+.slide-top{display:flex;align-items:center;gap:8px;padding:8px 10px 4px;}
+.slide-icon{width:40px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:3px;border:1px solid var(--border);}
+.slide-icon svg{width:90%;height:90%;}
+.slide-info{flex:1;min-width:0;}
+.slide-name{font-family:'Josefin Sans',sans-serif;font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slide-type{font-size:8px;color:var(--muted);margin-top:1px;}
+.slide-price{font-size:8px;color:var(--gold);font-family:'Josefin Sans',sans-serif;}
+.slide-configs{display:flex;gap:3px;flex-wrap:wrap;padding:3px 10px 8px;}
+.scfg{padding:2px 7px;font-size:8px;border-radius:10px;cursor:pointer;transition:all .12s;border:1px solid var(--border);background:var(--surface);color:var(--text);white-space:nowrap;}
+.scfg:hover{border-color:var(--border2);}
+.scfg.fit{background:var(--green-bg);color:var(--green);border-color:rgba(58,112,80,.3);}
+.scfg.tight{background:var(--amber-bg);color:var(--amber);border-color:rgba(154,112,32,.3);}
+.scfg.nofit{background:#F5EFEE;color:var(--red);border-color:rgba(144,56,48,.2);}
+.scfg.on{background:var(--accent);color:rgba(255,255,255,.9);border-color:var(--accent);}
+.slide-cmp{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);cursor:pointer;z-index:1;transition:.12s;}
+.slide-cmp:hover{border-color:var(--gold);color:var(--gold);}
+.slide-cmp.on{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.9);font-size:10px;}
+
+
+/* ── STORE MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(26,26,24,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:24px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:var(--r);width:100%;max-width:660px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;animation:modalIn .22s ease;}
+@keyframes modalIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.modal-header{padding:22px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.modal-kicker{font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.modal-title{font-family:'Josefin Sans',sans-serif;font-size:16px;font-weight:300;letter-spacing:.08em;color:var(--accent);}
+.modal-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);flex-shrink:0;transition:all .13s;}
+.modal-close:hover{border-color:var(--border2);color:var(--accent);}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1;}
+.store-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.store-card{display:block;border:1.5px solid var(--border);border-radius:var(--r);padding:14px 14px 12px;text-decoration:none;cursor:pointer;transition:all .16s;position:relative;}
+.store-card:hover{border-color:var(--gold-lt);box-shadow:var(--sh2);transform:translateY(-1px);}
+.store-badge{display:inline-block;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;background:var(--accent);color:rgba(255,255,255,.88);padding:2px 8px;border-radius:10px;margin-bottom:7px;font-family:'Josefin Sans',sans-serif;}
+.store-name{font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.1em;color:var(--accent);margin-bottom:5px;}
+.store-addr{font-size:9.5px;color:var(--muted);line-height:1.5;margin-bottom:4px;}
+.store-hours{font-size:9px;color:var(--muted);opacity:.75;margin-bottom:10px;}
+.store-cta{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+.store-card-cta{background:var(--accent);border-color:var(--accent);}
+.store-card-cta .store-name,.store-card-cta .store-addr,.store-card-cta .store-hours,.store-card-cta .store-cta{color:rgba(255,255,255,.85);}
+.store-card-cta:hover{border-color:var(--accent);}
+.modal-footer{padding:12px 24px;border-top:1px solid var(--border);flex-shrink:0;}
+
+/* ── PROPS PANEL ── */
+.props-section{border-top:1px solid var(--border);padding-top:10px;margin-top:6px;}
+.props-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.props-add{display:flex;gap:4px;flex-wrap:wrap;}
+.prop-btn{padding:3px 8px;font-size:9px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);cursor:pointer;transition:all .14s;white-space:nowrap;}
+.prop-btn:hover{border-color:var(--gold-lt);color:var(--accent);}
+.prop-list{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.prop-item{background:var(--card);border-radius:var(--r);font-size:10px;color:var(--text);border:1.5px solid transparent;transition:border-color .15s;cursor:pointer;}
+.prop-item.active{border-color:var(--gold);}
+.pi-row{display:flex;align-items:center;gap:6px;padding:5px 8px;}
+.pi-name{flex:1;font-size:10px;}
+.pi-color{width:14px;height:14px;border-radius:50%;border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
+.pi-del{width:16px;height:16px;border-radius:50%;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);cursor:pointer;flex-shrink:0;transition:all .12s;}
+.pi-del:hover{border-color:var(--red);color:var(--red);background:rgba(144,56,48,.08);}
+.pi-size{display:none;padding:2px 8px 6px;gap:6px;}
+.prop-item.active .pi-size{display:flex;flex-wrap:wrap;gap:4px 10px;}
+.pi-sz{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--muted);}
+.pi-sz label{width:14px;flex-shrink:0;}
+.pi-sz input{width:52px;padding:2px 4px;border:1px solid var(--border);border-radius:2px;font-size:9px;background:var(--surface);color:var(--accent);text-align:center;}
+.pi-drag-hint{font-size:8px;color:var(--gold);letter-spacing:.06em;padding:0 8px 4px;display:none;}
+.prop-item.active .pi-drag-hint{display:block;}
+
+/* ── 3D VIEWER ── */
+#view3d{display:none;flex-direction:column;flex:1;min-height:320px;background:var(--bg);}
+#v3dWrap{position:relative;width:100%;flex:1;min-height:320px;overflow:hidden;}
+#threeContainer{flex:1;min-height:0;cursor:grab;position:relative;}
+#threeContainer:active{cursor:grabbing;}
+.three-hint{display:flex;gap:10px;align-items:center;padding:8px 16px;background:var(--surface);border-top:1px solid var(--border);font-size:9px;color:var(--muted);flex-shrink:0;}
+.three-overlay{position:absolute;top:8px;left:12px;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45);font-family:'Josefin Sans',sans-serif;pointer-events:none;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.rec-card:nth-child(1){animation:fadeUp .22s ease both;}
+.rec-card:nth-child(2){animation:fadeUp .22s ease .06s both;}
+.rec-card:nth-child(3){animation:fadeUp .22s ease .12s both;}
+
+/* ══ PRICE ══ */
+.rec-price{font-size:9px;color:var(--gold);margin-top:2px;font-family:'Josefin Sans',sans-serif;letter-spacing:.05em;}
+.sel-config-row{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0 6px;}
+.sel-cfg{padding:4px 10px;font-size:9.5px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);cursor:pointer;transition:all .13s;}
+.sel-cfg:hover{border-color:var(--gold-lt);}
+.sel-cfg.on{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.9);}
+.sel-cfg-p{display:block;font-size:7.5px;color:inherit;opacity:.7;margin-top:1px;}
+.sel-price{display:flex;align-items:baseline;gap:7px;margin:8px 0 2px;}
+.sel-price-main{font-family:'Josefin Sans',sans-serif;font-size:22px;font-weight:300;color:var(--accent);}
+.sel-price-mat{font-size:9px;color:var(--muted);}
+.sel-price-note{font-size:8.5px;color:var(--muted);margin-bottom:6px;}
+
+/* ══ COMPARE BAR ══ */
+#cmpBar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--accent);color:rgba(255,255,255,.9);
+  padding:10px 24px;
+  align-items:center;gap:12px;
+  border-top:2px solid rgba(255,255,255,.12);
+}
+.cmp-pill{
+  padding:3px 10px;border:1px solid rgba(255,255,255,.25);border-radius:20px;
+  font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.1em;
+  white-space:nowrap;
+}
+#cmpCount{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;margin-right:4px;}
+#cmpItems{display:flex;gap:6px;flex:1;flex-wrap:wrap;}
+.cmp-btn{
+  padding:6px 16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  border-radius:var(--r);font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;transition:all .14s;white-space:nowrap;
+}
+.cmp-btn:hover{background:rgba(255,255,255,.22);}
+.cmp-btn-pri{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);}
+.cmp-close{cursor:pointer;opacity:.5;font-size:16px;padding:0 4px;transition:opacity .13s;}
+.cmp-close:hover{opacity:1;}
+
+/* ══ COMPARE MODAL ══ */
+#cmpModal{display:none;position:fixed;inset:0;z-index:300;background:rgba(26,26,24,.6);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px;}
+.cmp-modal-box{background:var(--surface);border-radius:var(--r);width:100%;max-width:780px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.25);}
+.cmp-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.cmp-modal-title{font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);}
+.cmp-modal-close{width:28px;height:28px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted);transition:all .14s;}
+.cmp-modal-close:hover{border-color:var(--border2);color:var(--accent);}
+#cmpModalBody{overflow:auto;padding:20px;}
+.cmp-table{width:100%;border-collapse:collapse;font-size:11px;}
+.cmp-table th{padding:10px 14px;background:var(--card);font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:400;text-align:left;border-bottom:2px solid var(--border2);}
+.cmp-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);}
+.cmp-lbl-cell{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:rgba(245,244,240,.6);width:90px;}
+.cmp-th-name{font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);}
+.cmp-th-ko{font-size:9px;color:var(--muted);margin-top:2px;}
+.cmp-fit{color:var(--green);font-weight:500;}
+.cmp-warn{color:var(--amber);}
+.cmp-no{color:var(--red);}
+
+/* ══ SAVE BUTTON ══ */
+.save-btn{
+  padding:5px 11px;border:1px solid var(--border);border-radius:var(--r);
+  background:var(--card);font-family:'Josefin Sans',sans-serif;font-size:8.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--text);
+  cursor:pointer;transition:all .13s;display:flex;align-items:center;gap:5px;
+}
+.save-btn:hover{border-color:var(--border2);}
+
+/* ══ MOBILE ══ */
+@media(max-width:768px){
+  #s1{flex-direction:column;height:auto;min-height:calc(100vh - 92px);}
+  .s1-left{width:100%;border-right:none;border-bottom:1px solid var(--border);}
+  .s1-right{flex:1;min-height:360px;}
+  .pref-pane-inner{grid-template-columns:1fr;padding:16px 18px;gap:18px;}
+  
+  #s2{flex-direction:column;}
+  .ai-hero{padding:10px 14px;}
+  .rec-row{flex-direction:column;gap:6px;}
+  .rec-card{padding:9px 10px;}
+  .rec-thumb{width:52px;height:34px;}
+  
+  .s2-body{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+  .s2-panel{order:-1;max-height:none;border-bottom:1px solid var(--border);}
+  .s2-panel .p-section{padding:10px 14px;}
+  
+  #roomCanvas{width:100%!important;height:auto!important;}
+  .cv-hint{display:none;}
+  .cv-body{padding:10px;}
+  .cv-header{padding:7px 12px;}
+  
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .slider-wrap{order:3;}
+  .slider-row{grid-template-columns:1fr;}
+  
+  #cmpBar{padding:8px 14px;flex-wrap:wrap;gap:6px;}
+  .step-bar{padding:0 14px;}
+  .nav{padding:0 14px;}
+}
+@media(max-width:480px){
+  .rec-row{gap:4px;}
+  .phase-title{font-size:17px;}
+  .s1-scroll{padding:18px 16px 12px;}
+  .s1-cta{padding:10px 16px 16px;}
+  .ai-hero{padding:8px 12px;}
+  .hero-sub{font-size:10px;}
+  .s2-panel .p-title{font-size:7.5px;}
+}
+
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div><div class="nav-eyebrow">Alloso · Feature</div><div class="nav-title">Studio</div></div>
+  <div class="nav-step" id="navStep">Step 1 of 2</div>
+</nav>
+<div class="step-bar">
+  <div class="sn active" id="sn1"><div class="sn-dot">1</div><div class="sn-lbl">공간 &amp; 취향</div></div>
+  <div class="sn-line" id="snl1"></div>
+  <div class="sn" id="sn2"><div class="sn-dot">2</div><div class="sn-lbl">탐색 &amp; 배치</div></div>
+</div>
+
+<!-- S1 -->
+<div class="screen active" id="s1">
+  <div class="s1-left">
+    <div class="s1-scroll">
+      <div class="phase-kicker">01 — 공간 입력</div>
+      <div class="phase-title">거실 크기를<br>알려주세요</div>
+      <div class="phase-desc">평형 선택 또는 직접 입력.<br>오른쪽 취향 탭도 채우시면 더 정확한 AI 추천이 가능해요.</div>
+      <div class="range-tabs">
+        <div class="range-tab on" onclick="setRange('small')">20평대</div>
+        <div class="range-tab" onclick="setRange('mid')">30평대</div>
+        <div class="range-tab" onclick="setRange('large')">40평대↑</div>
+      </div>
+      <div class="apt-grid" id="aptGrid"></div>
+      <div class="divider">직접 입력</div>
+      <div class="irow"><div class="ilab">가로폭</div><input class="ifield" id="rW" type="number" placeholder="예: 420" min="200" max="1000"><div class="iunit">cm</div></div>
+      <div class="irow"><div class="ilab">깊이</div><input class="ifield" id="rD" type="number" placeholder="예: 350" min="150" max="1000"><div class="iunit">cm</div></div>
+    </div>
+    <div class="s1-cta">
+      <button class="btn-pri" id="startBtn" onclick="goS2()">소파 탐색 시작 →</button>
+    </div>
+  </div>
+  <div class="s1-right">
+    <div class="s1-tabs">
+      <div class="s1-tab on" id="tab-fp" onclick="setS1Tab('fp')">평면도 미리보기</div>
+      <div class="s1-tab" id="tab-pref" onclick="setS1Tab('pref')">취향 입력 <span class="pref-cnt" id="prefCnt">0</span></div>
+    </div>
+    <div class="s1-pane on" id="pane-fp">
+      <div class="fp-header"><div class="fp-htitle" id="fpTitle">평면도 미리보기</div><div class="fp-hmeta" id="fpMeta">평형을 선택하세요</div></div>
+      <div class="fp-layout-bar" id="fpLayoutBar"><div style="font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);">구조 유형</div><div class="layout-tabs" id="fpLayoutTabs"></div></div>
+      <div class="fp-canvas-wrap" id="fpWrap"><div class="fp-empty" id="fpEmpty"><div class="fp-empty-icon">⬜</div><div class="fp-empty-txt">평형을 선택하면<br>평면도가 표시돼요</div></div><canvas id="p1Canvas" style="display:none;"></canvas></div>
+      <div class="fp-legend" id="fpLegend"><div class="leg-row"><div class="leg"><div class="leg-sw" style="background:rgba(139,115,85,.2);border:1px solid rgba(139,115,85,.45);"></div>거실</div><div class="leg"><div class="leg-sw" style="background:#E8E4DA;border:1px solid #C8C4B8;"></div>공용</div><div class="leg"><div class="leg-sw" style="background:#DDD9CE;border:1px solid #B8B5AA;"></div>침실</div><div class="leg"><div class="leg-sw" style="background:#D0D8DC;border:1px solid #A8B4B8;"></div>욕실</div><div class="leg"><div class="leg-sw" style="background:rgba(42,72,112,.15);border:1px dashed rgba(42,72,112,.4);"></div>소파 영역</div></div></div>
+    </div>
+    <div class="s1-pane" id="pane-pref">
+      <div class="pref-pane-inner">
+        <div class="pq"><div class="pq-label">사용 인원</div><div class="pq-chips" id="pcPeople"><div class="pq-chip" onclick="setPref('people','1')">혼자</div><div class="pq-chip" onclick="setPref('people','2')">커플 · 2인</div><div class="pq-chip" onclick="setPref('people','3')">3~4인 가족</div><div class="pq-chip" onclick="setPref('people','5')">5인 이상</div></div></div>
+        <div class="pq"><div class="pq-label">주요 용도</div><div class="pq-chips" id="pcUse"><div class="pq-chip" onclick="setPref('use','rest')">독서 · 휴식</div><div class="pq-chip" onclick="setPref('use','media')">TV · 영상</div><div class="pq-chip" onclick="setPref('use','guest')">손님 접대</div><div class="pq-chip" onclick="setPref('use','nap')">눕기 · 낮잠</div></div></div>
+        <div class="pq"><div class="pq-label">인테리어 스타일</div><div class="pq-chips" id="pcStyle"><div class="pq-chip" onclick="setPref('style','modern')">모던 · 미니멀</div><div class="pq-chip" onclick="setPref('style','classic')">클래식 · 고급</div><div class="pq-chip" onclick="setPref('style','natural')">내추럴 · 북유럽</div><div class="pq-chip" onclick="setPref('style','luxury')">럭셔리 · 로우</div></div></div>
+        <div class="pq"><div class="pq-label">가족 구성</div><div class="pq-chips" id="pcFamily"><div class="pq-chip" onclick="setPref('family','single')">1인 가구</div><div class="pq-chip" onclick="setPref('family','couple')">신혼 · 딩크</div><div class="pq-chip" onclick="setPref('family','child')">어린 자녀</div><div class="pq-chip" onclick="setPref('family','pet')">반려동물</div></div></div>
+        <div class="pq"><div class="pq-label">소재 선호</div><div class="pq-chips" id="pcMat"><div class="pq-chip" onclick="setPref('mat','fabric')">패브릭</div><div class="pq-chip" onclick="setPref('mat','leather')">레더</div><div class="pq-chip" onclick="setPref('mat','either')">상관없음</div></div></div>
+        <div class="pq"><div class="pq-label">예산 범위</div><div class="pq-chips" id="pcBudget"><div class="pq-chip" onclick="setPref('budget','low')">~200만</div><div class="pq-chip" onclick="setPref('budget','mid')">200~400만</div><div class="pq-chip" onclick="setPref('budget','high')">400~600만</div><div class="pq-chip" onclick="setPref('budget','premium')">600만+</div></div></div>
+      </div>
+      <div class="pref-footer"><div class="pref-summary" id="prefSum">선택한 항목이 AI 추천에 반영돼요</div><div class="pref-reset" onclick="resetPrefs()">초기화</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="screen" id="s2">
+  <div class="ai-hero">
+    <div class="hero-kicker">AI 추천</div>
+    <div class="hero-sub" id="heroSub">공간을 분석하고 있어요…</div>
+    <div class="rec-row" id="recRow"></div>
+  </div>
+  <div class="s2-body">
+    <div class="cv-area">
+      <div class="cv-header"><div class="cv-title">Floor Plan · 1:1 Scale</div><div style="display:flex;align-items:center;gap:8px;"><div class="save-btn" onclick="saveImg()" title="이미지 저장">↓ 저장</div><div class="cv-meta" id="cvMeta">—</div><div class="view-toggle" id="viewToggle" style="display:none;"><div class="vt-btn on" id="btn2d" onclick="setView('2d')">2D</div><div class="vt-btn" id="btn3d" onclick="setView('3d')">3D</div></div></div></div>
+      <div class="cv-body" id="view2d"><canvas id="roomCanvas" width="560" height="360"></canvas><div class="cv-hint"><span>드래그로 이동</span><span class="hint-k">↑↓←→</span><span>키보드</span><span class="hint-k">R</span><span>회전</span></div></div>
+      <div id="view3d" style="display:none;flex-direction:column;flex:1;min-height:320px;height:100%;background:var(--bg);"><div id="v3dWrap" style="position:relative;width:100%;height:100%;min-height:320px;flex:1;overflow:hidden;"><div id="v3dHint" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:Josefin Sans,sans-serif;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);opacity:.7;pointer-events:none;">드래그로 회전</div></div></div>
+      <div class="cv-controls" id="cvCtrl">
+        <div class="ctrl-g"><div class="dpad"><div class="dp blank"></div><div class="dp" onclick="mv(0,-1)">↑</div><div class="dp blank"></div><div class="dp" onclick="mv(-1,0)">←</div><div class="dp blank" style="background:var(--card);border-color:var(--border);cursor:default;font-size:8px;color:var(--muted);display:flex;align-items:center;justify-content:center;">이동</div><div class="dp" onclick="mv(1,0)">→</div><div class="dp blank"></div><div class="dp" onclick="mv(0,1)">↓</div><div class="dp blank"></div></div></div>
+        <div class="ctrl-g" style="flex-direction:column;gap:3px;"><div style="font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">단위</div><div class="step-tog"><div class="st-o" id="s10" onclick="setStep(10)">10</div><div class="st-o on" id="s30" onclick="setStep(30)">30</div><div class="st-o" id="s50" onclick="setStep(50)">50cm</div></div></div>
+        <div class="ctrl-g" style="flex-direction:column;gap:3px;align-items:center;"><div style="font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">회전</div><div style="display:flex;gap:4px;align-items:center;"><div class="rot-btn" onclick="rot(-90)">↺</div><div class="rot-ind" id="rotInd">0°</div><div class="rot-btn" onclick="rot(90)">↻</div></div></div>
+        <div class="ctrl-g" style="margin-left:auto;"><div class="cv-legend"><div class="cv-leg"><div class="cv-leg-sw" id="legFloor" style="background:#C8A870;border:1px solid #B09060;"></div>거실</div><div class="cv-leg"><div class="cv-leg-sw" style="background:rgba(42,72,112,.25);border:1px solid rgba(42,72,112,.45);"></div>소파</div><div class="cv-leg"><div class="cv-leg-sw" style="background:rgba(58,112,80,.12);border:1px dashed rgba(58,112,80,.4);"></div>동선</div></div></div>
+      </div>
+    </div>
+    <div class="s2-panel">
+      <div class="p-section"><div class="p-title">선택된 소파</div><div id="selInfo"><div class="sel-empty">AI 추천 카드 또는<br>하단 슬라이더에서 선택하세요</div></div></div>
+      <div class="p-section" id="statsWrap" style="display:none;"><div class="p-title">공간 분석</div><div class="stat-grid" id="statGrid"></div></div>
+      <div class="p-section"><div class="p-title">바닥 마감재</div><div class="chip-row" id="floorChips"></div><div class="chip-name" id="floorName">오크 원목</div></div>
+      <div class="p-section"><div class="p-title">벽 컬러</div><div class="chip-row" id="wallChips"></div><div class="chip-name" id="wallName">순백</div></div>
+      <div class="p-section" id="matWrap" style="display:none;"><div class="p-title">소파 마감재</div><div class="mat-grid" id="matGrid"></div><div class="chip-name" id="matName" style="margin-top:6px;">아이보리</div></div>
+      <div class="p-section props-section" id="propsWrap">
+        <div class="props-head"><div class="p-title">인테리어 소품</div></div>
+        <div class="props-add" id="propsAdd">
+          <div class="prop-btn" onclick="addProp('coffee_table')">☕ 커피테이블</div>
+          <div class="prop-btn" onclick="addProp('side_table')">◻ 사이드테이블</div>
+          <div class="prop-btn" onclick="addProp('floor_lamp')">💡 플로어램프</div>
+          <div class="prop-btn" onclick="addProp('rug_rect')">▭ 러그(사각)</div>
+          <div class="prop-btn" onclick="addProp('rug_round')">◯ 러그(원형)</div>
+          <div class="prop-btn" onclick="addProp('tv_unit')">▬ TV 유닛</div>
+          <div class="prop-btn" onclick="addProp('bookshelf')">▤ 책장</div>
+          <div class="prop-btn" onclick="addProp('plant_lg')">🌿 화분(대)</div>
+          <div class="prop-btn" onclick="addProp('pet_dog')">🐕 반려견</div>
+        </div>
+        <div class="prop-list" id="propList"></div>
+      </div>
+      <div class="p-cta"><button class="btn-pri" id="ctaBtn" onclick="openNaverPlace()" disabled>매장 상담 예약 →</button><button class="btn-sec" onclick="goS1()">← 공간 다시 입력</button></div>
+    </div>
+  </div>
+  <div class="slider-wrap">
+    <div class="slider-head"><div class="slider-lbl">전체 소파 시리즈</div><div class="slider-count" id="sliderCount">16개</div></div>
+    <div class="slider-row" id="sofaSlider"></div>
+  </div>
+</div>
+
+<script>
+let room={w:0,d:0},selId=null,selW=null,sofaX=0,sofaY=-1,sofaRot=0,moveStep=30;
+let cvScale=1,cvOx=0,cvRoomPxW=0,dragging=false,dsx=0,dsy=0,dssX=0,dssY=0,curView='2d';
+
+/* ════════════════════════════════════
+   INTERIOR PROPS SYSTEM
+════════════════════════════════════ */
+const PROP_CATALOG = {
+  coffee_table: {name:'커피테이블', w:90, d:60, h:40, colors:['#8B6E52','#3A3028','#E8DCC8','#C8C4BC']},
+  side_table:   {name:'사이드테이블', w:45, d:45, h:50, colors:['#8B6E52','#1A1A18','#E8DCC8','#C89080']},
+  floor_lamp:   {name:'플로어램프', w:30, d:30, h:160, colors:['#1A1A18','#C4A882','#E8E0D0','#888070']},
+  rug_rect:     {name:'사각 러그', w:200, d:140, h:1, colors:['#D8CEB8','#B8B0A0','#C8B898','#A89888']},
+  rug_round:    {name:'원형 러그', w:160, d:160, h:1, colors:['#D8CEB8','#B8B0A0','#C8B898','#A89888']},
+  tv_unit:      {name:'TV 유닛', w:160, d:40, h:50, colors:['#3A3028','#8B6E52','#E8DCC8','#606058']},
+  bookshelf:    {name:'책장', w:80, d:35, h:180, colors:['#8B6E52','#3A3028','#E8DCC8','#C8A870']},
+  plant_lg:     {name:'화분(대)', w:35, d:35, h:120, colors:['#5A7850','#3A5830','#7A9870','#4A6840']},
+  pet_dog:      {name:'반려견', w:50, d:25, h:40, colors:['#C8A870','#8B6E52','#F0E8D8','#4A4040']},
+};
+let placedProps = [];
+let propIdCounter = 0;
+let activePropId = null;
+let propDragging = false, propDragId = null;
+
+function addProp(type){
+  if(!room.w || !room.d) return;
+  const cat = PROP_CATALOG[type]; if(!cat) return;
+  const id = 'prop_' + (propIdCounter++);
+  const prop = {
+    id, type,
+    x: room.w * 0.5, z: room.d * 0.4,
+    w: cat.w, d: cat.d,
+    colorIdx: 0,
+    mesh3d: null
+  };
+  placedProps.push(prop);
+  activePropId = id;
+  renderPropList();
+  drawCanvas();
+  if(curView==='3d' && t3Scene) addProp3D(prop);
+}
+
+function removeProp(id){
+  const idx = placedProps.findIndex(p=>p.id===id);
+  if(idx<0)return;
+  const prop = placedProps[idx];
+  if(prop.mesh3d && t3Scene){ t3Scene.remove(prop.mesh3d); }
+  placedProps.splice(idx,1);
+  if(activePropId===id) activePropId=null;
+  renderPropList(); drawCanvas();
+}
+
+function selectProp(id){
+  activePropId = activePropId===id ? null : id;
+  renderPropList(); drawCanvas();
+}
+
+function cyclePropColor(id, e){
+  if(e) e.stopPropagation();
+  const prop = placedProps.find(p=>p.id===id);
+  if(!prop)return;
+  const cat = PROP_CATALOG[prop.type];
+  prop.colorIdx = (prop.colorIdx + 1) % cat.colors.length;
+  rebuildProp3D(prop);
+  renderPropList(); drawCanvas();
+}
+
+function setPropSize(id, dim, val){
+  const prop = placedProps.find(p=>p.id===id);
+  if(!prop) return;
+  const n = parseInt(val);
+  if(isNaN(n) || n < 10 || n > 500) return;
+  prop[dim] = n;
+  rebuildProp3D(prop);
+  drawCanvas();
+}
+
+function rebuildProp3D(prop){
+  if(!t3Scene || typeof THREE==='undefined') return;
+  if(prop.mesh3d){ t3Scene.remove(prop.mesh3d); prop.mesh3d=null; }
+  addProp3D(prop);
+}
+
+function renderPropList(){
+  const el = document.getElementById('propList');
+  if(!el) return;
+  el.innerHTML = placedProps.map(p=>{
+    const cat = PROP_CATALOG[p.type];
+    const col = cat.colors[p.colorIdx];
+    const isActive = activePropId===p.id;
+    return `<div class="prop-item${isActive?' active':''}" onclick="selectProp('${p.id}')">
+      <div class="pi-row">
+        <div class="pi-name">${cat.name}</div>
+        <div class="pi-color" style="background:${col}" onclick="cyclePropColor('${p.id}',event)" title="색상 변경"></div>
+        <div class="pi-del" onclick="event.stopPropagation();removeProp('${p.id}')" title="삭제">×</div>
+      </div>
+      <div class="pi-size">
+        <div class="pi-sz"><label>W</label><input type="number" value="${p.w}" min="10" max="500" onchange="setPropSize('${p.id}','w',this.value)" onclick="event.stopPropagation()">cm</div>
+        <div class="pi-sz"><label>D</label><input type="number" value="${p.d}" min="10" max="500" onchange="setPropSize('${p.id}','d',this.value)" onclick="event.stopPropagation()">cm</div>
+      </div>
+      <div class="pi-drag-hint">▹ 2D 평면도에서 드래그로 이동</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── 2D 캔버스 소품 드래그 ── */
+function propHitTest(canvasX, canvasY, ox, oy, scale){
+  for(let i=placedProps.length-1;i>=0;i--){
+    const p=placedProps[i];
+    const cat=PROP_CATALOG[p.type];
+    const px=ox+p.x*scale, py=oy+p.z*scale;
+    const hw=p.w*scale/2, hd=p.d*scale/2;
+    if(p.type==='rug_round'){
+      const dx=canvasX-px, dy=canvasY-py;
+      if(dx*dx+dy*dy <= hw*hw) return p.id;
+    } else {
+      if(canvasX>=px-hw && canvasX<=px+hw && canvasY>=py-hd && canvasY<=py+hd) return p.id;
+    }
+  }
+  return null;
+}
+
+function initPropDrag(){
+  const canvas=document.getElementById('roomCanvas');
+  if(!canvas) return;
+  let pdsx=0, pdsy=0, pdsox=0, pdsoz=0;
+
+  canvas.addEventListener('mousedown', function(e){
+    if(!room.w||!room.d) return;
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(canvas.width/rect.width);
+    const my=(e.clientY-rect.top)*(canvas.height/rect.height);
+    const rPxW=room.w*cvScale, rPxH=room.d*cvScale;
+    const ox=(canvas.width-rPxW)/2, oy=(canvas.height-rPxH)/2;
+    const hitId=propHitTest(mx,my,ox,oy,cvScale);
+    if(hitId){
+      e.preventDefault(); e.stopPropagation();
+      propDragging=true; propDragId=hitId;
+      activePropId=hitId;
+      const prop=placedProps.find(p=>p.id===hitId);
+      pdsx=mx; pdsy=my; pdsox=prop.x; pdsoz=prop.z;
+      renderPropList(); drawCanvas();
+    }
+  }, true);
+
+  window.addEventListener('mousemove', function(e){
+    if(!propDragging||!propDragId) return;
+    const canvas=document.getElementById('roomCanvas');
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(canvas.width/rect.width);
+    const my=(e.clientY-rect.top)*(canvas.height/rect.height);
+    const prop=placedProps.find(p=>p.id===propDragId);
+    if(!prop) return;
+    const dx=(mx-pdsx)/cvScale, dy=(my-pdsy)/cvScale;
+    prop.x=Math.max(0,Math.min(room.w, pdsox+dx));
+    prop.z=Math.max(0,Math.min(room.d, pdsoz+dy));
+    drawCanvas();
+  });
+
+  window.addEventListener('mouseup', function(){
+    if(propDragging && propDragId){
+      const prop=placedProps.find(p=>p.id===propDragId);
+      if(prop) rebuildProp3D(prop);
+    }
+    propDragging=false; propDragId=null;
+  });
+}
+
+function buildPropMesh(type, colorHex, pw, pd){
+  if(typeof THREE==='undefined') return null;
+  const group = new THREE.Group();
+  const scW = pw/100, scD = pd/100;
+  const mat = (hex,r,m) => new THREE.MeshStandardMaterial({color:parseInt(hex.replace('#',''),16),roughness:r||0.8,metalness:m||0});
+  const box = (w,h,d,m,pos) => { const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); b.position.set(...pos); b.castShadow=true; b.receiveShadow=true; group.add(b); return b; };
+  const cyl = (rt,rb,h,m,pos) => { const c=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m); c.position.set(...pos); c.castShadow=true; group.add(c); return c; };
+  const darkW = mat(colorHex,0.85);
+  const lightW = mat('#F8F6F0',0.6);
+  const metalM = mat('#888880',0.4,0.3);
+
+  if(type==='coffee_table'){
+    box(scW,.03,scD,darkW,[0,.4,0]);
+    const lx=scW/2-.04, lz=scD/2-.04;
+    [[-lx,0,-lz],[lx,0,-lz],[-lx,0,lz],[lx,0,lz]].forEach(p=>box(.03,.4,.03,darkW,[p[0],.2,p[2]]));
+  } else if(type==='side_table'){
+    const r=Math.min(scW,scD)/2;
+    cyl(r,r,.03,darkW,[0,.5,0]);
+    cyl(.03,.03,.5,darkW,[0,.25,0]);
+    cyl(r*.7,r*.7,.02,darkW,[0,.01,0]);
+  } else if(type==='floor_lamp'){
+    cyl(.15,.15,.02,metalM,[0,.01,0]);
+    cyl(.012,.012,1.5,metalM,[0,.76,0]);
+    cyl(.01,.15,.2,lightW,[0,1.55,0]);
+  } else if(type==='rug_rect'){
+    const r=new THREE.Mesh(new THREE.PlaneGeometry(scW,scD),mat(colorHex,0.95));
+    r.rotation.x=-Math.PI/2; r.position.set(0,0.003,0); r.receiveShadow=true; group.add(r);
+  } else if(type==='rug_round'){
+    const r=new THREE.Mesh(new THREE.CircleGeometry(scW/2,32),mat(colorHex,0.95));
+    r.rotation.x=-Math.PI/2; r.position.set(0,0.003,0); r.receiveShadow=true; group.add(r);
+  } else if(type==='tv_unit'){
+    box(scW,.45,scD,darkW,[0,.225,0]);
+    box(scW-.1,.01,scD-.04,mat('#2A2A2A',0.3,0.1),[0,.455,0]);
+    box(scW-.4,.7,.03,mat('#1A1A18',0.2,0.1),[0,.8,-scD/2+.02]);
+  } else if(type==='bookshelf'){
+    box(scW,1.8,scD,darkW,[0,.9,0]);
+    for(let i=0;i<4;i++) box(scW-.06,.015,scD-.04,mat('#C8B898',0.85),[0,.25+i*.42,0]);
+    for(let i=0;i<3;i++){
+      const bw=.08+Math.random()*.06, bh=.18+Math.random()*.08;
+      box(bw,bh,.2,mat(['#8B4040','#406080','#608040','#806040'][i%4],0.7),[-.15+i*.18,.25+i*.42+bh/2+.01,0]);
+    }
+  } else if(type==='plant_lg'){
+    cyl(.12,.14,.25,mat('#8B6E52',0.85),[0,.125,0]);
+    const leafMat = mat(colorHex,0.75);
+    const s1=new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),leafMat); s1.position.set(0,.55,0); s1.castShadow=true; group.add(s1);
+    const s2=new THREE.Mesh(new THREE.SphereGeometry(.15,10,8),leafMat); s2.position.set(.1,.72,.05); s2.castShadow=true; group.add(s2);
+    const s3=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),leafMat); s3.position.set(-.08,.65,-.06); s3.castShadow=true; group.add(s3);
+    cyl(.015,.015,.35,mat('#5A4030',0.8),[0,.35,0]);
+  } else if(type==='pet_dog'){
+    const fur = mat(colorHex,0.9);
+    const nose = mat('#1A1A18',0.5);
+    // 몸통
+    box(.28,.14,.13,fur,[0,.16,0]);
+    // 머리
+    const head = new THREE.Mesh(new THREE.SphereGeometry(.08,10,8),fur);
+    head.position.set(.18,.22,0); head.castShadow=true; group.add(head);
+    // 코
+    const n = new THREE.Mesh(new THREE.SphereGeometry(.02,6,6),nose);
+    n.position.set(.26,.21,0); group.add(n);
+    // 귀 2개
+    const earG = mat(colorHex,0.85);
+    const ear1 = new THREE.Mesh(new THREE.SphereGeometry(.035,6,6),earG);
+    ear1.position.set(.15,.29,.05); ear1.scale.set(1,1.3,.6); ear1.castShadow=true; group.add(ear1);
+    const ear2 = ear1.clone(); ear2.position.set(.15,.29,-.05); group.add(ear2);
+    // 다리 4개
+    [[-0.1,0,0.06],[-0.1,0,-0.06],[0.1,0,0.06],[0.1,0,-0.06]].forEach(p=>{
+      cyl(.025,.025,.1,fur,[p[0],.05,p[2]]);
+    });
+    // 꼬리
+    const tail = new THREE.Mesh(new THREE.CylinderGeometry(.015,.01,.1,6),fur);
+    tail.position.set(-.17,.24,0); tail.rotation.z=0.8; tail.castShadow=true; group.add(tail);
+  }
+  group.userData.isProp=true;
+  return group;
+}
+
+function addProp3D(prop){
+  if(!t3Scene || typeof THREE==='undefined') return;
+  const cat = PROP_CATALOG[prop.type];
+  const colorHex = cat.colors[prop.colorIdx];
+  const mesh = buildPropMesh(prop.type, colorHex, prop.w, prop.d);
+  if(!mesh) return;
+  const roomScale3D = 5.0;
+  const px = (prop.x / room.w - 0.5) * roomScale3D;
+  const pz = (prop.z / room.d - 0.5) * roomScale3D;
+  mesh.position.set(px, 0, pz);
+  prop.mesh3d = mesh;
+  t3Scene.add(mesh);
+}
+
+function addAllProps3D(){
+  placedProps.forEach(p=>{
+    if(p.mesh3d && t3Scene) t3Scene.remove(p.mesh3d);
+    p.mesh3d = null;
+    addProp3D(p);
+  });
+}
+
+function drawPropsOnCanvas(ctx, ox, oy, cvScale){
+  placedProps.forEach(p=>{
+    const cat = PROP_CATALOG[p.type];
+    const col = cat.colors[p.colorIdx];
+    const px = ox + p.x * cvScale;
+    const py = oy + p.z * cvScale;
+    const pw = p.w * cvScale;
+    const pd = p.d * cvScale;
+    const isActive = activePropId===p.id;
+    ctx.save();
+    if(p.type==='rug_round'){
+      ctx.beginPath();
+      ctx.arc(px, py, pw/2, 0, Math.PI*2);
+      ctx.fillStyle = col + (isActive?'66':'33');
+      ctx.fill();
+      ctx.strokeStyle = isActive ? '#8B7355' : col+'88';
+      ctx.lineWidth = isActive ? 2 : 1;
+      ctx.setLineDash(isActive?[]:[3,2]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else {
+      ctx.fillStyle = col + (isActive?'55':'2A');
+      ctx.fillRect(px - pw/2, py - pd/2, pw, pd);
+      ctx.strokeStyle = isActive ? '#8B7355' : col+'88';
+      ctx.lineWidth = isActive ? 2 : 1;
+      ctx.strokeRect(px - pw/2, py - pd/2, pw, pd);
+    }
+    ctx.fillStyle = isActive ? '#1A1A18' : '#7A7668';
+    ctx.font = `${Math.max(8,cvScale*11)}px 'Noto Sans KR',sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(cat.name, px, py + 3);
+    if(isActive){
+      ctx.fillStyle = '#8B7355';
+      ctx.font = `${Math.max(7,cvScale*9)}px 'Josefin Sans',sans-serif`;
+      ctx.fillText(p.w+'×'+p.d+'cm', px, py + 3 + Math.max(8,cvScale*12));
+    }
+    ctx.restore();
+  });
+}
+const CATALOG=[
+  {id:'sati_1p',name:'SATI 1P',ko:'사티 1인',type:'1인 소파',depth:80,tag:'모던·미니멀·1인',configs:[{name:'1인',w:846,p:178}]},
+  {id:'sati',name:'SATI',ko:'사티',type:'모던',depth:98,tag:'모던·미니멀',configs:[{name:'1인',w:846,p:178},{name:'2인',w:2200,p:288},{name:'3인',w:2800,p:368},{name:'3.5인',w:3100,p:408}]},
+  {id:'regina',name:'REGINA',ko:'레지나',type:'다리형',depth:104,tag:'클래식·고급',configs:[{name:'2인',w:2200,p:578},{name:'3인',w:3070,p:778}]},
+  {id:'bonum_op',name:'BONUM OP',ko:'보눔 OP',type:'오픈암',depth:106,tag:'모던·오픈암',configs:[{name:'2인',w:2320,p:318},{name:'3인',w:3200,p:438}]},
+  {id:'bonum_fu',name:'BONUM FU',ko:'보눔 FU',type:'풀세트',depth:106,tag:'모던·모듈',configs:[{name:'2인',w:2270,p:338},{name:'2.5인',w:2520,p:378},{name:'3인',w:3200,p:458},{name:'3.5인',w:3420,p:508}]},
+  {id:'capone',name:'CAPONE',ko:'카포네',type:'쿠션백',depth:98,tag:'쿠션백·내추럴',configs:[{name:'2인',w:2200,p:358},{name:'3인',w:3140,p:478}]},
+  {id:'capone_g',name:'CAPONE GRAND',ko:'카포네 그랑',type:'섹셔널',depth:112,tag:'섹셔널·패밀리',configs:[{name:'A',w:2310,p:618},{name:'B',w:3065,p:818},{name:'코너',w:3080,p:848}]},
+  {id:'sati_m',name:'SATI MOTION',ko:'사티 모션',type:'리클라이너',depth:108,tag:'리클라이너',configs:[{name:'전동2인',w:2080,p:488}]},
+  {id:'querencia',name:'QUERENCIA',ko:'케렌시아',type:'로우 모듈',depth:110,tag:'럭셔리·로우',configs:[{name:'2인A',w:2050,p:418},{name:'2인B',w:2120,p:438},{name:'3인',w:3000,p:578},{name:'3.5인',w:3150,p:638}]},
+  {id:'vard',name:'VARD',ko:'바드',type:'스칸디',depth:88,tag:'스칸디·컴팩트',configs:[{name:'1인',w:1800,p:178},{name:'2인',w:1900,p:218},{name:'3인',w:2600,p:308}]},
+  {id:'milo',name:'MILO',ko:'밀로',type:'모듈',depth:100,tag:'프리미엄·모듈',configs:[{name:'1인',w:1000,p:548},{name:'와이드1인',w:1200,p:648}]},
+  {id:'elmer',name:'ELMER',ko:'엘머',type:'패밀리',depth:105,tag:'패밀리·컴포트',configs:[{name:'마마',w:2200,p:458},{name:'파파',w:2600,p:558}]},
+  {id:'stan',name:'STAN',ko:'스탠',type:'대형 모듈',depth:120,tag:'대형·프리미엄',configs:[{name:'A',w:2580,p:518},{name:'B',w:3580,p:718},{name:'코너',w:3620,p:778},{name:'풀세트',w:4780,p:1188}]},
+  {id:'bihar',name:'BIHAR',ko:'비하르',type:'로우 모듈',depth:102,tag:'로우·내추럴',configs:[{name:'2인',w:2160,p:338},{name:'3인',w:2880,p:458},{name:'4인',w:3600,p:578}]},
+  {id:'everyday',name:'EVERYDAY',ko:'에브리데이',type:'캐주얼',depth:100,tag:'캐주얼·패밀리',configs:[{name:'2인',w:2160,p:258},{name:'2.5인',w:2680,p:298},{name:'3인',w:2960,p:338}]},
+  {id:'holiday',name:'HOLIDAY',ko:'홀리데이',type:'가족',depth:102,tag:'패밀리·포근',configs:[{name:'2인',w:2080,p:268},{name:'3인',w:2770,p:358},{name:'3.5인',w:3250,p:398}]},
+];
+const FLOOR_C=[{id:'oak',hex:'#C8A870',name:'오크 원목'},{id:'walnut',hex:'#7A5030',name:'월넛'},{id:'birch',hex:'#E8DCC8',name:'버치'},{id:'marble_w',hex:'#F0EEE8',name:'화이트 마블'},{id:'marble_g',hex:'#C8C4BC',name:'그레이 마블'},{id:'concrete',hex:'#A8A49C',name:'콘크리트'},{id:'dark_oak',hex:'#5A3C20',name:'다크 오크'},{id:'beige',hex:'#D8C8A8',name:'베이지 타일'}];
+const WALL_C=[{id:'white',hex:'#F8F6F2',name:'순백'},{id:'ivory',hex:'#F0EAD8',name:'아이보리'},{id:'warm_gray',hex:'#C8C4BC',name:'웜 그레이'},{id:'sand',hex:'#D8C8A4',name:'샌드'},{id:'sage',hex:'#B8C8B0',name:'세이지'},{id:'dusty',hex:'#A8B8C8',name:'더스티 블루'},{id:'terracotta',hex:'#C89080',name:'테라코타'},{id:'charcoal',hex:'#606058',name:'차콜'}];
+const MAT_C=[{id:'ivory',hex:'#E8E0D0',name:'아이보리'},{id:'sand',hex:'#C8B898',name:'샌드'},{id:'warm_gray',hex:'#A8A098',name:'웜 그레이'},{id:'charcoal',hex:'#4A4844',name:'차콜'},{id:'midnight',hex:'#2A2830',name:'미드나잇'},{id:'camel',hex:'#B88858',name:'카멜'},{id:'terracotta',hex:'#B86848',name:'테라코타'},{id:'sage',hex:'#788870',name:'세이지'},{id:'navy',hex:'#283858',name:'네이비'},{id:'forest',hex:'#385840',name:'포레스트'},{id:'cream_lth',hex:'#D8C8A8',name:'크림 레더'},{id:'cognac',hex:'#884828',name:'코냑'}];
+let floorC=FLOOR_C[0],wallC=WALL_C[0],matC=MAT_C[0];
+
+const MAT_TYPE={ivory:'fabric',sand:'fabric',warm_gray:'fabric',charcoal:'fabric',midnight:'fabric',camel:'fabric',terracotta:'fabric',sage:'fabric',navy:'fabric',forest:'fabric',cream_lth:'leather',cognac:'leather'};
+const MAT_MULT={fabric:1.0,leather:1.18};
+function calcPrice(s,wMm){const cfg=s.configs.find(c=>c.w===wMm)||s.configs[0];if(!cfg||!cfg.p)return null;const mult=MAT_MULT[MAT_TYPE[matC.id]]||1;return Math.round(cfg.p*mult);}
+function fmtPrice(p){return p>=1000?Math.floor(p/100)/10+'백만':p+'만원';}
+function priceRange(s){const ps=s.configs.filter(c=>c.p).map(c=>c.p);if(!ps.length)return '';const mn=Math.min(...ps),mx=Math.max(...ps);return mn===mx?mn+'만원~':mn+'~'+mx+'만원~';}
+
+const APT={small:[{p:'20평',name:'59㎡',w:390,d:310,layouts:[{t:'판상형',rooms:[{id:'l',x:.0,y:.0,w:.6,h:.5,cl:'living',lb:'거실'},{id:'k',x:.6,y:.0,w:.4,h:.5,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.5,w:.5,h:.5,cl:'room',lb:'안방'},{id:'r2',x:.5,y:.5,w:.3,h:.5,cl:'room',lb:'방'},{id:'b',x:.8,y:.5,w:.2,h:.5,cl:'bath',lb:'욕실'}]},{t:'복도형',rooms:[{id:'f',x:.35,y:.0,w:.3,h:.1,cl:'foyer',lb:'현관'},{id:'l',x:.0,y:.1,w:.6,h:.5,cl:'living',lb:'거실'},{id:'k',x:.6,y:.1,w:.4,h:.35,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.6,w:.5,h:.4,cl:'room',lb:'안방'},{id:'r2',x:.5,y:.6,w:.3,h:.4,cl:'room',lb:'방'},{id:'b',x:.8,y:.45,w:.2,h:.2,cl:'bath',lb:'욕실'}]}]},{p:'24평',name:'79㎡',w:420,d:330,layouts:[{t:'판상형',rooms:[{id:'l',x:.0,y:.0,w:.58,h:.5,cl:'living',lb:'거실'},{id:'k',x:.58,y:.0,w:.42,h:.5,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.5,w:.45,h:.5,cl:'room',lb:'안방'},{id:'r2',x:.45,y:.5,w:.32,h:.5,cl:'room',lb:'방'},{id:'b1',x:.77,y:.5,w:.23,h:.25,cl:'bath',lb:'욕실'},{id:'b2',x:.77,y:.75,w:.23,h:.25,cl:'bath',lb:'욕실'}]}]},{p:'25평',name:'82㎡',w:430,d:340,layouts:[{t:'3베이',rooms:[{id:'l',x:.0,y:.0,w:.6,h:.52,cl:'living',lb:'거실'},{id:'k',x:.6,y:.0,w:.4,h:.52,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.52,w:.42,h:.48,cl:'room',lb:'안방'},{id:'r2',x:.42,y:.52,w:.3,h:.48,cl:'room',lb:'방'},{id:'r3',x:.72,y:.52,w:.28,h:.3,cl:'room',lb:'방'},{id:'b',x:.72,y:.82,w:.28,h:.18,cl:'bath',lb:'욕실'}]}]},{p:'26평',name:'86㎡',w:440,d:340,layouts:[{t:'판상형',rooms:[{id:'l',x:.0,y:.0,w:.58,h:.52,cl:'living',lb:'거실'},{id:'k',x:.58,y:.0,w:.42,h:.52,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.52,w:.4,h:.48,cl:'room',lb:'안방'},{id:'r2',x:.4,y:.52,w:.3,h:.48,cl:'room',lb:'방'},{id:'r3',x:.7,y:.52,w:.3,h:.3,cl:'room',lb:'방'},{id:'b',x:.7,y:.82,w:.3,h:.18,cl:'bath',lb:'욕실'}]}]}],mid:[{p:'32평',name:'105㎡',w:490,d:370,layouts:[{t:'4베이',rooms:[{id:'l',x:.0,y:.0,w:.5,h:.5,cl:'living',lb:'거실'},{id:'k',x:.5,y:.0,w:.5,h:.38,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.5,w:.38,h:.5,cl:'room',lb:'안방'},{id:'r2',x:.38,y:.5,w:.28,h:.5,cl:'room',lb:'방'},{id:'r3',x:.66,y:.38,w:.34,h:.4,cl:'room',lb:'방'},{id:'b',x:.66,y:.78,w:.34,h:.22,cl:'bath',lb:'욕실'}]},{t:'타워형',rooms:[{id:'f',x:.0,y:.1,w:.1,h:.4,cl:'foyer',lb:'현관'},{id:'l',x:.1,y:.0,w:.55,h:.5,cl:'living',lb:'거실'},{id:'k',x:.65,y:.0,w:.35,h:.5,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.5,w:.4,h:.5,cl:'room',lb:'안방'},{id:'r2',x:.4,y:.5,w:.3,h:.5,cl:'room',lb:'방'},{id:'r3',x:.7,y:.5,w:.3,h:.35,cl:'room',lb:'방'},{id:'b',x:.7,y:.85,w:.3,h:.15,cl:'bath',lb:'욕실'}]}]},{p:'34평',name:'112㎡',w:500,d:400,layouts:[{t:'타워형',rooms:[{id:'l',x:.08,y:.0,w:.52,h:.52,cl:'living',lb:'거실'},{id:'k',x:.6,y:.0,w:.4,h:.52,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.52,w:.42,h:.48,cl:'room',lb:'안방'},{id:'r2',x:.42,y:.52,w:.3,h:.48,cl:'room',lb:'방'},{id:'r3',x:.72,y:.52,w:.28,h:.3,cl:'room',lb:'방'},{id:'b',x:.72,y:.82,w:.28,h:.18,cl:'bath',lb:'욕실'}]}]},{p:'36평',name:'119㎡',w:520,d:390,layouts:[{t:'판상형',rooms:[{id:'l',x:.0,y:.0,w:.55,h:.5,cl:'living',lb:'거실'},{id:'k',x:.55,y:.0,w:.45,h:.5,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.5,w:.38,h:.5,cl:'room',lb:'안방'},{id:'r2',x:.38,y:.5,w:.28,h:.5,cl:'room',lb:'방'},{id:'r3',x:.66,y:.5,w:.34,h:.32,cl:'room',lb:'방'},{id:'b',x:.66,y:.82,w:.34,h:.18,cl:'bath',lb:'욕실'}]}]},{p:'38평',name:'125㎡',w:540,d:400,layouts:[{t:'판상형',rooms:[{id:'l',x:.0,y:.0,w:.55,h:.55,cl:'living',lb:'거실'},{id:'k',x:.55,y:.0,w:.45,h:.4,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.55,w:.4,h:.45,cl:'room',lb:'안방'},{id:'r2',x:.4,y:.55,w:.3,h:.45,cl:'room',lb:'방'},{id:'r3',x:.7,y:.4,w:.3,h:.35,cl:'room',lb:'방'},{id:'b',x:.7,y:.75,w:.3,h:.25,cl:'bath',lb:'욕실'}]}]}],large:[{p:'42평',name:'138㎡',w:580,d:420,layouts:[{t:'4베이',rooms:[{id:'l',x:.0,y:.0,w:.5,h:.5,cl:'living',lb:'거실'},{id:'k',x:.5,y:.0,w:.5,h:.4,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.5,w:.38,h:.5,cl:'room',lb:'안방'},{id:'r2',x:.38,y:.5,w:.28,h:.5,cl:'room',lb:'방'},{id:'r3',x:.66,y:.4,w:.34,h:.35,cl:'room',lb:'방'},{id:'b',x:.5,y:.4,w:.16,h:.1,cl:'bath',lb:'욕실'}]}]},{p:'46평',name:'152㎡',w:610,d:440,layouts:[{t:'타워형',rooms:[{id:'l',x:.08,y:.0,w:.5,h:.52,cl:'living',lb:'거실'},{id:'k',x:.58,y:.0,w:.42,h:.52,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.52,w:.4,h:.48,cl:'room',lb:'안방'},{id:'r2',x:.4,y:.52,w:.3,h:.48,cl:'room',lb:'방'},{id:'r3',x:.7,y:.52,w:.3,h:.3,cl:'room',lb:'방'},{id:'b',x:.7,y:.82,w:.3,h:.18,cl:'bath',lb:'욕실'}]}]},{p:'50평',name:'165㎡',w:650,d:460,layouts:[{t:'오픈형',rooms:[{id:'l',x:.0,y:.0,w:.52,h:.52,cl:'living',lb:'거실'},{id:'k',x:.52,y:.0,w:.48,h:.38,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.52,w:.4,h:.48,cl:'room',lb:'안방'},{id:'r2',x:.4,y:.52,w:.28,h:.48,cl:'room',lb:'방'},{id:'r3',x:.68,y:.52,w:.32,h:.3,cl:'room',lb:'방'},{id:'b',x:.52,y:.38,w:.16,h:.14,cl:'bath',lb:'욕실'}]}]},{p:'59평',name:'195㎡',w:720,d:500,layouts:[{t:'대형',rooms:[{id:'l',x:.0,y:.0,w:.5,h:.5,cl:'living',lb:'거실'},{id:'k',x:.5,y:.0,w:.5,h:.42,cl:'kitchen',lb:'주방'},{id:'r1',x:.0,y:.5,w:.38,h:.5,cl:'room',lb:'안방'},{id:'r2',x:.38,y:.5,w:.28,h:.5,cl:'room',lb:'방'},{id:'r3',x:.66,y:.42,w:.34,h:.3,cl:'room',lb:'방'},{id:'b',x:.5,y:.42,w:.16,h:.08,cl:'bath',lb:'욕실'}]}]}]};
+let curRange='small',selApt=-1,selLayout=0;
+const prefs={people:null,use:null,style:null,family:null,mat:null,budget:null};
+const PREF_IDS={people:'pcPeople',use:'pcUse',style:'pcStyle',family:'pcFamily',mat:'pcMat',budget:'pcBudget'};
+const PREF_LBL={people:{1:'1인',2:'커플',3:'3~4인',5:'5인+'},use:{rest:'독서·휴식',media:'TV·영상',guest:'접대',nap:'눕기'},style:{modern:'모던',classic:'클래식',natural:'내추럴',luxury:'럭셔리'},family:{single:'1인가구',couple:'딩크',child:'어린자녀',pet:'반려동물'},mat:{fabric:'패브릭',leather:'레더',either:'무관'},budget:{low:'~200만',mid:'~400만',high:'~600만',premium:'600+'}};
+function setPref(k,v){prefs[k]=prefs[k]===v?null:v;document.querySelectorAll('#'+PREF_IDS[k]+' .pq-chip').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${v}'`)&&prefs[k]!==null));updatePrefUI();}
+function resetPrefs(){Object.keys(prefs).forEach(k=>prefs[k]=null);document.querySelectorAll('.pq-chip').forEach(el=>el.classList.remove('on'));updatePrefUI();}
+function updatePrefUI(){const f=Object.entries(prefs).filter(([,v])=>v!==null),cnt=f.length;const b=document.getElementById('prefCnt');if(b){b.textContent=cnt;b.classList.toggle('vis',cnt>0);}const s=document.getElementById('prefSum');if(s)s.textContent=cnt?'✦ '+f.map(([k,v])=>PREF_LBL[k][v]).join(' · '):'선택한 항목이 AI 추천에 반영돼요';const btn=document.getElementById('startBtn');if(btn)btn.textContent=cnt>=2?'AI 맞춤 추천 보기 →':'소파 탐색 시작 →';}
+function setS1Tab(t){['fp','pref'].forEach(id=>{document.getElementById('tab-'+id).classList.toggle('on',id===t);document.getElementById('pane-'+id).classList.toggle('on',id===t);});}
+function setRange(r){curRange=r;selApt=-1;selLayout=0;document.querySelectorAll('.range-tab').forEach((el,i)=>el.classList.toggle('on',['small','mid','large'][i]===r));renderAptGrid();}
+function renderAptGrid(){const g=document.getElementById('aptGrid');g.innerHTML=(APT[curRange]||[]).map((p,i)=>`<div class="apt-card${selApt===i?' on':''}" onclick="selAptCard(${i})"><div class="apt-pyeong">${p.p}</div><div class="apt-name">${p.name}</div><div class="apt-dim">${p.w}×${p.d}cm</div></div>`).join('');}
+function selAptCard(i){selApt=i;selLayout=0;const p=APT[curRange][i];document.getElementById('rW').value=p.w;document.getElementById('rD').value=p.d;renderAptGrid();renderLayoutTabs();drawFloorPlan();setS1Tab('fp');}
+function renderLayoutTabs(){const p=APT[curRange][selApt];if(!p)return;const bar=document.getElementById('fpLayoutBar');if(p.layouts.length<=1){bar.classList.remove('show');return;}bar.classList.add('show');document.getElementById('fpLayoutTabs').innerHTML=p.layouts.map((l,i)=>`<div class="layout-tab${i===selLayout?' on':''}" onclick="selLayoutTab(${i})">${l.t}</div>`).join('');}
+function selLayoutTab(i){selLayout=i;renderLayoutTabs();drawFloorPlan();}
+function drawFloorPlan(){const cv=document.getElementById('p1Canvas');const empty=document.getElementById('fpEmpty');if(!cv||selApt<0)return;const p=APT[curRange][selApt],layout=p.layouts[selLayout]||p.layouts[0];empty.style.display='none';cv.style.display='block';document.getElementById('fpLegend').classList.add('show');document.getElementById('fpMeta').textContent=p.p+(layout?' · '+layout.t:'');document.getElementById('fpTitle').textContent=p.name;const wrap=document.getElementById('fpWrap');const W=Math.min(wrap.offsetWidth-48,600);const H=Math.max(220,Math.min(Math.round(W*(p.d/p.w)),440));cv.width=W;cv.height=H;const ctx=cv.getContext('2d');ctx.clearRect(0,0,W,H);const PAD=14,iW=W-PAD*2,iH=H-PAD*2;const COLORS={living:{fill:'rgba(139,115,85,.22)',stroke:'rgba(139,115,85,.55)',text:'rgba(100,75,40,.85)'},kitchen:{fill:'#E8E4DA',stroke:'#C0BDB0',text:'#7A7668'},room:{fill:'#DDD9CE',stroke:'#B0ADA4',text:'#7A7668'},bath:{fill:'#D0D8DC',stroke:'#A0ACB2',text:'#6A7A80'},foyer:{fill:'#E0DDD4',stroke:'#B8B5AA',text:'#9A9890'}};ctx.fillStyle='#EEEAD8';ctx.fillRect(PAD,PAD,iW,iH);ctx.strokeStyle='#8A8278';ctx.lineWidth=2;ctx.strokeRect(PAD,PAD,iW,iH);if(layout?.rooms){layout.rooms.forEach(r=>{const col=COLORS[r.cl]||COLORS.room;const rx=PAD+r.x*iW,ry=PAD+r.y*iH,rw=r.w*iW,rh=r.h*iH;ctx.fillStyle=col.fill;ctx.fillRect(rx,ry,rw,rh);ctx.strokeStyle=col.stroke;ctx.lineWidth=1.2;ctx.strokeRect(rx,ry,rw,rh);if(rw>22&&rh>16){ctx.fillStyle=col.text;ctx.font=`${Math.max(8,Math.min(11,rw*.16))}px 'Noto Sans KR',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(r.lb,rx+rw/2,ry+rh/2);}});const lv=layout.rooms.find(r=>r.cl==='living');if(lv){const lx=PAD+lv.x*iW+3,ly=PAD+lv.y*iH+3,lw=lv.w*iW-6,lh=lv.h*iH-6,sh=Math.min(lh*.35,lw*.22);ctx.fillStyle='rgba(42,72,112,.1)';ctx.fillRect(lx,ly,lw,sh);ctx.strokeStyle='rgba(42,72,112,.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.strokeRect(lx,ly,lw,sh);ctx.setLineDash([]);ctx.fillStyle='rgba(42,72,112,.5)';ctx.font='8px Josefin Sans,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';if(sh>14)ctx.fillText('소파 영역',lx+lw/2,ly+sh/2);ctx.fillStyle='rgba(139,115,85,.8)';ctx.font='bold 9px Josefin Sans';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(p.w+'cm',lx+lw/2,ly-2);ctx.save();ctx.translate(lx-3,ly+lh/2);ctx.rotate(-Math.PI/2);ctx.fillText(p.d+'cm',0,0);ctx.restore();}}}
+function onDirect(){const w=+document.getElementById('rW').value,d=+document.getElementById('rD').value;if(w>100&&d>100){const cv=document.getElementById('p1Canvas');document.getElementById('fpEmpty').style.display='none';cv.style.display='block';document.getElementById('fpLegend').classList.remove('show');document.getElementById('fpMeta').textContent=w+' × '+d+' cm';document.getElementById('fpTitle').textContent='직접 입력';const W=Math.min(document.getElementById('fpWrap').offsetWidth-48,600);const H=Math.max(200,Math.min(Math.round(W*d/w),380));cv.width=W;cv.height=H;const ctx=cv.getContext('2d'),PAD=24,iW=W-PAD*2,iH=H-PAD*2;ctx.fillStyle='#DDD5C0';ctx.fillRect(PAD,PAD,iW,iH);ctx.strokeStyle='#B0A890';ctx.lineWidth=2;ctx.strokeRect(PAD,PAD,iW,iH);ctx.fillStyle='#8A8278';ctx.font='11px Josefin Sans';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(w+' × '+d+' cm',PAD+iW/2,PAD+iH/2);setS1Tab('fp');}}
+function goS1(){document.getElementById('s1').classList.add('active');document.getElementById('s2').classList.remove('active');document.getElementById('navStep').textContent='Step 1 of 2';document.getElementById('sn1').className='sn active';document.getElementById('sn2').className='sn';document.getElementById('snl1').className='sn-line';}
+function goS2(){const w=+document.getElementById('rW').value,d=+document.getElementById('rD').value;if(!w||!d){alert('거실 치수를 입력해주세요');return;}room={w,d};selId=null;selW=null;sofaX=0;sofaY=-1;sofaRot=0;document.getElementById('s1').classList.remove('active');document.getElementById('s2').classList.add('active');document.getElementById('navStep').textContent='Step 2 of 2';document.getElementById('sn1').className='sn done';document.getElementById('sn1').setAttribute('onclick','goS1()');document.getElementById('sn2').className='sn active';document.getElementById('snl1').className='sn-line done';document.getElementById('cvMeta').textContent=w+' × '+d+' cm';document.getElementById('cvCtrl').style.display='none';document.getElementById('statsWrap').style.display='none';document.getElementById('matWrap').style.display='none';document.getElementById('ctaBtn').disabled=true;buildHero();buildColorChips();buildMatGrid();buildSlider();setTimeout(drawCanvas,60);}
+function sofaSVG(id,fit){const f=fit==='fit'?'rgba(42,72,112,.22)':fit==='tight'?'rgba(160,120,40,.22)':'rgba(160,60,50,.15)';const s=fit==='fit'?'rgba(42,72,112,.6)':fit==='tight'?'rgba(160,120,40,.6)':'rgba(160,60,50,.5)';const sect=`<rect x="2" y="10" width="32" height="16" rx="2" fill="${f}" stroke="${s}" stroke-width="1.2"/><rect x="30" y="14" width="18" height="12" rx="2" fill="${f}" stroke="${s}" stroke-width="1.2"/><rect x="2" y="7" width="32" height="5" rx="1" fill="${f}" stroke="${s}" stroke-width="1"/>`;const low=`<rect x="2" y="15" width="48" height="11" rx="2" fill="${f}" stroke="${s}" stroke-width="1.2"/><rect x="2" y="11" width="48" height="6" rx="1" fill="${f}" stroke="${s}" stroke-width="1"/><rect x="2" y="24" width="5" height="4" rx="1" fill="${f}" stroke="${s}" stroke-width="1"/><rect x="45" y="24" width="5" height="4" rx="1" fill="${f}" stroke="${s}" stroke-width="1"/>`;const rec=`<rect x="4" y="9" width="44" height="16" rx="3" fill="${f}" stroke="${s}" stroke-width="1.2"/><rect x="4" y="6" width="10" height="19" rx="2" fill="${f}" stroke="${s}" stroke-width="1"/><rect x="38" y="6" width="10" height="19" rx="2" fill="${f}" stroke="${s}" stroke-width="1"/><rect x="14" y="6" width="24" height="5" rx="1" fill="${f}" stroke="${s}" stroke-width="1"/>`;const def=`<rect x="2" y="12" width="48" height="14" rx="2" fill="${f}" stroke="${s}" stroke-width="1.2"/><rect x="2" y="8" width="48" height="6" rx="2" fill="${f}" stroke="${s}" stroke-width="1"/><rect x="2" y="22" width="6" height="6" rx="1" fill="${f}" stroke="${s}" stroke-width="1"/><rect x="44" y="22" width="6" height="6" rx="1" fill="${f}" stroke="${s}" stroke-width="1"/>`;const m={capone_g:sect,stan:sect,querencia:low,bihar:low,sati_m:rec};return`<svg viewBox="0 0 52 30" xmlns="http://www.w3.org/2000/svg">${m[id]||def}</svg>`;}
+function prefScore(s){let sc=0;const tag=(s.tag+'').toLowerCase()+s.id;if(prefs.people==='1'&&['vard','sati','everyday'].includes(s.id))sc+=3;if(prefs.people==='2'&&(tag.includes('미니멀')||tag.includes('오픈암')))sc+=2;if(prefs.people==='3'&&(tag.includes('패밀리')||tag.includes('모듈')))sc+=3;if(prefs.people==='5'&&['stan','capone_g','bihar','everyday'].includes(s.id))sc+=4;if(prefs.use==='rest'&&(tag.includes('럭셔리')||tag.includes('로우')))sc+=3;if(prefs.use==='media'&&(tag.includes('리클라이너')||s.id==='sati_m'))sc+=4;if(prefs.use==='guest'&&(tag.includes('클래식')||s.id==='regina'))sc+=3;if(prefs.use==='nap'&&['querencia','bihar','sati_m','stan'].includes(s.id))sc+=4;if(prefs.style==='modern'&&(tag.includes('모던')||tag.includes('스칸디')))sc+=3;if(prefs.style==='classic'&&(tag.includes('클래식')||s.id==='regina'))sc+=3;if(prefs.style==='natural'&&(tag.includes('내추럴')||tag.includes('스칸디')||['vard','capone','bihar'].includes(s.id)))sc+=3;if(prefs.style==='luxury'&&(tag.includes('럭셔리')||tag.includes('로우')||tag.includes('프리미엄')))sc+=3;if(prefs.family==='child'&&['everyday','holiday','capone_g','stan'].includes(s.id))sc+=3;if(prefs.family==='pet'&&['capone','bihar','everyday'].includes(s.id))sc+=3;if(prefs.family==='single'&&['vard','sati'].includes(s.id))sc+=3;if(prefs.mat==='leather'&&['capone','bihar','querencia','regina'].includes(s.id))sc+=2;if(prefs.mat==='fabric'&&['sati','vard','holiday','everyday'].includes(s.id))sc+=2;const bm={low:['vard','sati','everyday','holiday'],mid:['sati','capone','bonum_op','bonum_fu','querencia'],high:['querencia','bihar','capone_g','stan','regina'],premium:['stan','querencia','sati_m','capone_g']};if(prefs.budget&&bm[prefs.budget]?.includes(s.id))sc+=3;return sc;}
+function configFit(wCm){const r=wCm/room.w;return r<=.70?'fit':r<=.82?'tight':'nofit';}
+function getSeries(id){return CATALOG.find(s=>s.id===id);}
+function whyText(s,fit){const tag=(s.tag+'').toLowerCase()+s.id;if(prefs.use==='nap'&&['querencia','bihar','sati_m'].includes(s.id))return'눕기에 최적인 로우형';if(prefs.style==='luxury'&&tag.includes('럭셔리'))return'럭셔리 스타일에 어울려요';if(prefs.style==='natural'&&tag.includes('스칸디'))return'북유럽 감성과 잘 맞아요';if(prefs.family==='pet'&&['capone','bihar'].includes(s.id))return'내구성 소재로 추천';if(prefs.use==='media'&&s.id==='sati_m')return'리클라이닝 · TV 시청에 최적';if(prefs.people==='5'&&s.id==='stan')return'대가족 · 넉넉한 풀세트';return fit==='fit'?'공간 비율 최적':'취향과 가장 잘 맞아요';}
+function buildHero(){const hp=Object.values(prefs).some(v=>v!==null);const scored=CATALOG.map(s=>{const fits=s.configs.map(cfg=>({cfg,fit:configFit(cfg.w/10)}));const best=fits.find(f=>f.fit==='fit')||fits.find(f=>f.fit==='tight')||fits[0];return{s,bestCfg:best.cfg,bestFit:best.fit,score:(best.fit==='fit'?10:best.fit==='tight'?5:0)+(hp?prefScore(s):0)};}).filter(x=>x.bestFit!=='nofit').sort((a,b)=>b.score-a.score).slice(0,3);document.getElementById('heroSub').textContent=hp?room.w+'×'+room.d+'cm · 라이프스타일 기반 맞춤 추천이에요':room.w+'×'+room.d+'cm 공간에 어울리는 소파를 찾았어요';const rk=['rk1','rk2','rk3'];document.getElementById('recRow').innerHTML=scored.map((r,i)=>`<div class="rec-card${selId===r.s.id?' on':''}" onclick="pickFromHero('${r.s.id}',${r.bestCfg.w})"><div class="rec-rank ${rk[i]}">${i+1}</div><div class="rec-thumb">${sofaSVG(r.s.id,r.bestFit)}</div><div class="rec-info"><div class="rec-name">${r.s.name}</div><div class="rec-ko">${r.s.ko} · ${r.s.tag}</div><div class="rec-sz">${Math.round(r.bestCfg.w/10)}cm × ${r.s.depth}D</div><div class="rec-price">${priceRange(r.s)}</div><div class="rec-why">${whyText(r.s,r.bestFit)}</div></div><div class="rec-badge ${r.bestFit==='fit'?'b-fit':'b-tight'}">${r.bestFit==='fit'?'적합':'여유'}</div></div>`).join('');}
+function pickFromHero(id,wMm){pickSofa(id,wMm);document.querySelectorAll('.rec-card').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${id}'`)));}
+function pickSofa(id,wMm){const s=getSeries(id);if(!s)return;selId=id;selW=Math.round(wMm/10);sofaX=Math.round((cvRoomPxW||300)*.08);sofaY=-1;sofaRot=0;document.getElementById('ctaBtn').disabled=false;if(curView==='2d')document.getElementById('cvCtrl').style.display='flex';document.getElementById('rotInd').textContent='0°';document.getElementById('viewToggle').style.display='flex';document.getElementById('matWrap').style.display='block';updateSelPanel();drawCanvas();updateStats();buildSlider();if(curView==='3d')build3D();}
+function updateSelPanel(){const s=getSeries(selId);if(!s)return;const w=selW,d=s.depth,ratio=Math.round(w/room.w*100),front=room.d-d-30;const rOk=ratio>=54&&ratio<=74,fOk=front>=45;const baseP=calcPrice(s,selW*10),lthP=baseP?Math.round(baseP*1.18):null;const isLth=MAT_TYPE[matC.id]==='leather';
+document.getElementById('selInfo').innerHTML=`<div class="sel-name">${s.name}</div><div class="sel-sub">${s.ko} · ${s.type} · ${s.tag}</div><div class="sel-config-row">${s.configs.map(cfg=>`<div class="sel-cfg${selW===Math.round(cfg.w/10)?' on':''}" onclick="pickSofa('${s.id}',${cfg.w})">${cfg.name}<span class="sel-cfg-p">${cfg.p?cfg.p+'만':''}</span></div>`).join('')}</div><div class="sel-price"><span class="sel-price-main">${isLth?lthP:baseP}만원</span><span class="sel-price-mat">${isLth?'레더':'패브릭 기준'}</span></div><div class="sel-price-note">레더 +18% · 색상별 상이</div>`;document.getElementById('statsWrap').style.display='block';document.getElementById('statGrid').innerHTML=`<div class="stat"><div class="stat-lbl">소파 폭</div><div class="stat-val">${w}cm</div></div><div class="stat"><div class="stat-lbl">깊이</div><div class="stat-val">${d}cm</div></div><div class="stat"><div class="stat-lbl">공간 비율</div><div class="stat-val ${rOk?'spec-ok':'spec-warn'}">${ratio}%</div><div class="stat-sub">${rOk?'이상적':'권장 54–74%'}</div></div><div class="stat"><div class="stat-lbl">전면 동선</div><div class="stat-val ${fOk?'spec-ok':'spec-warn'}">${front}cm</div><div class="stat-sub">${fOk?'충분':'최소 45cm'}</div></div>`;}
+function updateStats(){if(selId)updateSelPanel();}
+
+/* ══ COMPARE ══ */
+let cmpList=[];
+function toggleCmp(id){
+  if(cmpList.includes(id))cmpList=cmpList.filter(x=>x!==id);
+  else if(cmpList.length<3)cmpList.push(id);
+  else{cmpList.shift();cmpList.push(id);}
+  buildSlider();updateCmpBar();
+}
+function updateCmpBar(){
+  const bar=document.getElementById('cmpBar');
+  const cnt=cmpList.length;
+  if(!bar)return;
+  bar.style.display=cnt>0?'flex':'none';
+  document.getElementById('cmpCount').textContent=cnt+'/3 선택됨';
+  document.getElementById('cmpItems').innerHTML=cmpList.map(id=>{const s=getSeries(id);return`<div class="cmp-pill">${s?s.name:id}<span onclick="toggleCmp('${id}')" style="cursor:pointer;margin-left:5px;opacity:.6;">×</span></div>`;}).join('');
+}
+function openCmpModal(){
+  if(cmpList.length<2)return;
+  const modal=document.getElementById('cmpModal');
+  const body=document.getElementById('cmpModalBody');
+  body.innerHTML=buildCmpTable();
+  modal.style.display='flex';
+}
+function closeCmpModal(){document.getElementById('cmpModal').style.display='none';}
+function buildCmpTable(){
+  const items=cmpList.map(id=>({s:getSeries(id),fit:(()=>{const s2=getSeries(id);if(!s2)return'?';const fs=s2.configs.map(cfg=>configFit(cfg.w/10));return fs.includes('fit')?'fit':fs.includes('tight')?'tight':'nofit';})()}));
+  const rows=[
+    {lbl:'타입',fn:x=>x.s.type},
+    {lbl:'태그',fn:x=>x.s.tag},
+    {lbl:'최적 폭',fn:x=>{const b=x.s.configs.find(c=>configFit(c.w/10)==='fit')||x.s.configs[0];return Math.round(b.w/10)+'cm';}},
+    {lbl:'깊이',fn:x=>x.s.depth+'cm'},
+    {lbl:'공간 적합',fn:x=>x.fit==='fit'?'✓ 적합':x.fit==='tight'?'△ 여유':'✕ 부적합',cls:x=>x.fit==='fit'?'cmp-fit':x.fit==='tight'?'cmp-warn':'cmp-no'},
+    {lbl:'가격(패브릭)',fn:x=>{const ps=x.s.configs.filter(c=>c.p).map(c=>c.p);return ps.length?Math.min(...ps)+'만원~':'—';}},
+    {lbl:'레더 추가',fn:x=>{const ps=x.s.configs.filter(c=>c.p).map(c=>c.p);return ps.length?'+'+Math.round(Math.min(...ps)*0.18)+'만원':'—';}},
+    {lbl:'설정 수',fn:x=>x.s.configs.length+'가지'},
+  ];
+  const heads=items.map(({s})=>`<th><div class="cmp-th-name">${s.name}</div><div class="cmp-th-ko">${s.ko}</div></th>`).join('');
+  const trs=rows.map(r=>`<tr><td class="cmp-lbl-cell">${r.lbl}</td>${items.map(x=>`<td class="${r.cls?r.cls(x):''}">${r.fn(x)}</td>`).join('')}</tr>`).join('');
+  return`<table class="cmp-table"><thead><tr><th></th>${heads}</tr></thead><tbody>${trs}</tbody></table>`;
+}
+function saveImg(){
+  const canvas=document.getElementById('roomCanvas');
+  if(!canvas||!selId){alert('소파를 먼저 배치해주세요');return;}
+  const a=document.createElement('a');
+  a.download='alloso-living-studio.png';
+  a.href=canvas.toDataURL('image/png');
+  a.click();
+}
+
+function buildColorChips(){const fc=document.getElementById('floorChips'),wc=document.getElementById('wallChips');if(fc)fc.innerHTML=FLOOR_C.map(c=>`<div class="chip${c.id===floorC.id?' on':''}" style="background:${c.hex};" title="${c.name}" onclick="setFloor('${c.id}')"></div>`).join('');if(wc)wc.innerHTML=WALL_C.map(c=>`<div class="chip${c.id===wallC.id?' on':''}" style="background:${c.hex};" title="${c.name}" onclick="setWall('${c.id}')"></div>`).join('');}
+function buildMatGrid(){const g=document.getElementById('matGrid');if(!g)return;g.innerHTML=MAT_C.map(m=>`<div class="mat-sw${m.id===matC.id?' on':''}" style="background:${m.hex};" title="${m.name}" onclick="setMat('${m.id}')"></div>`).join('');}
+function buildSlider(){const sl=document.getElementById('sofaSlider');if(!sl)return;const ct=document.getElementById('sliderCount');if(ct)ct.textContent=CATALOG.length+'개';sl.innerHTML=CATALOG.map(s=>{const isCmp=cmpList.includes(s.id);const hasGLB=!!GLB_MAP[s.id];return`<div class="slide${selId===s.id?' on':''}" style="position:relative;"><div class="slide-top"><div class="slide-icon">${sofaSVG(s.id,'fit')}</div><div class="slide-info"><div class="slide-name">${s.name}${hasGLB?'<span style="font-size:7px;color:var(--gold);margin-left:4px;">3D</span>':''}</div><div class="slide-type">${s.ko} · ${s.type}</div><div class="slide-price">${priceRange(s)}</div></div></div><div class="slide-configs">${s.configs.map(cfg=>{const fit=configFit(cfg.w/10);const isOn=selId===s.id&&selW===Math.round(cfg.w/10);return`<div class="scfg ${isOn?'on':fit}" onclick="event.stopPropagation();pickSofa('${s.id}',${cfg.w})">${cfg.name} ${Math.round(cfg.w/10)}cm</div>`;}).join('')}</div><div class="slide-cmp${isCmp?' on':''}" onclick="event.stopPropagation();toggleCmp('${s.id}')" title="비교 추가">${isCmp?'✓':'+'}</div></div>`;}).join('');}
+function pickBest(id){const s=getSeries(id);if(!s)return;const fits=s.configs.map(cfg=>({cfg,fit:configFit(cfg.w/10)}));const best=fits.find(f=>f.fit==='fit')||fits.find(f=>f.fit==='tight')||fits[0];pickSofa(id,best.cfg.w);buildSlider();}
+function drawCanvas(){const canvas=document.getElementById('roomCanvas');if(!canvas)return;const ctx=canvas.getContext('2d'),CW=canvas.width,CH=canvas.height;ctx.clearRect(0,0,CW,CH);if(!room.w||!room.d)return;const PAD=36,scX=(CW-PAD*2)/room.w,scY=(CH-PAD*2)/room.d;cvScale=Math.min(scX,scY);const rPxW=room.w*cvScale,rPxH=room.d*cvScale;cvRoomPxW=rPxW;const ox=(CW-rPxW)/2,oy=(CH-rPxH)/2;cvOx=ox;ctx.fillStyle=floorC.hex;ctx.fillRect(ox,oy,rPxW,rPxH);ctx.fillStyle=wallC.hex;ctx.fillRect(ox,oy,rPxW,7);ctx.fillRect(ox,oy,7,rPxH);ctx.strokeStyle='#B0A890';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rPxW,rPxH);ctx.fillStyle='#7A7668';ctx.font=`${Math.max(10,cvScale*18)}px 'Josefin Sans',sans-serif`;ctx.textAlign='center';ctx.fillText(`${room.w}cm`,ox+rPxW/2,oy-9);ctx.save();ctx.translate(ox-10,oy+rPxH/2);ctx.rotate(-Math.PI/2);ctx.fillText(`${room.d}cm`,0,0);ctx.restore();drawPropsOnCanvas(ctx,ox,oy,cvScale);if(!selId||!selW)return;const s=getSeries(selId);if(!s)return;const isL=sofaRot===0||sofaRot===180;const sWcm=isL?selW:s.depth,sDcm=isL?s.depth:selW;const sPxW=sWcm*cvScale,sPxH=sDcm*cvScale;if(sofaY<0)sofaY=oy+6;sofaX=Math.max(ox,Math.min(ox+rPxW-sPxW,sofaX));sofaY=Math.max(oy,Math.min(oy+rPxH-sPxH,sofaY));const wz=45*cvScale,zy=sofaY+sPxH,zh=Math.min(wz,oy+rPxH-zy);if(zh>0){ctx.fillStyle='rgba(58,112,80,.1)';ctx.fillRect(sofaX,zy,sPxW,zh);ctx.strokeStyle='rgba(58,112,80,.35)';ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.strokeRect(sofaX,zy,sPxW,zh);ctx.setLineDash([]);}const fit=configFit(sWcm);const sf=fit==='fit'?'rgba(42,72,112,.28)':fit==='tight'?'rgba(160,120,40,.28)':'rgba(160,60,50,.22)';const ss=fit==='fit'?'rgba(42,72,112,.65)':fit==='tight'?'rgba(160,120,40,.65)':'rgba(160,60,50,.55)';ctx.fillStyle=sf;ctx.fillRect(sofaX,sofaY,sPxW,sPxH);ctx.strokeStyle=ss;ctx.lineWidth=1.5;ctx.strokeRect(sofaX,sofaY,sPxW,sPxH);ctx.fillStyle=ss;ctx.font=`${Math.max(9,cvScale*14)}px 'Josefin Sans',sans-serif`;ctx.textAlign='center';if(sPxW>60&&sPxH>18)ctx.fillText(`${s.name} ${sWcm}cm`,sofaX+sPxW/2,sofaY+sPxH/2+3);}
+function mv(dx,dy){if(!selId||!cvScale)return;const px=moveStep*cvScale;sofaX+=dx*px;sofaY+=dy*px;drawCanvas();updateStats();}
+function rot(deg){sofaRot=(sofaRot+deg+360)%360;document.getElementById('rotInd').textContent=sofaRot+'°';drawCanvas();updateStats();}
+function setStep(v){moveStep=v;['s10','s30','s50'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',parseInt(el.textContent)===v||el.textContent===v+'cm');});}
+function setView(mode){curView=mode;document.getElementById('btn2d').classList.toggle('on',mode==='2d');document.getElementById('btn3d').classList.toggle('on',mode==='3d');document.getElementById('view2d').style.display=mode==='2d'?'flex':'none';document.getElementById('view3d').style.display=mode==='3d'?'flex':'none';document.getElementById('cvCtrl').style.display=mode==='2d'&&selId?'flex':'none';if(mode==='3d'&&selId){
+    _init3DRetry = 0;
+    // display:flex 전환 후 레이아웃 확정까지 충분히 대기
+    setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>init3D())), 120);
+  }if(mode==='2d'&&t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}}
+
+/* ════════════════════════════════════
+   THREE.JS 3D SOFA VIEWER — v3 GLB
+════════════════════════════════════ */
+
+/* ── R2 GLB 매핑 ── */
+const GLB_BASE = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/Alloso%20series%20%28glb%29/';
+
+function glbURL(name){ return GLB_BASE + encodeURIComponent(name); }
+
+/* 소파 ID → GLB 파일 배열 (우+좌 순서로 나란히 배치) */
+const GLB_MAP = {
+  'sati_1p':  [{f:'사티1인.glb'}],
+  'sati':     [{f:'02.사티 와이드 1인 좌.glb'}, {f:'02.사티 와이드 1인 우.glb'}],
+  'querencia':[{f:'03.케렌시아 싱글.glb'}],
+  'bonum_op': [{f:'04.보눔 1인 좌.glb'}, {f:'04.보눔 1인 우.glb'}],
+  'bonum_fu': [{f:'05.보눔 1인라운지 좌.glb'}, {f:'04.보눔 1인 우.glb'}],
+  'vard':     [{f:'06.바드 데이베드.glb'}],
+  'milo':     [{f:'07. 밀로 1인 우.glb'}],
+  'elmer':    [{f:'09.엘머 마마.glb'}],
+  'bihar':    [{f:'10.비하르 암리스.glb'}, {f:'10.비하르 1인 우.glb'}],
+  'holiday':  [{f:'11.홀리데이 터미널 좌.glb'}, {f:'11.홀리데이 와이드 2인 좌.glb'}, {f:'11.홀리데이 터미널 우.glb'}],
+  'capone_g': [{f:'12.카포네그랑 1인 좌.glb'}, {f:'12.카포네그랑 2인 우.glb'}],
+};
+
+/* ── State ── */
+let t3Scene=null,t3Camera=null,t3Renderer=null,t3AnimId=null;
+let t3Theta=28,t3Phi=26,t3Radius=3.6;
+let t3Drag=false,t3Lx=0,t3Ly=0,t3AutoRot=true,t3LastInteract=0;
+let t3Loading=false;
+let t3CachedSelId=null, t3SofaGroup=null; // GLB 캐시
+
+/* ── Color helpers ── */
+function hexToThree(hex){ return parseInt(hex.replace('#',''),16); }
+function hexToRGB(hex){
+  const h=hex.replace('#','');
+  return {r:parseInt(h.slice(0,2),16)/255,g:parseInt(h.slice(2,4),16)/255,b:parseInt(h.slice(4,6),16)/255};
+}
+function darkenHex(hex,amt){
+  const h=hex.replace('#','');
+  const c=v=>Math.max(0,Math.min(255,v));
+  return (c(parseInt(h.slice(0,2),16)-Math.round(255*amt))<<16)
+        |(c(parseInt(h.slice(2,4),16)-Math.round(255*amt))<<8)
+        | c(parseInt(h.slice(4,6),16)-Math.round(255*amt));
+}
+function lightenHex(hex,amt){
+  const h=hex.replace('#','');
+  const c=v=>Math.max(0,Math.min(255,v));
+  return (c(parseInt(h.slice(0,2),16)+Math.round(255*amt))<<16)
+        |(c(parseInt(h.slice(2,4),16)+Math.round(255*amt))<<8)
+        | c(parseInt(h.slice(4,6),16)+Math.round(255*amt));
+}
+
+/* ── PBR Material ── */
+function mkMat(colorHex,roughness=0.82,metalness=0){
+  return new THREE.MeshStandardMaterial({color:colorHex,roughness,metalness});
+}
+
+/* ── Box helper ── */
+function addBox(group,w,h,d,mat,pos){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(...pos); m.castShadow=true; m.receiveShadow=true;
+  group.add(m); return m;
+}
+
+/* ── Cushion row helper ── */
+function addCushionRow(group,W,cushW,cushH,cushD,mat,baseY,baseZ,count){
+  const gap=0.012, totalW=cushW*count+gap*(count-1), startX=-totalW/2+cushW/2;
+  for(let i=0;i<count;i++){
+    const x=startX+i*(cushW+gap);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(cushW,cushH,cushD),mat);
+    m.position.set(x,baseY,baseZ); m.castShadow=true; m.receiveShadow=true;
+    group.add(m);
+    // 하이라이트 스트립
+    const hl=new THREE.Mesh(new THREE.BoxGeometry(cushW*.84,cushH*1.05,cushD*.3),
+      mkMat(lightenHex(matC.hex,0.06),0.7));
+    hl.position.set(x,baseY,baseZ-cushD*.2); group.add(hl);
+  }
+}
+
+/* ── 절차적 소파 (GLB fallback) ── */
+function buildSofaMeshes(group){
+  // selId가 없으면 기본 데모 소파 표시
+  let s, useW;
+  if(!selId){
+    s = {name:'SATI', depth:100};
+    useW = 220;
+    console.log('[3D] Building demo SATI sofa (no selId)');
+  } else {
+    s = getSeries(selId); if(!s){ console.warn('[3D] getSeries returned null for:', selId); return; }
+    useW = selW;
+    console.log('[3D] Building procedural sofa:', s.name, useW+'cm');
+  }
+  const sofaW=useW/100, sofaD=s.depth/100;
+  const norm=2.0/sofaW, W=sofaW*norm, D=sofaD*norm;
+  const mat=mkMat(hexToThree(matC.hex),0.85);
+  const matDk=mkMat(darkenHex(matC.hex,0.10),0.9);
+  const matDk2=mkMat(darkenHex(matC.hex,0.18),0.92);
+  const matLt=mkMat(lightenHex(matC.hex,0.05),0.78);
+  const legMat=mkMat(0x2C2420,0.6,0.05);
+
+  const stdSofa=(sh=0.10,bh=0.50,bd=0.11,ah=0.40,aw=0.12,legH=0.10)=>{
+    const sd=D*0.56, nC=W>1.8?3:2, cW=(W-aw*2)/nC, cH=0.10, cD=sd*0.9;
+    addBox(group,W,sh,D,matDk,[0,sh/2,0]);
+    [[W/2-.07,D/2-.07],[W/2-.07,-(D/2-.07)],[-(W/2-.07),D/2-.07],[-(W/2-.07),-(D/2-.07)]].forEach(([x,z])=>addBox(group,.05,legH,.05,legMat,[x,legH/2,z]));
+    addBox(group,W-aw*2,sh*.6,sd,matDk2,[0,sh+sh*.3,0]);
+    addCushionRow(group,W,cW,cH,cD,mat,sh+sh*.6+cH/2,0,nC);
+    addBox(group,W-aw*2,bh,bd,matDk,[0,sh+bh/2,-(D/2-bd/2)]);
+    for(let i=0;i<nC;i++){const x=-(W-aw*2)/2+cW/2+i*(cW+.01);const bk=new THREE.Mesh(new THREE.BoxGeometry(cW*.9,bh*.8,bd*1.1),matLt);bk.position.set(x,sh+bh*.44,-(D/2-bd*.5));bk.castShadow=true;group.add(bk);}
+    addBox(group,aw,ah,D,matDk,[-(W/2-aw/2),ah/2,0]);
+    addBox(group,aw,ah,D,matDk,[ (W/2-aw/2),ah/2,0]);
+  };
+
+  if(['capone_g','stan'].includes(selId)){
+    const sh=0.10,bh=0.50,bd=0.11,ah=0.40,aw=0.12,legH=0.10;
+    const mW=W*.66,sW=W*.36;
+    addBox(group,mW,sh,D,matDk,[-(W-mW)/2,sh/2,0]);
+    addBox(group,mW,sh*.5,D*.56,matDk2,[-(W-mW)/2,sh+sh*.25,0]);
+    addCushionRow(group,mW,(mW-aw)/3,0.10,D*.5,mat,sh+sh*.5+0.05,0,3);
+    addBox(group,mW-aw,bh,bd,matDk,[-(W-mW)/2,sh+bh/2,-(D/2-bd/2)]);
+    addBox(group,aw,ah,D,matDk,[-(W/2-aw/2),ah/2,0]);
+    addBox(group,sW,sh,sW,matDk,[(W/2-sW/2),sh/2,D/2-sW/2]);
+    addBox(group,sW,sh*.5,sW*.9,matDk2,[(W/2-sW/2),sh+sh*.25,D/2-sW/2]);
+    addBox(group,aw,ah,sW,matDk,[(W/2-aw/2),ah/2,D/2-sW/2]);
+    [[-(W/2-.06),-(D/2-.06)],[mW/2-(W-mW)/2+.06,-(D/2-.06)],[W/2-.06,D/2-.06],[W/2-sW+.06,D/2-.06]].forEach(([x,z])=>addBox(group,.05,legH,.05,legMat,[x,legH/2,z]));
+  } else if(['querencia','bihar'].includes(selId)){
+    const sh=0.06,bh=0.38,bd=0.11,legH=0.06,sd=D*.60,nC=W>1.8?3:2,cW=W*.92/nC;
+    addBox(group,W,sh,D,matDk,[0,sh/2,0]);
+    [[W/2-.05,D/2-.05],[W/2-.05,-(D/2-.05)],[-(W/2-.05),D/2-.05],[-(W/2-.05),-(D/2-.05)]].forEach(([x,z])=>addBox(group,.035,legH,.035,mkMat(0x888070,0.5,0.3),[x,legH/2,z]));
+    addBox(group,W,sh*.4,sd,matDk2,[0,sh+sh*.2,0]);
+    addCushionRow(group,W,cW,0.09,sd*.9,mat,sh+sh*.4+0.045,0,nC);
+    addBox(group,W,bh,bd,matDk,[0,sh+bh/2,-(D/2-bd/2)]);
+  } else if(selId==='sati_m'){
+    const sh=0.11,bh=0.54,bd=0.13,ah=0.44,aw=0.14,legH=0.11,sd=D*.54;
+    addBox(group,W,sh,D,matDk,[0,sh/2,0]);
+    addBox(group,W-aw*2,sh*.5,sd,matDk2,[0,sh+sh*.25,0]);
+    addCushionRow(group,W,W-aw*2-.01,0.11,sd*.9,mat,sh+sh*.5+0.055,0,1);
+    const bg=new THREE.Group();addBox(bg,W-aw*2,bh,bd,matDk,[0,bh/2,0]);bg.position.set(0,sh,-(D/2-bd/2));bg.rotation.x=-0.14;group.add(bg);
+    addBox(group,W-aw*2,0.09,D*.26,mat,[0,sh+0.045,D/2+D*.1]);
+    addBox(group,aw,ah,D,matDk,[-(W/2-aw/2),ah/2,0]);addBox(group,aw,ah,D,matDk,[(W/2-aw/2),ah/2,0]);
+    [[W/2-.07,-(D/2-.07)],[-(W/2-.07),-(D/2-.07)],[W/2-.07,D/2+D*.15],[-(W/2-.07),D/2+D*.15]].forEach(([x,z])=>addBox(group,.05,legH,.05,legMat,[x,legH/2,z]));
+  } else if(selId==='vard'){
+    const sh=0.16,bh=0.46,bd=0.10,ah=0.36,aw=0.09,legH=0.16,sd=D*.56,nC=W>1.6?3:2,cW=(W-aw*2)/nC;
+    addBox(group,W,0.06,D,mkMat(0x8B6E52,0.5,0.05),[0,sh+.03,0]);
+    const oak=mkMat(0xC8A878,0.4,0);[[W/2-.07,D/2-.07],[W/2-.07,-(D/2-.07)],[-(W/2-.07),D/2-.07],[-(W/2-.07),-(D/2-.07)]].forEach(([x,z])=>addBox(group,.045,sh,.045,oak,[x,sh/2,z]));
+    addBox(group,W,0.04,D,mkMat(0xB09070,0.7),[0,sh+.02,0]);
+    addCushionRow(group,W,cW,0.09,sd*.9,mat,sh+0.07,0,nC);
+    addBox(group,W-aw*2,bh,bd,matDk,[0,sh+bh/2,-(D/2-bd/2)]);
+    addBox(group,aw,ah,D,matDk,[-(W/2-aw/2),sh+ah/2,0]);addBox(group,aw,ah,D,matDk,[(W/2-aw/2),sh+ah/2,0]);
+  } else {
+    stdSofa();
+  }
+  group.userData.isSofa=true;
+}
+
+/* ── 방 환경 ── */
+function buildRoom(scene){
+  const floorMat=mkMat(hexToThree(floorC.hex),0.88);
+  const wallMat=mkMat(hexToThree(wallC.hex),0.92);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(12,12),floorMat);
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  // 바닥 플랭크 라인
+  const plkMat=new THREE.MeshStandardMaterial({color:darkenHex(floorC.hex,0.06),roughness:0.95});
+  for(let i=-5;i<=5;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(.004,12),plkMat);p.rotation.x=-Math.PI/2;p.position.set(i*.5,.001,0);scene.add(p);}
+  // 뒷벽
+  const bw=new THREE.Mesh(new THREE.PlaneGeometry(12,6),wallMat);bw.position.set(0,3,-5);bw.receiveShadow=true;scene.add(bw);
+  // 왼쪽 벽
+  const lw=new THREE.Mesh(new THREE.PlaneGeometry(12,6),wallMat);lw.position.set(-5,3,0);lw.rotation.y=Math.PI/2;lw.receiveShadow=true;scene.add(lw);
+  // 걸레받이
+  const bm=mkMat(darkenHex(wallC.hex,0.06),0.8);
+  const baseboard=new THREE.Mesh(new THREE.BoxGeometry(12,.07,.04),bm);baseboard.position.set(0,.035,-4.98);scene.add(baseboard);
+  // 천장
+  const cm=mkMat(lightenHex(wallC.hex,0.04),0.95);
+  const ceil=new THREE.Mesh(new THREE.PlaneGeometry(12,12),cm);ceil.rotation.x=Math.PI/2;ceil.position.set(0,5,0);scene.add(ceil);
+}
+
+/* ── 조명 ── */
+function buildLighting(scene){
+  scene.add(new THREE.HemisphereLight(0xFFF8F0,0xD4C8B0,0.55));
+  const key=new THREE.DirectionalLight(0xFFF5E8,1.1);key.position.set(4,7,3);key.castShadow=true;
+  key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-5;key.shadow.camera.right=5;
+  key.shadow.camera.top=5;key.shadow.camera.bottom=-5;key.shadow.bias=-0.001;scene.add(key);
+  const fill=new THREE.DirectionalLight(0xE8F0FF,0.3);fill.position.set(-4,3,-2);scene.add(fill);
+  const rim=new THREE.DirectionalLight(0xFFFFFF,0.15);rim.position.set(0,2,-5);scene.add(rim);
+}
+
+/* ── GLB 로드 후 자동 배치·스케일 ── */
+function arrangeGLBs(scenes, group){
+  // 각 모델 바운딩박스
+  const boxes=scenes.map(sc=>{sc.updateMatrixWorld(true);return new THREE.Box3().setFromObject(sc);});
+  let xCursor=0;
+  scenes.forEach((sc,i)=>{
+    const box=boxes[i];
+    const sz=box.getSize(new THREE.Vector3());
+    const ctr=box.getCenter(new THREE.Vector3());
+    sc.position.set(-ctr.x+xCursor, -box.min.y, -ctr.z);
+    xCursor+=sz.x+0.05;
+    sc.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
+    group.add(sc);
+  });
+  // 전체 스케일: 최대 2m에 맞춤
+  group.updateMatrixWorld(true);
+  const cb=new THREE.Box3().setFromObject(group);
+  const cs=cb.getSize(new THREE.Vector3());
+  const maxD=Math.max(cs.x,cs.z,0.5);
+  const scale=2.0/maxD;
+  group.scale.setScalar(scale);
+  // 중앙 정렬
+  group.updateMatrixWorld(true);
+  const fb=new THREE.Box3().setFromObject(group);
+  const fc=fb.getCenter(new THREE.Vector3());
+  group.position.x=-fc.x;
+  group.position.z=-fc.z;
+  group.position.y=-fb.min.y;
+}
+
+/* ── 로딩 스피너 ── */
+function showGLBSpinner(container, show){
+  let el=container.querySelector('#glbSpinner');
+  if(show){
+    if(!el){
+      el=document.createElement('div');
+      el.id='glbSpinner';
+      el.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(240,238,232,.82);z-index:5;gap:12px;';
+      el.innerHTML=`<div style="width:28px;height:28px;border:2.5px solid rgba(139,115,85,.2);border-top-color:#8B7355;border-radius:50%;animation:spin3d .8s linear infinite;"></div><div style="font-family:Josefin Sans,sans-serif;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#8B7355;">3D 로딩 중</div>`;
+    }
+    container.appendChild(el);
+  } else {
+    if(el) el.remove();
+  }
+}
+
+/* ── init3D (메인 진입점) ── */
+let _init3DRetry = 0;
+async function init3D(){
+  if(typeof THREE==='undefined'){
+    console.warn('[3D] THREE.js not loaded');
+    show3DFallback('3D 라이브러리를 불러올 수 없습니다');
+    return;
+  }
+  const container=document.getElementById('v3dWrap');
+  if(!container)return;
+
+  try {
+  // 기존 정리
+  if(t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}
+  const oldCanvas=container.querySelector('canvas');
+  if(oldCanvas)oldCanvas.remove();
+  const oldFb=container.querySelector('.v3d-fallback');
+  if(oldFb)oldFb.remove();
+  console.log('[3D] Step 1: Cleanup OK');
+
+  // 레이아웃 강제 flush 후 크기 계산
+  container.style.minHeight='320px';
+  const cvArea = document.querySelector('.cv-body') || document.getElementById('view3d');
+  const W = container.offsetWidth || cvArea?.offsetWidth || window.innerWidth * 0.65 || 640;
+  const H = Math.max(container.offsetHeight, container.parentElement?.offsetHeight || 0, 320);
+
+  // Renderer
+  console.log('[3D] container size:', W, 'x', H, '| container el:', container.id, '| retry:', _init3DRetry);
+  if(W <= 10 || H <= 10){
+    if(_init3DRetry < 8){
+      _init3DRetry++;
+      console.warn('[3D] Container has zero/small size - retry', _init3DRetry, 'in', 100 * _init3DRetry, 'ms');
+      setTimeout(init3D, 100 * _init3DRetry);
+      return;
+    }
+    // 최종 fallback: 강제 크기 설정
+    console.warn('[3D] Forcing fallback size 640x400');
+    container.style.width = '100%';
+    container.style.height = '400px';
+  }
+  _init3DRetry = 0;
+  const finalW = container.offsetWidth || 640;
+  const finalH = Math.max(container.offsetHeight, 320);
+  t3Renderer=new THREE.WebGLRenderer({antialias:true, alpha:false});
+  t3Renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  t3Renderer.setSize(finalW,finalH);
+  t3Renderer.domElement.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;display:block;';
+  t3Renderer.shadowMap.enabled=true;
+  t3Renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  t3Renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  t3Renderer.toneMappingExposure=1.05;
+  container.insertBefore(t3Renderer.domElement, container.firstChild);
+
+  // Scene
+  t3Scene=new THREE.Scene();
+  const rgb=hexToRGB(wallC.hex);
+  const bgColor=new THREE.Color(rgb.r,rgb.g,rgb.b);
+  t3Scene.background=bgColor;
+  t3Scene.fog=new THREE.FogExp2(bgColor,0.035);
+
+  // Camera
+  t3Camera=new THREE.PerspectiveCamera(36,finalW/finalH,0.05,30);
+  updateT3Cam();
+  console.log('[3D] Renderer+Scene+Camera created OK');
+
+  // 방 + 조명
+  buildRoom(t3Scene);
+  buildLighting(t3Scene);
+  console.log('[3D] Room+Lighting built OK');
+
+  // 소파 그룹 — 캐시 확인
+  const sofaChanged = (t3CachedSelId !== selId);
+
+  if(sofaChanged || !t3SofaGroup){
+    t3SofaGroup=new THREE.Group();
+    t3Scene.add(t3SofaGroup);
+
+    // GLB 로드 시도
+    // GLTFLoader 로딩 대기
+    if(window._glbLoaderReady) await window._glbLoaderReady;
+    const glbList=GLB_MAP[selId];
+    // GLB 시도 (실패 시 절차적 소파 자동 표시)
+    const canGLB = glbList && typeof THREE.GLTFLoader !== 'undefined';
+    console.log('[3D] selId:', selId, '| GLB available:', canGLB, '| GLTFLoader:', typeof THREE.GLTFLoader);
+    if(canGLB){
+      showGLBSpinner(container, true);
+      try{
+        const loader=new THREE.GLTFLoader();
+        // 타임아웃 8초 — GLB 로드 실패 시 절차적 소파로 전환
+        const loadWithTimeout = (item) => new Promise((res, rej) => {
+          const timer = setTimeout(() => rej(new Error('GLB load timeout: ' + item.f)), 8000);
+          loader.load(glbURL(item.f), g => { clearTimeout(timer); console.log('[3D] GLB loaded:', item.f); res(g.scene); }, null, e => { clearTimeout(timer); rej(e); });
+        });
+        const scenes=await Promise.all(glbList.map(loadWithTimeout));
+        showGLBSpinner(container, false);
+        arrangeGLBs(scenes, t3SofaGroup);
+        console.log('[3D] GLB arranged successfully');
+        // 카메라 거리 GLB 크기 기반 조정
+        const cb=new THREE.Box3().setFromObject(t3SofaGroup);
+        const cs=cb.getSize(new THREE.Vector3());
+        t3Radius=Math.max(2.8, Math.min(5.5, Math.max(cs.x,cs.z)*1.8));
+        updateT3Cam();
+      }catch(e){
+        console.warn('[3D] GLB load failed, using procedural sofa:', e.message);
+        showGLBSpinner(container, false);
+        buildSofaMeshes(t3SofaGroup);
+      }
+    } else {
+      console.log('[3D] No GLB map for selId, using procedural sofa. selId:', selId);
+      buildSofaMeshes(t3SofaGroup);
+    }
+    t3CachedSelId = selId;
+    // 초기 마감재 색상 적용
+    updateSofaMaterial();
+  } else {
+    // 캐시된 소파 재사용 — 씬에 추가만
+    t3Scene.add(t3SofaGroup);
+    console.log('[3D] Using cached sofa for:', selId);
+  }
+
+  // 2D 배치 좌표 → 3D 위치 반영
+  if(t3SofaGroup && selId && room.w && room.d){
+    const s = getSeries(selId);
+    if(s){
+      const roomScale3D = 5.0; // 3D 월드에서 방 크기 (바닥 12m 중 중앙 5m 사용)
+      const scX = roomScale3D / room.w; // cm → 3D units
+      const scZ = roomScale3D / room.d;
+      // 2D sofaX,sofaY → 중앙 기준 3D 좌표
+      const canvas = document.getElementById('roomCanvas');
+      if(canvas && cvScale > 0){
+        const rPxW = room.w * cvScale;
+        const rPxH = room.d * cvScale;
+        const ox = (canvas.width - rPxW) / 2;
+        const oy = (canvas.height - rPxH) / 2;
+        // 소파 중심의 캔버스 좌표 → 방 내 비율 (0~1)
+        const isL = sofaRot===0||sofaRot===180;
+        const sWcm = isL ? selW : s.depth;
+        const sDcm = isL ? s.depth : selW;
+        const cx = (sofaX - ox + sWcm*cvScale/2) / rPxW; // 0~1
+        const cz = (sofaY - oy + sDcm*cvScale/2) / rPxH; // 0~1
+        // 3D 좌표 (중앙=0, 범위 -2.5 ~ +2.5)
+        t3SofaGroup.position.x = (cx - 0.5) * roomScale3D;
+        t3SofaGroup.position.z = (cz - 0.5) * roomScale3D + 0.2;
+      }
+    }
+  }
+
+  // 인테리어 소품 3D 배치
+  addAllProps3D();
+
+  // 오버레이 라벨
+  let overlay=container.querySelector('.v3d-overlay');
+  if(!overlay){overlay=document.createElement('div');overlay.className='v3d-overlay';overlay.style.cssText='position:absolute;top:12px;left:16px;font-family:Josefin Sans,sans-serif;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.55);pointer-events:none;z-index:3;';container.appendChild(overlay);}
+  const ovS=getSeries(selId);
+  const isGLB=!!(GLB_MAP[selId] && typeof THREE.GLTFLoader!=='undefined');
+  if(ovS) overlay.innerHTML=ovS.name+' · '+selW+'cm · '+matC.name
+    +(isGLB?'<span style="margin-left:8px;opacity:.5;font-size:8px;">GLB</span>':'');
+
+  // 스핀 애니메이션 CSS
+  if(!document.getElementById('spin3dStyle')){
+    const st=document.createElement('style');
+    st.id='spin3dStyle';
+    st.textContent='@keyframes spin3d{to{transform:rotate(360deg);}}';
+    document.head.appendChild(st);
+  }
+
+  // 컨트롤
+  const el=t3Renderer.domElement;
+  const onDown=(x,y)=>{t3Drag=true;t3Lx=x;t3Ly=y;t3AutoRot=false;t3LastInteract=Date.now();};
+  const onMove=(x,y)=>{if(!t3Drag)return;t3Theta-=(x-t3Lx)*.5;t3Phi=Math.max(6,Math.min(72,t3Phi-(y-t3Ly)*.3));t3Lx=x;t3Ly=y;updateT3Cam();};
+  const onUp=()=>{t3Drag=false;t3LastInteract=Date.now();};
+  el.addEventListener('mousedown',e=>onDown(e.clientX,e.clientY));
+  window.addEventListener('mouseup',onUp);
+  el.addEventListener('mousemove',e=>onMove(e.clientX,e.clientY));
+  el.addEventListener('wheel',e=>{t3Radius=Math.max(1.8,Math.min(8,t3Radius+e.deltaY*.004));updateT3Cam();t3AutoRot=false;},{passive:true});
+  el.addEventListener('touchstart',e=>{if(e.touches.length===1)onDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  el.addEventListener('touchmove',e=>{if(e.touches.length===1)onMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  el.addEventListener('touchend',onUp);
+
+  // ResizeObserver — 컨테이너 크기 변화 감지
+  if(window._t3ResizeObs) window._t3ResizeObs.disconnect();
+  if(window.ResizeObserver){
+    window._t3ResizeObs = new ResizeObserver(()=>{
+      if(!t3Renderer||!t3Camera)return;
+      const nW=container.offsetWidth, nH=Math.max(container.offsetHeight,320);
+      if(nW>0&&nH>0){t3Renderer.setSize(nW,nH);t3Camera.aspect=nW/nH;t3Camera.updateProjectionMatrix();}
+    });
+    window._t3ResizeObs.observe(container);
+  }
+
+  // 애니메이션 루프
+  console.log('[3D] Starting animation loop');
+  function animate(){
+    t3AnimId=requestAnimationFrame(animate);
+    if(!t3Drag && Date.now()-t3LastInteract>3000){t3Theta+=0.18;updateT3Cam();}
+    t3Renderer.render(t3Scene,t3Camera);
+  }
+  animate();
+
+  } catch(e) {
+    console.error('[3D] init3D failed:', e);
+    show3DFallback('3D 렌더링 오류: ' + (e.message || e));
+  }
+}
+
+function show3DFallback(msg){
+  const container=document.getElementById('v3dWrap');
+  if(!container)return;
+  const oldFb=container.querySelector('.v3d-fallback');
+  if(oldFb)oldFb.remove();
+  const fb=document.createElement('div');
+  fb.className='v3d-fallback';
+  fb.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg,#F5F4F0);z-index:5;';
+  fb.innerHTML='<div style="width:120px;height:80px;border:2px solid var(--border,#DDDBD3);border-radius:8px;display:flex;align-items:center;justify-content:center;"><div style="width:80px;height:30px;background:var(--border,#DDDBD3);border-radius:4px;"></div></div>'
+    +'<div style="font-size:11px;color:var(--text,#5A5A54);text-align:center;line-height:1.7;max-width:400px;padding:0 20px;word-break:break-all;">'+msg+'</div>'
+    +'<div style="display:flex;gap:10px;margin-top:4px;"><button onclick="setView(\'2d\');this.closest(\'.v3d-fallback\').remove();" style="padding:8px 20px;background:var(--accent,#1A1A18);color:rgba(255,255,255,.9);border:none;border-radius:2px;font-size:11px;cursor:pointer;">2D 보기 →</button>'
+    +'<button onclick="this.closest(\'.v3d-fallback\').remove();_init3DRetry=0;init3D();" style="padding:8px 20px;background:transparent;border:1px solid var(--border,#DDDBD3);border-radius:2px;font-size:11px;cursor:pointer;color:var(--text,#5A5A54);">다시 시도</button></div>';
+  container.appendChild(fb);
+}
+
+function build3D(){init3D();}
+function buildSofaMesh(){init3D();}
+
+function updateT3Cam(){
+  if(!t3Camera)return;
+  const th=t3Theta*Math.PI/180,ph=t3Phi*Math.PI/180;
+  t3Camera.position.set(Math.sin(th)*Math.cos(ph)*t3Radius,Math.sin(ph)*t3Radius,Math.cos(th)*Math.cos(ph)*t3Radius);
+  t3Camera.lookAt(0,0.3,0);
+}
+
+/* ── 환경만 리빌드 (바닥/벽 색상 변경 시 — GLB 재로드 없음) ── */
+function rebuild3DEnv(){
+  if(!t3Scene||!t3Renderer)return;
+  const keepSet = new Set();
+  if(t3SofaGroup) keepSet.add(t3SofaGroup);
+  placedProps.forEach(p=>{ if(p.mesh3d) keepSet.add(p.mesh3d); });
+  t3Scene.children.slice().forEach(c=>{ if(!keepSet.has(c)) t3Scene.remove(c); });
+  const rgb=hexToRGB(wallC.hex);
+  const bgColor=new THREE.Color(rgb.r,rgb.g,rgb.b);
+  t3Scene.background=bgColor;
+  t3Scene.fog=new THREE.FogExp2(bgColor,0.035);
+  buildRoom(t3Scene);
+  buildLighting(t3Scene);
+}
+
+/* ── 소파 마감재 색상 적용 (GLB 재로드 없이 즉시 반영) ── */
+function updateSofaMaterial(){
+  if(!t3SofaGroup)return;
+  const baseColor = new THREE.Color(hexToThree(matC.hex));
+  const darkColor = new THREE.Color(darkenHex(matC.hex,0.12));
+  const lightColor = new THREE.Color(lightenHex(matC.hex,0.06));
+  let meshIdx = 0;
+  t3SofaGroup.traverse(function(child){
+    if(!child.isMesh)return;
+    // 원래 GLB 머티리얼의 밝기를 보존하면서 마감재 색상 적용
+    const origLum = child.material.color ? child.material.color.getHSL({}).l : 0.5;
+    const newMat = child.material.clone();
+    // 밝기에 따라 base/dark/light 블렌드
+    if(origLum > 0.6) newMat.color.copy(lightColor);
+    else if(origLum < 0.3) newMat.color.copy(darkColor);
+    else newMat.color.copy(baseColor);
+    newMat.needsUpdate = true;
+    child.material = newMat;
+    meshIdx++;
+  });
+  console.log('[3D] Material updated to:', matC.name, '| meshes:', meshIdx);
+  // 오버레이 라벨도 갱신
+  const overlay=document.querySelector('#v3dWrap .v3d-overlay');
+  if(overlay && selId){
+    const ovS=getSeries(selId);
+    const isGLB=!!(GLB_MAP[selId] && typeof THREE.GLTFLoader!=='undefined');
+    if(ovS) overlay.innerHTML=ovS.name+' · '+selW+'cm · '+matC.name+(isGLB?'<span style="margin-left:8px;opacity:.5;font-size:8px;">GLB</span>':'');
+  }
+}
+
+function setFloor(id){floorC=FLOOR_C.find(c=>c.id===id)||floorC;document.getElementById('floorName').textContent=floorC.name;document.querySelectorAll('#floorChips .chip').forEach((el,i)=>el.classList.toggle('on',FLOOR_C[i].id===id));const l=document.getElementById('legFloor');if(l)l.style.background=floorC.hex;drawCanvas();if(curView==='3d'&&t3Scene)rebuild3DEnv();}
+function setWall(id){wallC=WALL_C.find(c=>c.id===id)||wallC;document.getElementById('wallName').textContent=wallC.name;document.querySelectorAll('#wallChips .chip').forEach((el,i)=>el.classList.toggle('on',WALL_C[i].id===id));drawCanvas();if(curView==='3d'&&t3Scene)rebuild3DEnv();}
+function setMat(id){matC=MAT_C.find(m=>m.id===id)||matC;document.getElementById('matName').textContent=matC.name;document.querySelectorAll('#matGrid .mat-sw').forEach((el,i)=>el.classList.toggle('on',MAT_C[i].id===id));if(selId)updateSelPanel();if(curView==='3d'&&t3SofaGroup)updateSofaMaterial();}
+
+
+/* ════════════════════════════════════
+   STORE MODAL
+════════════════════════════════════ */
+function openStoreModal(){document.getElementById('storeModal').classList.add('open');}
+function closeStoreModal(e){if(e.target===document.getElementById('storeModal'))document.getElementById('storeModal').classList.remove('open');}
+
+window.addEventListener('load',()=>{renderAptGrid();document.getElementById('rW').addEventListener('input',onDirect);document.getElementById('rD').addEventListener('input',onDirect);const canvas=document.getElementById('roomCanvas');if(!canvas)return;canvas.addEventListener('mousedown',e=>{if(propDragging)return;if(!selId)return;const rect=canvas.getBoundingClientRect();const mx=(e.clientX-rect.left)*(canvas.width/rect.width);const my=(e.clientY-rect.top)*(canvas.height/rect.height);const rPxW=room.w*cvScale,rPxH=room.d*cvScale;const ox=(canvas.width-rPxW)/2,oy=(canvas.height-rPxH)/2;if(propHitTest(mx,my,ox,oy,cvScale))return;e.preventDefault();dragging=true;dsx=e.clientX;dsy=e.clientY;dssX=sofaX;dssY=sofaY;});const onM=(cx,cy)=>{if(propDragging||!dragging)return;sofaX=dssX+(cx-dsx);sofaY=dssY+(cy-dsy);drawCanvas();updateStats();};canvas.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));window.addEventListener('mouseup',()=>{dragging=false;});canvas.addEventListener('touchstart',e=>{if(!selId||e.touches.length!==1)return;dragging=true;dsx=e.touches[0].clientX;dsy=e.touches[0].clientY;dssX=sofaX;dssY=sofaY;},{passive:true});canvas.addEventListener('touchmove',e=>onM(e.touches[0].clientX,e.touches[0].clientY),{passive:true});window.addEventListener('touchend',()=>{dragging=false;});window.addEventListener('keydown',e=>{if(!selId)return;const px=moveStep*cvScale;if(e.key==='ArrowLeft'){e.preventDefault();sofaX-=px;}if(e.key==='ArrowRight'){e.preventDefault();sofaX+=px;}if(e.key==='ArrowUp'){e.preventDefault();sofaY-=px;}if(e.key==='ArrowDown'){e.preventDefault();sofaY+=px;}if(e.key.toLowerCase()==='r'){sofaRot=(sofaRot+90)%360;document.getElementById('rotInd').textContent=sofaRot+'°';}drawCanvas();updateStats();});initPropDrag();});
+
+
+/* ══ NAVER PLACE ══ */
+// ✦ 아래 URL을 실제 매장 네이버 플레이스 URL로 교체하세요
+const NAVER_PLACE_URL='https://map.naver.com/v5/search/알로소';
+
+function openNaverPlace(){
+  if(!selId){alert('소파를 먼저 선택해주세요');return;}
+  const s=getSeries(selId);
+  window.open(NAVER_PLACE_URL,'_blank','noopener');
+}
+
+</script>
+
+<!-- ═══ STORE MODAL ═══ -->
+<div class="modal-overlay" id="storeModal" onclick="closeStoreModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-kicker">Alloso Showroom</div>
+        <div class="modal-title">가까운 매장을 선택해 주세요</div>
+      </div>
+      <div class="modal-close" onclick="document.getElementById('storeModal').classList.remove('open')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="store-grid">
+        <a class="store-card" href="https://map.naver.com/p/search/알로소%20판교" target="_blank" rel="noopener">
+          <div class="store-badge">플래그십</div>
+          <div class="store-name">판교점</div>
+          <div class="store-addr">경기 성남시 분당구 판교역로 235</div>
+          <div class="store-hours">Mon – Sun  10:00 – 19:00</div>
+          <div class="store-cta">네이버 지도 →</div>
+        </a>
+        <a class="store-card" href="https://map.naver.com/p/search/알로소%20논현" target="_blank" rel="noopener">
+          <div class="store-name">논현점</div>
+          <div class="store-addr">서울 강남구 논현로 842</div>
+          <div class="store-hours">Mon – Sun  10:30 – 19:30</div>
+          <div class="store-cta">네이버 지도 →</div>
+        </a>
+        <a class="store-card" href="https://map.naver.com/p/search/알로소%20부산" target="_blank" rel="noopener">
+          <div class="store-name">부산센텀점</div>
+          <div class="store-addr">부산 해운대구 센텀중앙로 55</div>
+          <div class="store-hours">Mon – Sun  10:30 – 19:30</div>
+          <div class="store-cta">네이버 지도 →</div>
+        </a>
+        <a class="store-card" href="https://map.naver.com/p/search/알로소%20대구" target="_blank" rel="noopener">
+          <div class="store-name">대구점</div>
+          <div class="store-addr">대구 수성구 달구벌대로 2424</div>
+          <div class="store-hours">Mon – Sun  10:30 – 19:30</div>
+          <div class="store-cta">네이버 지도 →</div>
+        </a>
+        <a class="store-card" href="https://map.naver.com/p/search/알로소%20광주" target="_blank" rel="noopener">
+          <div class="store-name">광주점</div>
+          <div class="store-addr">광주 서구 상무중앙로 110</div>
+          <div class="store-hours">Mon – Sun  10:30 – 19:30</div>
+          <div class="store-cta">네이버 지도 →</div>
+        </a>
+        <a class="store-card store-card-cta" href="tel:1588-0000" target="_blank" rel="noopener">
+          <div class="store-name">전화 상담</div>
+          <div class="store-addr">1588 - 0000</div>
+          <div class="store-hours">Mon – Fri  09:00 – 18:00</div>
+          <div class="store-cta">전화 연결 →</div>
+        </a>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:9px;color:var(--muted);">✦ 방문 전 전화 예약을 권장드립니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE BAR -->
+<div id="cmpBar">
+  <div id="cmpCount">0/3 선택됨</div>
+  <div id="cmpItems"></div>
+  <div class="cmp-btn cmp-btn-pri" onclick="openCmpModal()">비교하기 →</div>
+  <div class="cmp-close" onclick="cmpList=[];updateCmpBar();buildSlider();">×</div>
+</div>
+
+<!-- COMPARE MODAL -->
+<div id="cmpModal" onclick="if(event.target===this)closeCmpModal()">
+  <div class="cmp-modal-box">
+    <div class="cmp-modal-hd">
+      <div class="cmp-modal-title">소파 비교</div>
+      <div class="cmp-modal-close" onclick="closeCmpModal()">×</div>
+    </div>
+    <div id="cmpModalBody"></div>
+  </div>
+</div>
+
+</body>
+</html>
