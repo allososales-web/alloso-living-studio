@@ -699,10 +699,12 @@ function initPropDrag(){
   });
 }
 
-function buildPropMesh(type, colorHex, pw, pd){
+function buildPropMesh(type, colorHex, pw, pd, u){
   if(typeof THREE==='undefined') return null;
   const group = new THREE.Group();
-  const scW = pw/100, scD = pd/100;
+  // u = 3D units per cm (소파 스케일 기준)
+  if(!u) u = 2.0/220; // fallback
+  const W = pw*u, D = pd*u; // prop의 3D 크기
   const mat = (hex,r,m) => new THREE.MeshStandardMaterial({color:parseInt(hex.replace('#',''),16),roughness:r||0.8,metalness:m||0});
   const box = (w,h,d,m,pos) => { const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); b.position.set(...pos); b.castShadow=true; b.receiveShadow=true; group.add(b); return b; };
   const cyl = (rt,rb,h,m,pos) => { const c=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m); c.position.set(...pos); c.castShadow=true; group.add(c); return c; };
@@ -711,65 +713,66 @@ function buildPropMesh(type, colorHex, pw, pd){
   const metalM = mat('#888880',0.4,0.3);
 
   if(type==='coffee_table'){
-    box(scW,.03,scD,darkW,[0,.4,0]);
-    const lx=scW/2-.04, lz=scD/2-.04;
-    [[-lx,0,-lz],[lx,0,-lz],[-lx,0,lz],[lx,0,lz]].forEach(p=>box(.03,.4,.03,darkW,[p[0],.2,p[2]]));
+    const H=45*u; // 높이 45cm
+    box(W,.02*W/0.5,D,darkW,[0,H,0]); // 상판
+    const lx=W/2-4*u, lz=D/2-4*u, legR=2*u;
+    [[-lx,0,-lz],[lx,0,-lz],[-lx,0,lz],[lx,0,lz]].forEach(p=>box(legR,H,legR,darkW,[p[0],H/2,p[2]]));
   } else if(type==='side_table'){
-    const r=Math.min(scW,scD)/2;
-    cyl(r,r,.03,darkW,[0,.5,0]);
-    cyl(.03,.03,.5,darkW,[0,.25,0]);
-    cyl(r*.7,r*.7,.02,darkW,[0,.01,0]);
+    const H=55*u, R=Math.min(W,D)/2;
+    cyl(R,R,2*u,darkW,[0,H,0]); // 상판
+    cyl(2*u,2*u,H,darkW,[0,H/2,0]); // 기둥
+    cyl(R*.65,R*.65,1.5*u,darkW,[0,1*u,0]); // 베이스
   } else if(type==='floor_lamp'){
-    cyl(.15,.15,.02,metalM,[0,.01,0]);
-    cyl(.012,.012,1.5,metalM,[0,.76,0]);
-    cyl(.01,.15,.2,lightW,[0,1.55,0]);
+    const H=150*u, baseR=15*u, poleR=1.2*u, shadeR=18*u, shadeH=22*u;
+    cyl(baseR,baseR,2*u,metalM,[0,1*u,0]); // 베이스
+    cyl(poleR,poleR,H,metalM,[0,H/2,0]); // 폴
+    cyl(poleR,shadeR,shadeH,lightW,[0,H-shadeH/2,0]); // 갓
   } else if(type==='rug_rect'){
-    const r=new THREE.Mesh(new THREE.PlaneGeometry(scW,scD),mat(colorHex,0.95));
+    const r=new THREE.Mesh(new THREE.PlaneGeometry(W,D),mat(colorHex,0.95));
     r.rotation.x=-Math.PI/2; r.position.set(0,0.003,0); r.receiveShadow=true; group.add(r);
   } else if(type==='rug_round'){
-    const r=new THREE.Mesh(new THREE.CircleGeometry(scW/2,32),mat(colorHex,0.95));
+    const r=new THREE.Mesh(new THREE.CircleGeometry(W/2,32),mat(colorHex,0.95));
     r.rotation.x=-Math.PI/2; r.position.set(0,0.003,0); r.receiveShadow=true; group.add(r);
   } else if(type==='tv_unit'){
-    box(scW,.45,scD,darkW,[0,.225,0]);
-    box(scW-.1,.01,scD-.04,mat('#2A2A2A',0.3,0.1),[0,.455,0]);
-    box(scW-.4,.7,.03,mat('#1A1A18',0.2,0.1),[0,.8,-scD/2+.02]);
+    const H=45*u, tvH=60*u;
+    box(W,H,D,darkW,[0,H/2,0]); // 캐비닛
+    box(W-6*u,1*u,D-3*u,mat('#2A2A2A',0.3,0.1),[0,H+0.5*u,0]); // 상판
+    box(W*0.7,tvH,2*u,mat('#1A1A18',0.2,0.1),[0,H+tvH/2,-D/2+1.5*u]); // TV
   } else if(type==='bookshelf'){
-    box(scW,1.8,scD,darkW,[0,.9,0]);
-    for(let i=0;i<4;i++) box(scW-.06,.015,scD-.04,mat('#C8B898',0.85),[0,.25+i*.42,0]);
-    for(let i=0;i<3;i++){
-      const bw=.08+Math.random()*.06, bh=.18+Math.random()*.08;
-      box(bw,bh,.2,mat(['#8B4040','#406080','#608040','#806040'][i%4],0.7),[-.15+i*.18,.25+i*.42+bh/2+.01,0]);
+    const H=180*u;
+    box(W,H,D,darkW,[0,H/2,0]); // 본체
+    for(let i=0;i<5;i++) box(W-4*u,1*u,D-3*u,mat('#C8B898',0.85),[0,(i+1)*H/6,0]); // 선반
+    for(let i=0;i<4;i++){
+      const bw=(6+Math.random()*4)*u, bh=(16+Math.random()*6)*u;
+      box(bw,bh,D*0.55,mat(['#8B4040','#406080','#608040','#806040'][i%4],0.7),[-W/4+i*W/5,(i+1)*H/6+bh/2+1*u,0]);
     }
   } else if(type==='plant_lg'){
-    cyl(.12,.14,.25,mat('#8B6E52',0.85),[0,.125,0]);
+    const potH=25*u, potR=14*u, crownR=22*u, stemH=50*u;
+    cyl(potR-1*u,potR,potH,mat('#8B6E52',0.85),[0,potH/2,0]); // 화분
+    cyl(1.5*u,1.5*u,stemH,mat('#5A4030',0.8),[0,potH+stemH/2,0]); // 줄기
     const leafMat = mat(colorHex,0.75);
-    const s1=new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),leafMat); s1.position.set(0,.55,0); s1.castShadow=true; group.add(s1);
-    const s2=new THREE.Mesh(new THREE.SphereGeometry(.15,10,8),leafMat); s2.position.set(.1,.72,.05); s2.castShadow=true; group.add(s2);
-    const s3=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),leafMat); s3.position.set(-.08,.65,-.06); s3.castShadow=true; group.add(s3);
-    cyl(.015,.015,.35,mat('#5A4030',0.8),[0,.35,0]);
+    const s1=new THREE.Mesh(new THREE.SphereGeometry(crownR,12,10),leafMat); s1.position.set(0,potH+stemH+crownR*0.6,0); s1.castShadow=true; group.add(s1);
+    const s2=new THREE.Mesh(new THREE.SphereGeometry(crownR*0.65,10,8),leafMat); s2.position.set(crownR*0.4,potH+stemH+crownR*1.1,crownR*0.2); s2.castShadow=true; group.add(s2);
   } else if(type==='pet_dog'){
+    // 중형견 기준: 몸통 40cm, 높이 35cm
+    const bodyW=40*u, bodyH=16*u, bodyD=18*u, legH=14*u, headR=9*u;
     const fur = mat(colorHex,0.9);
     const nose = mat('#1A1A18',0.5);
-    // 몸통
-    box(.28,.14,.13,fur,[0,.16,0]);
-    // 머리
-    const head = new THREE.Mesh(new THREE.SphereGeometry(.08,10,8),fur);
-    head.position.set(.18,.22,0); head.castShadow=true; group.add(head);
-    // 코
-    const n = new THREE.Mesh(new THREE.SphereGeometry(.02,6,6),nose);
-    n.position.set(.26,.21,0); group.add(n);
-    // 귀 2개
-    const earG = mat(colorHex,0.85);
-    const ear1 = new THREE.Mesh(new THREE.SphereGeometry(.035,6,6),earG);
-    ear1.position.set(.15,.29,.05); ear1.scale.set(1,1.3,.6); ear1.castShadow=true; group.add(ear1);
-    const ear2 = ear1.clone(); ear2.position.set(.15,.29,-.05); group.add(ear2);
-    // 다리 4개
-    [[-0.1,0,0.06],[-0.1,0,-0.06],[0.1,0,0.06],[0.1,0,-0.06]].forEach(p=>{
-      cyl(.025,.025,.1,fur,[p[0],.05,p[2]]);
+    box(bodyW,bodyH,bodyD,fur,[0,legH+bodyH/2,0]); // 몸통
+    const head = new THREE.Mesh(new THREE.SphereGeometry(headR,10,8),fur);
+    head.position.set(bodyW/2+headR*0.5,legH+bodyH*0.7,0); head.castShadow=true; group.add(head);
+    const n = new THREE.Mesh(new THREE.SphereGeometry(headR*0.22,6,6),nose);
+    n.position.set(bodyW/2+headR*1.3,legH+bodyH*0.6,0); group.add(n);
+    const earMat = mat(colorHex,0.85);
+    const ear1 = new THREE.Mesh(new THREE.SphereGeometry(headR*0.4,6,6),earMat);
+    ear1.position.set(bodyW/2+headR*0.2,legH+bodyH+headR*0.3,headR*0.5); ear1.scale.set(1,1.3,.6); ear1.castShadow=true; group.add(ear1);
+    const ear2 = ear1.clone(); ear2.position.z=-headR*0.5; group.add(ear2);
+    const legR=3*u;
+    [[-bodyW/3,0,bodyD/3],[-bodyW/3,0,-bodyD/3],[bodyW/3,0,bodyD/3],[bodyW/3,0,-bodyD/3]].forEach(p=>{
+      cyl(legR,legR,legH,fur,[p[0],legH/2,p[2]]);
     });
-    // 꼬리
-    const tail = new THREE.Mesh(new THREE.CylinderGeometry(.015,.01,.1,6),fur);
-    tail.position.set(-.17,.24,0); tail.rotation.z=0.8; tail.castShadow=true; group.add(tail);
+    const tail = new THREE.Mesh(new THREE.CylinderGeometry(1.5*u,1*u,12*u,6),fur);
+    tail.position.set(-bodyW/2-3*u,legH+bodyH*0.7,0); tail.rotation.z=0.8; tail.castShadow=true; group.add(tail);
   }
   group.userData.isProp=true;
   return group;
@@ -779,7 +782,10 @@ function addProp3D(prop){
   if(!t3Scene || typeof THREE==='undefined') return;
   const cat = PROP_CATALOG[prop.type];
   const colorHex = cat.colors[prop.colorIdx];
-  const mesh = buildPropMesh(prop.type, colorHex, prop.w, prop.d);
+  // 소파 GLB 스케일 기준 (maxDim=2.0 units)으로 소품 맞추기
+  const refW = selW || 220; // cm
+  const unitPerCm = 2.0 / refW;
+  const mesh = buildPropMesh(prop.type, colorHex, prop.w, prop.d, unitPerCm);
   if(!mesh) return;
   const roomScale3D = 5.0;
   const px = (prop.x / room.w - 0.5) * roomScale3D;
@@ -956,7 +962,7 @@ function setView(mode){curView=mode;document.getElementById('btn2d').classList.t
     _init3DRetry = 0;
     // display:flex 전환 후 레이아웃 확정까지 충분히 대기
     setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>init3D())), 120);
-  }if(mode==='2d'&&t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}}
+  }if(mode==='2d'){sync3Dto2D();if(t3AnimId){cancelAnimationFrame(t3AnimId);t3AnimId=null;}}}
 
 /* ════════════════════════════════════
    THREE.JS 3D SOFA VIEWER — v3 GLB
@@ -1357,16 +1363,52 @@ async function init3D(){
 
   // 컨트롤
   const el=t3Renderer.domElement;
-  const onDown=(x,y)=>{t3Drag=true;t3Lx=x;t3Ly=y;t3AutoRot=false;t3LastInteract=Date.now();};
-  const onMove=(x,y)=>{if(!t3Drag)return;t3Theta-=(x-t3Lx)*.5;t3Phi=Math.max(6,Math.min(72,t3Phi-(y-t3Ly)*.3));t3Lx=x;t3Ly=y;updateT3Cam();};
-  const onUp=()=>{t3Drag=false;t3LastInteract=Date.now();};
-  el.addEventListener('mousedown',e=>onDown(e.clientX,e.clientY));
+  let t3MoveMode=false; // shift 누르면 이동 모드
+  const onDown=(x,y,e)=>{
+    t3AutoRot=false;t3LastInteract=Date.now();
+    if(e && e.shiftKey){
+      // Shift+드래그 = 소파 이동
+      t3MoveMode=true;
+    } else {
+      t3MoveMode=false;
+    }
+    t3Drag=true;t3Lx=x;t3Ly=y;
+  };
+  const onMove=(x,y)=>{
+    if(!t3Drag)return;
+    if(t3MoveMode && t3SofaGroup){
+      // 3D 소파 이동 (화면 드래그 → 월드 좌표)
+      const dx=(x-t3Lx)*0.01, dz=(y-t3Ly)*0.01;
+      const th=t3Theta*Math.PI/180;
+      t3SofaGroup.position.x += dx*Math.cos(th) - dz*Math.sin(th);
+      t3SofaGroup.position.z += dx*Math.sin(th) + dz*Math.cos(th);
+      // 3D→2D 역방향 싱크
+      sync3Dto2D();
+    } else {
+      // 카메라 회전
+      t3Theta-=(x-t3Lx)*.5;
+      t3Phi=Math.max(6,Math.min(72,t3Phi-(y-t3Ly)*.3));
+      updateT3Cam();
+    }
+    t3Lx=x;t3Ly=y;
+  };
+  const onUp=()=>{t3Drag=false;t3MoveMode=false;t3LastInteract=Date.now();};
+  el.addEventListener('mousedown',e=>{e.preventDefault();onDown(e.clientX,e.clientY,e);});
   window.addEventListener('mouseup',onUp);
   el.addEventListener('mousemove',e=>onMove(e.clientX,e.clientY));
-  el.addEventListener('wheel',e=>{t3Radius=Math.max(1.8,Math.min(8,t3Radius+e.deltaY*.004));updateT3Cam();t3AutoRot=false;},{passive:true});
+  // 마우스 스크롤 줌 (감도 향상)
+  el.addEventListener('wheel',e=>{t3Radius=Math.max(1.2,Math.min(10,t3Radius+e.deltaY*.008));updateT3Cam();t3AutoRot=false;t3LastInteract=Date.now();},{passive:true});
   el.addEventListener('touchstart',e=>{if(e.touches.length===1)onDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
   el.addEventListener('touchmove',e=>{if(e.touches.length===1)onMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
   el.addEventListener('touchend',onUp);
+  // 핀치 줌 (모바일)
+  let t3PinchDist=0;
+  el.addEventListener('touchstart',e=>{if(e.touches.length===2){t3PinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}},{passive:true});
+  el.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);t3Radius=Math.max(1.2,Math.min(10,t3Radius-(d-t3PinchDist)*0.008));t3PinchDist=d;updateT3Cam();}},{passive:true});
+
+  // 3D 힌트 업데이트
+  const hint=document.getElementById('v3dHint');
+  if(hint) hint.textContent='드래그: 회전 · 스크롤: 줌 · Shift+드래그: 이동';
 
   // ResizeObserver — 컨테이너 크기 변화 감지
   if(window._t3ResizeObs) window._t3ResizeObs.disconnect();
@@ -1411,6 +1453,28 @@ function show3DFallback(msg){
 
 function build3D(){init3D();}
 function buildSofaMesh(){init3D();}
+
+/* ── 3D → 2D 위치 역방향 동기화 ── */
+function sync3Dto2D(){
+  if(!t3SofaGroup || !selId || !room.w || !room.d) return;
+  const s = getSeries(selId); if(!s) return;
+  const roomScale3D = 5.0;
+  const canvas = document.getElementById('roomCanvas');
+  if(!canvas || cvScale <= 0) return;
+  const rPxW = room.w * cvScale;
+  const rPxH = room.d * cvScale;
+  const ox = (canvas.width - rPxW) / 2;
+  const oy = (canvas.height - rPxH) / 2;
+  const isL = sofaRot===0||sofaRot===180;
+  const sWcm = isL ? selW : s.depth;
+  const sDcm = isL ? s.depth : selW;
+  // 3D 좌표 → 방 비율 (0~1) → 2D 캔버스 좌표
+  const rx = t3SofaGroup.position.x / roomScale3D + 0.5;
+  const rz = (t3SofaGroup.position.z - 0.2) / roomScale3D + 0.5;
+  sofaX = ox + rx * rPxW - sWcm*cvScale/2;
+  sofaY = oy + rz * rPxH - sDcm*cvScale/2;
+  drawCanvas(); updateStats();
+}
 
 function updateT3Cam(){
   if(!t3Camera)return;
