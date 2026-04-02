@@ -1,14 +1,12 @@
 export async function onRequestPost(context) {
   const API_KEY = context.env.ANTHROPIC_API_KEY;
   if (!API_KEY) {
-    return new Response(JSON.stringify({ error: "API key not configured" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
+    return Response.json({ error: "API key not configured" }, { status: 500 });
   }
 
   try {
     const { messages, system } = await context.request.json();
+    const sysPrompt = typeof system === 'string' ? system.slice(0, 12000) : '';
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -20,34 +18,36 @@ export async function onRequestPost(context) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1024,
-        system: system,
-        messages: messages.slice(-10),
+        system: sysPrompt,
+        messages: (messages || []).slice(-10),
       }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const err = await response.text();
-      console.error("Anthropic API error:", response.status, err);
-      return new Response(JSON.stringify({ error: "API request failed" }), {
+      return Response.json({
+        error: "API request failed",
         status: response.status,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        detail: data
+      }, {
+        status: response.status,
+        headers: { "Access-Control-Allow-Origin": "*" }
       });
     }
 
-    const data = await response.json();
     const text = data.content
       .filter((c) => c.type === "text")
       .map((c) => c.text)
       .join("\n");
 
-    return new Response(JSON.stringify({ reply: text }), {
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    return Response.json({ reply: text }, {
+      headers: { "Access-Control-Allow-Origin": "*" }
     });
   } catch (err) {
-    console.error("Function error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return Response.json({ error: err.message, stack: err.stack }, {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Access-Control-Allow-Origin": "*" }
     });
   }
 }
