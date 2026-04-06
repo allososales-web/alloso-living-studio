@@ -1689,8 +1689,66 @@ function rebuild3DEnv(){
   buildLighting(t3Scene);
 }
 
-/* ── 소파 마감재 색상 적용 (GLB 재로드 없이 즉시 반영) ── */
+/* ── 소파 마감재 적용 (텍스처 우선, 없으면 hex 폴백) ── */
+let t3TexLoader=null;
+let t3TexCache={};
 function updateSofaMaterial(){
+  if(!t3SofaGroup)return;
+  // 텍스처 URL 결정
+  const texCode = matC.article ? (function(){
+    const col = matC.article.colors.find(c=>c.name===matC.name);
+    return col && col.tex ? col.tex : null;
+  })() : null;
+  const texBase = MAT_DATA && MAT_DATA.texBase ? MAT_DATA.texBase : null;
+  const texUrl = (texCode && texBase) ? texBase + texCode : null;
+
+  if(texUrl){
+    // 텍스처 로드 → 적용
+    if(!t3TexLoader) t3TexLoader = new THREE.TextureLoader();
+    if(t3TexCache[texUrl]){
+      applyTexture(t3TexCache[texUrl]);
+    } else {
+      console.log('[3D] Loading texture:', texUrl);
+      t3TexLoader.load(texUrl, function(tex){
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(2, 2);
+        tex.encoding = THREE.sRGBEncoding;
+        t3TexCache[texUrl] = tex;
+        applyTexture(tex);
+      }, undefined, function(){
+        console.warn('[3D] Texture load failed, using hex fallback');
+        applyHexColor();
+      });
+    }
+  } else {
+    applyHexColor();
+  }
+  // 오버레이 라벨 갱신
+  const overlay=document.querySelector('#v3dWrap .v3d-overlay');
+  if(overlay && selId){
+    const ovS=getSeries(selId);
+    const isGLB=!!(GLB_MAP[selId] && typeof THREE.GLTFLoader!=='undefined');
+    const artLabel = matC.article ? matC.article.name + ' · ' : '';
+    if(ovS) overlay.innerHTML=ovS.name+' · '+selW+'cm · '+artLabel+matC.name+(isGLB?'<span style="margin-left:8px;opacity:.5;font-size:8px;">GLB</span>':'');
+  }
+}
+function applyTexture(tex){
+  if(!t3SofaGroup)return;
+  let meshIdx=0;
+  t3SofaGroup.traverse(function(child){
+    if(!child.isMesh)return;
+    const origLum = child.material.color ? child.material.color.getHSL({}).l : 0.5;
+    const newMat = child.material.clone();
+    newMat.map = tex;
+    newMat.color.setHSL(0, 0, Math.max(0.7, origLum));
+    newMat.needsUpdate = true;
+    child.material = newMat;
+    meshIdx++;
+  });
+  console.log('[3D] Texture applied:', matC.name, '| meshes:', meshIdx);
+}
+function applyHexColor(){
   if(!t3SofaGroup)return;
   const baseColor = new THREE.Color(hexToThree(matC.hex));
   const darkColor = new THREE.Color(darkenHex(matC.hex,0.12));
@@ -1698,10 +1756,9 @@ function updateSofaMaterial(){
   let meshIdx = 0;
   t3SofaGroup.traverse(function(child){
     if(!child.isMesh)return;
-    // 원래 GLB 머티리얼의 밝기를 보존하면서 마감재 색상 적용
     const origLum = child.material.color ? child.material.color.getHSL({}).l : 0.5;
     const newMat = child.material.clone();
-    // 밝기에 따라 base/dark/light 블렌드
+    newMat.map = null;
     if(origLum > 0.6) newMat.color.copy(lightColor);
     else if(origLum < 0.3) newMat.color.copy(darkColor);
     else newMat.color.copy(baseColor);
@@ -1709,14 +1766,7 @@ function updateSofaMaterial(){
     child.material = newMat;
     meshIdx++;
   });
-  console.log('[3D] Material updated to:', matC.name, '| meshes:', meshIdx);
-  // 오버레이 라벨도 갱신
-  const overlay=document.querySelector('#v3dWrap .v3d-overlay');
-  if(overlay && selId){
-    const ovS=getSeries(selId);
-    const isGLB=!!(GLB_MAP[selId] && typeof THREE.GLTFLoader!=='undefined');
-    if(ovS) overlay.innerHTML=ovS.name+' · '+selW+'cm · '+matC.name+(isGLB?'<span style="margin-left:8px;opacity:.5;font-size:8px;">GLB</span>':'');
-  }
+  console.log('[3D] Hex color applied:', matC.name, '| meshes:', meshIdx);
 }
 
 function setFloor(id){floorC=FLOOR_C.find(c=>c.id===id)||floorC;document.getElementById('floorName').textContent=floorC.name;document.querySelectorAll('#floorChips .chip').forEach((el,i)=>el.classList.toggle('on',FLOOR_C[i].id===id));const l=document.getElementById('legFloor');if(l)l.style.background=floorC.hex;drawCanvas();if(curView==='3d'&&t3Scene)rebuild3DEnv();}
