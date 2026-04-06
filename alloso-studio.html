@@ -220,10 +220,24 @@ body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:
 .chip:hover{transform:scale(1.1);}
 .chip.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
 .chip-name{font-size:9px;color:var(--gold);}
+.mat-type-tabs{display:flex;gap:4px;margin-bottom:6px;}
+.mat-type-tab{flex:1;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.1em;text-transform:uppercase;border-radius:14px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .14s;font-family:'Josefin Sans',sans-serif;}
+.mat-type-tab.on{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.9);}
+.mat-grade-row{display:flex;gap:3px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px;}
+.mat-grade-pill{padding:3px 9px;font-size:8px;letter-spacing:.08em;border-radius:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);white-space:nowrap;transition:all .12s;font-family:'Josefin Sans',sans-serif;}
+.mat-grade-pill.on{background:var(--accent);border-color:var(--accent);color:rgba(255,255,255,.9);}
+.mat-art-label{font-size:8px;letter-spacing:.12em;color:var(--muted);margin:6px 0 4px;display:flex;align-items:center;gap:6px;}
+.mat-art-label::after{content:'';flex:1;height:0.5px;background:var(--border);}
 .mat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;}
-.mat-sw{aspect-ratio:1;border-radius:2px;cursor:pointer;border:2px solid transparent;transition:all .12s;}
-.mat-sw:hover{transform:scale(1.1);}
-.mat-sw.on{border-color:var(--accent);}
+.mat-sw{aspect-ratio:1;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:all .12s;background-size:cover;background-position:center;position:relative;overflow:hidden;}
+.mat-sw:hover{transform:scale(1.08);}
+.mat-sw.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.mat-sw.discontinued{opacity:.4;position:relative;}
+.mat-sw.discontinued::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px);}
+.mat-info{margin-top:6px;font-size:9px;color:var(--muted);line-height:1.6;}
+.mat-info-name{color:var(--gold);font-weight:400;}
+.mat-info-co{color:var(--muted);font-style:italic;}
+.mat-info-care{color:var(--muted);font-size:8.5px;margin-top:2px;}
 .p-cta{padding:14px 17px;margin-top:auto;flex-shrink:0;}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .stat{background:var(--card);border-radius:var(--r);padding:8px 9px;}
@@ -507,7 +521,7 @@ body{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:13px;color:
       <div class="p-section" id="statsWrap" style="display:none;"><div class="p-title">공간 분석</div><div class="stat-grid" id="statGrid"></div></div>
       <div class="p-section"><div class="p-title">바닥 마감재</div><div class="chip-row" id="floorChips"></div><div class="chip-name" id="floorName">오크 원목</div></div>
       <div class="p-section"><div class="p-title">벽 컬러</div><div class="chip-row" id="wallChips"></div><div class="chip-name" id="wallName">순백</div></div>
-      <div class="p-section" id="matWrap" style="display:none;"><div class="p-title">소파 마감재</div><div class="mat-grid" id="matGrid"></div><div class="chip-name" id="matName" style="margin-top:6px;">아이보리</div></div>
+      <div class="p-section" id="matWrap" style="display:none;"><div class="p-title">소파 마감재</div><div class="mat-type-tabs" id="matTypeTabs"></div><div class="mat-grade-row" id="matGradeRow"></div><div id="matArticleArea"></div><div id="matInfo" class="mat-info"></div></div>
       <div class="p-section props-section" id="propsWrap">
         <div class="props-head"><div class="p-title">인테리어 소품</div></div>
         <div class="props-add" id="propsAdd">
@@ -862,12 +876,38 @@ const CATALOG=[
 ];
 const FLOOR_C=[{id:'oak',hex:'#C8A870',name:'오크 원목'},{id:'walnut',hex:'#7A5030',name:'월넛'},{id:'birch',hex:'#E8DCC8',name:'버치'},{id:'marble_w',hex:'#F0EEE8',name:'화이트 마블'},{id:'marble_g',hex:'#C8C4BC',name:'그레이 마블'},{id:'concrete',hex:'#A8A49C',name:'콘크리트'},{id:'dark_oak',hex:'#5A3C20',name:'다크 오크'},{id:'beige',hex:'#D8C8A8',name:'베이지 타일'}];
 const WALL_C=[{id:'white',hex:'#F8F6F2',name:'순백'},{id:'ivory',hex:'#F0EAD8',name:'아이보리'},{id:'warm_gray',hex:'#C8C4BC',name:'웜 그레이'},{id:'sand',hex:'#D8C8A4',name:'샌드'},{id:'sage',hex:'#B8C8B0',name:'세이지'},{id:'dusty',hex:'#A8B8C8',name:'더스티 블루'},{id:'terracotta',hex:'#C89080',name:'테라코타'},{id:'charcoal',hex:'#606058',name:'차콜'}];
-const MAT_C=[{id:'ivory',hex:'#E8E0D0',name:'아이보리'},{id:'sand',hex:'#C8B898',name:'샌드'},{id:'warm_gray',hex:'#A8A098',name:'웜 그레이'},{id:'charcoal',hex:'#4A4844',name:'차콜'},{id:'midnight',hex:'#2A2830',name:'미드나잇'},{id:'camel',hex:'#B88858',name:'카멜'},{id:'terracotta',hex:'#B86848',name:'테라코타'},{id:'sage',hex:'#788870',name:'세이지'},{id:'navy',hex:'#283858',name:'네이비'},{id:'forest',hex:'#385840',name:'포레스트'},{id:'cream_lth',hex:'#D8C8A8',name:'크림 레더'},{id:'cognac',hex:'#884828',name:'코냑'}];
-let floorC=FLOOR_C[0],wallC=WALL_C[0],matC=MAT_C[0];
+/* ── 마감재: manifest.json에서 동적 로드 ── */
+const FALLBACK_MAT_C=[{id:'ivory',hex:'#E8E0D0',name:'아이보리',type:'fabric'},{id:'sand',hex:'#C8B898',name:'샌드',type:'fabric'},{id:'charcoal',hex:'#4A4844',name:'차콜',type:'fabric'},{id:'cream_lth',hex:'#D8C8A8',name:'크림 레더',type:'leather'},{id:'cognac',hex:'#884828',name:'코냑',type:'leather'}];
+let MAT_DATA=null; // manifest.materials
+let matC={id:'ivory',hex:'#E8E0D0',name:'아이보리',type:'fabric',article:null,grade:null};
+let matCurType='leather'; // 'fabric' | 'leather'
+let matCurGrade=0;
+let floorC=FLOOR_C[0],wallC=WALL_C[0];
 
-const MAT_TYPE={ivory:'fabric',sand:'fabric',warm_gray:'fabric',charcoal:'fabric',midnight:'fabric',camel:'fabric',terracotta:'fabric',sage:'fabric',navy:'fabric',forest:'fabric',cream_lth:'leather',cognac:'leather'};
 const MAT_MULT={fabric:1.0,leather:1.18};
-function calcPrice(s,wMm){const cfg=s.configs.find(c=>c.w===wMm)||s.configs[0];if(!cfg||!cfg.p)return null;const mult=MAT_MULT[MAT_TYPE[matC.id]]||1;return Math.round(cfg.p*mult);}
+function calcPrice(s,wMm){const cfg=s.configs.find(c=>c.w===wMm)||s.configs[0];if(!cfg||!cfg.p)return null;const mult=MAT_MULT[matC.type||'fabric']||1;return Math.round(cfg.p*mult);}
+
+const MANIFEST_URL='https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/manifest.json';
+async function loadManifestMaterials(){
+  try{
+    const res=await fetch(MANIFEST_URL+'?v='+Date.now());
+    const data=await res.json();
+    if(data.materials){
+      MAT_DATA=data.materials;
+      console.log('[MAT] Manifest loaded:',MAT_DATA.articles.length,'articles');
+      // 첫 번째 활성 컬러를 기본 선택
+      const firstArt=MAT_DATA.articles.find(a=>a.colors.some(c=>c.active!==false));
+      if(firstArt){
+        const firstCol=firstArt.colors.find(c=>c.active!==false);
+        if(firstCol){
+          const gradeInfo=MAT_DATA.grades.find(g=>g.id===firstArt.grade);
+          matC={id:firstArt.id+'_'+firstCol.name,hex:firstCol.hex,name:firstCol.name,type:gradeInfo?gradeInfo.type:'leather',article:firstArt,grade:firstArt.grade,chip:firstCol.chip||null,care:firstArt.care};
+          matCurType=gradeInfo?gradeInfo.type:'leather';
+        }
+      }
+    }
+  }catch(e){console.warn('[MAT] Manifest load failed, using fallback',e);}
+}
 function fmtPrice(p){return p>=1000?Math.floor(p/100)/10+'백만':p+'만원';}
 function priceRange(s){const ps=s.configs.filter(c=>c.p).map(c=>c.p);if(!ps.length)return '';const mn=Math.min(...ps),mx=Math.max(...ps);return mn===mx?mn+'만원~':mn+'~'+mx+'만원~';}
 
@@ -897,7 +937,7 @@ function whyText(s,fit){const tag=(s.tag+'').toLowerCase()+s.id;if(prefs.use==='
 function buildHero(){const hp=Object.values(prefs).some(v=>v!==null);const scored=CATALOG.map(s=>{const fits=s.configs.map(cfg=>({cfg,fit:configFit(cfg.w/10)}));const best=fits.find(f=>f.fit==='fit')||fits.find(f=>f.fit==='tight')||fits[0];return{s,bestCfg:best.cfg,bestFit:best.fit,score:(best.fit==='fit'?10:best.fit==='tight'?5:0)+(hp?prefScore(s):0)};}).filter(x=>x.bestFit!=='nofit').sort((a,b)=>b.score-a.score).slice(0,3);document.getElementById('heroSub').textContent=hp?room.w+'×'+room.d+'cm · 라이프스타일 기반 맞춤 추천이에요':room.w+'×'+room.d+'cm 공간에 어울리는 소파를 찾았어요';const rk=['rk1','rk2','rk3'];document.getElementById('recRow').innerHTML=scored.map((r,i)=>`<div class="rec-card${selId===r.s.id?' on':''}" onclick="pickFromHero('${r.s.id}',${r.bestCfg.w})"><div class="rec-rank ${rk[i]}">${i+1}</div><div class="rec-thumb">${sofaSVG(r.s.id,r.bestFit)}</div><div class="rec-info"><div class="rec-name">${r.s.name}</div><div class="rec-ko">${r.s.ko} · ${r.s.tag}</div><div class="rec-sz">${Math.round(r.bestCfg.w/10)}cm × ${r.s.depth}D</div><div class="rec-price">${priceRange(r.s)}</div><div class="rec-why">${whyText(r.s,r.bestFit)}</div></div><div class="rec-badge ${r.bestFit==='fit'?'b-fit':'b-tight'}">${r.bestFit==='fit'?'적합':'여유'}</div></div>`).join('');}
 function pickFromHero(id,wMm){pickSofa(id,wMm);document.querySelectorAll('.rec-card').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${id}'`)));}
 function pickSofa(id,wMm){const s=getSeries(id);if(!s)return;selId=id;selW=Math.round(wMm/10);sofaX=Math.round((cvRoomPxW||300)*.08);sofaY=-1;sofaRot=0;document.getElementById('ctaBtn').disabled=false;if(curView==='2d')document.getElementById('cvCtrl').style.display='flex';document.getElementById('rotInd').textContent='0°';document.getElementById('viewToggle').style.display='flex';document.getElementById('matWrap').style.display='block';updateSelPanel();drawCanvas();updateStats();buildSlider();if(curView==='3d')build3D();}
-function updateSelPanel(){const s=getSeries(selId);if(!s)return;const w=selW,d=s.depth,ratio=Math.round(w/room.w*100),front=room.d-d-30;const rOk=ratio>=54&&ratio<=74,fOk=front>=45;const baseP=calcPrice(s,selW*10),lthP=baseP?Math.round(baseP*1.18):null;const isLth=MAT_TYPE[matC.id]==='leather';
+function updateSelPanel(){const s=getSeries(selId);if(!s)return;const w=selW,d=s.depth,ratio=Math.round(w/room.w*100),front=room.d-d-30;const rOk=ratio>=54&&ratio<=74,fOk=front>=45;const baseP=calcPrice(s,selW*10),lthP=baseP?Math.round(baseP*1.18):null;const isLth=matC.type==='leather';
 document.getElementById('selInfo').innerHTML=`<div class="sel-name">${s.name}</div><div class="sel-sub">${s.ko} · ${s.type} · ${s.tag}</div><div class="sel-config-row">${s.configs.map(cfg=>`<div class="sel-cfg${selW===Math.round(cfg.w/10)?' on':''}" onclick="pickSofa('${s.id}',${cfg.w})">${cfg.name}<span class="sel-cfg-p">${cfg.p?cfg.p+'만':''}</span></div>`).join('')}</div><div class="sel-price"><span class="sel-price-main">${isLth?lthP:baseP}만원</span><span class="sel-price-mat">${isLth?'레더':'패브릭 기준'}</span></div><div class="sel-price-note">레더 +18% · 색상별 상이</div>`;document.getElementById('statsWrap').style.display='block';document.getElementById('statGrid').innerHTML=`<div class="stat"><div class="stat-lbl">소파 폭</div><div class="stat-val">${w}cm</div></div><div class="stat"><div class="stat-lbl">깊이</div><div class="stat-val">${d}cm</div></div><div class="stat"><div class="stat-lbl">공간 비율</div><div class="stat-val ${rOk?'spec-ok':'spec-warn'}">${ratio}%</div><div class="stat-sub">${rOk?'이상적':'권장 54–74%'}</div></div><div class="stat"><div class="stat-lbl">전면 동선</div><div class="stat-val ${fOk?'spec-ok':'spec-warn'}">${front}cm</div><div class="stat-sub">${fOk?'충분':'최소 45cm'}</div></div>`;}
 function updateStats(){if(selId)updateSelPanel();}
 
@@ -951,7 +991,59 @@ function saveImg(){
 }
 
 function buildColorChips(){const fc=document.getElementById('floorChips'),wc=document.getElementById('wallChips');if(fc)fc.innerHTML=FLOOR_C.map(c=>`<div class="chip${c.id===floorC.id?' on':''}" style="background:${c.hex};" title="${c.name}" onclick="setFloor('${c.id}')"></div>`).join('');if(wc)wc.innerHTML=WALL_C.map(c=>`<div class="chip${c.id===wallC.id?' on':''}" style="background:${c.hex};" title="${c.name}" onclick="setWall('${c.id}')"></div>`).join('');}
-function buildMatGrid(){const g=document.getElementById('matGrid');if(!g)return;g.innerHTML=MAT_C.map(m=>`<div class="mat-sw${m.id===matC.id?' on':''}" style="background:${m.hex};" title="${m.name}" onclick="setMat('${m.id}')"></div>`).join('');}
+function buildMatGrid(){
+  if(!MAT_DATA){buildMatGridFallback();return;}
+  const grades=MAT_DATA.grades.filter(g=>g.type===matCurType);
+  if(matCurGrade>=grades.length)matCurGrade=0;
+  // Type tabs
+  const ttEl=document.getElementById('matTypeTabs');
+  if(ttEl)ttEl.innerHTML=['leather','fabric'].map(t=>`<div class="mat-type-tab${t===matCurType?' on':''}" onclick="switchMatType('${t}')">${t==='fabric'?'패브릭':'레더'}</div>`).join('');
+  // Grade pills
+  const grEl=document.getElementById('matGradeRow');
+  if(grEl)grEl.innerHTML=grades.map((g,i)=>`<div class="mat-grade-pill${i===matCurGrade?' on':''}" onclick="switchMatGrade(${i})">${g.label.replace(/패브릭|레더/,'').trim()}</div>`).join('');
+  // Articles for current grade
+  const curGrade=grades[matCurGrade];
+  if(!curGrade)return;
+  const arts=MAT_DATA.articles.filter(a=>a.grade===curGrade.id);
+  const areaEl=document.getElementById('matArticleArea');
+  if(!areaEl)return;
+  let html='';
+  arts.forEach(art=>{
+    const activeColors=art.colors.filter(c=>c.active!==false);
+    const discontinuedColors=art.colors.filter(c=>c.active===false);
+    if(activeColors.length===0&&discontinuedColors.length===0)return;
+    html+=`<div class="mat-art-label">${art.name} · ${art.company}</div><div class="mat-grid">`;
+    activeColors.forEach(c=>{
+      const cid=art.id+'__'+c.name;
+      const isOn=matC.id===cid;
+      const chipUrl=c.chip?MAT_DATA.chipBase+encodeURIComponent(c.chip):null;
+      const bgStyle=chipUrl?`background-image:url('${chipUrl}');background-color:${c.hex}`:`background:${c.hex}`;
+      html+=`<div class="mat-sw${isOn?' on':''}" style="${bgStyle}" title="${c.name}" onclick="setMat('${art.id}','${c.name.replace(/'/g,"\\'")}')"></div>`;
+    });
+    discontinuedColors.forEach(c=>{
+      const bgStyle=`background:${c.hex}`;
+      html+=`<div class="mat-sw discontinued" style="${bgStyle}" title="${c.name} (단종)"></div>`;
+    });
+    html+='</div>';
+  });
+  areaEl.innerHTML=html;
+  updateMatInfo();
+}
+function buildMatGridFallback(){
+  const areaEl=document.getElementById('matArticleArea');
+  if(!areaEl)return;
+  document.getElementById('matTypeTabs').innerHTML='';
+  document.getElementById('matGradeRow').innerHTML='';
+  areaEl.innerHTML='<div class="mat-grid">'+FALLBACK_MAT_C.map(m=>`<div class="mat-sw${m.id===matC.id?' on':''}" style="background:${m.hex}" title="${m.name}" onclick="setMatFallback('${m.id}')"></div>`).join('')+'</div>';
+}
+function updateMatInfo(){
+  const el=document.getElementById('matInfo');
+  if(!el)return;
+  if(!matC.article){el.innerHTML=`<span class="mat-info-name">${matC.name}</span>`;return;}
+  el.innerHTML=`<span class="mat-info-name">${matC.article.name} · ${matC.name}</span> <span class="mat-info-co">${matC.article.company}</span><div class="mat-info-care">${matC.article.care||''}</div>`;
+}
+function switchMatType(t){matCurType=t;matCurGrade=0;buildMatGrid();}
+function switchMatGrade(i){matCurGrade=i;buildMatGrid();}
 function buildSlider(){const sl=document.getElementById('sofaSlider');if(!sl)return;const ct=document.getElementById('sliderCount');if(ct)ct.textContent=CATALOG.length+'개';sl.innerHTML=CATALOG.map(s=>{const isCmp=cmpList.includes(s.id);const hasGLB=!!GLB_MAP[s.id];return`<div class="slide${selId===s.id?' on':''}" style="position:relative;"><div class="slide-top"><div class="slide-icon">${sofaSVG(s.id,'fit')}</div><div class="slide-info"><div class="slide-name">${s.name}${hasGLB?'<span style="font-size:7px;color:var(--gold);margin-left:4px;">3D</span>':''}</div><div class="slide-type">${s.ko} · ${s.type}</div><div class="slide-price">${priceRange(s)}</div></div></div><div class="slide-configs">${s.configs.map(cfg=>{const fit=configFit(cfg.w/10);const isOn=selId===s.id&&selW===Math.round(cfg.w/10);return`<div class="scfg ${isOn?'on':fit}" onclick="event.stopPropagation();pickSofa('${s.id}',${cfg.w})">${cfg.name} ${Math.round(cfg.w/10)}cm</div>`;}).join('')}</div><div class="slide-cmp${isCmp?' on':''}" onclick="event.stopPropagation();toggleCmp('${s.id}')" title="비교 추가">${isCmp?'✓':'+'}</div></div>`;}).join('');}
 function pickBest(id){const s=getSeries(id);if(!s)return;const fits=s.configs.map(cfg=>({cfg,fit:configFit(cfg.w/10)}));const best=fits.find(f=>f.fit==='fit')||fits.find(f=>f.fit==='tight')||fits[0];pickSofa(id,best.cfg.w);buildSlider();}
 function drawCanvas(){const canvas=document.getElementById('roomCanvas');if(!canvas)return;const ctx=canvas.getContext('2d'),CW=canvas.width,CH=canvas.height;ctx.clearRect(0,0,CW,CH);if(!room.w||!room.d)return;const PAD=36,scX=(CW-PAD*2)/room.w,scY=(CH-PAD*2)/room.d;cvScale=Math.min(scX,scY);const rPxW=room.w*cvScale,rPxH=room.d*cvScale;cvRoomPxW=rPxW;const ox=(CW-rPxW)/2,oy=(CH-rPxH)/2;cvOx=ox;ctx.fillStyle=floorC.hex;ctx.fillRect(ox,oy,rPxW,rPxH);ctx.fillStyle=wallC.hex;ctx.fillRect(ox,oy,rPxW,7);ctx.fillRect(ox,oy,7,rPxH);ctx.strokeStyle='#B0A890';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rPxW,rPxH);ctx.fillStyle='#7A7668';ctx.font=`${Math.max(10,cvScale*18)}px 'Josefin Sans',sans-serif`;ctx.textAlign='center';ctx.fillText(`${room.w}cm`,ox+rPxW/2,oy-9);ctx.save();ctx.translate(ox-10,oy+rPxH/2);ctx.rotate(-Math.PI/2);ctx.fillText(`${room.d}cm`,0,0);ctx.restore();drawPropsOnCanvas(ctx,ox,oy,cvScale);if(!selId||!selW)return;const s=getSeries(selId);if(!s)return;const isL=sofaRot===0||sofaRot===180;const sWcm=isL?selW:s.depth,sDcm=isL?s.depth:selW;const sPxW=sWcm*cvScale,sPxH=sDcm*cvScale;if(sofaY<0)sofaY=oy+6;sofaX=Math.max(ox,Math.min(ox+rPxW-sPxW,sofaX));sofaY=Math.max(oy,Math.min(oy+rPxH-sPxH,sofaY));const wz=45*cvScale,zy=sofaY+sPxH,zh=Math.min(wz,oy+rPxH-zy);if(zh>0){ctx.fillStyle='rgba(58,112,80,.1)';ctx.fillRect(sofaX,zy,sPxW,zh);ctx.strokeStyle='rgba(58,112,80,.35)';ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.strokeRect(sofaX,zy,sPxW,zh);ctx.setLineDash([]);}const fit=configFit(sWcm);const sf=fit==='fit'?'rgba(42,72,112,.28)':fit==='tight'?'rgba(160,120,40,.28)':'rgba(160,60,50,.22)';const ss=fit==='fit'?'rgba(42,72,112,.65)':fit==='tight'?'rgba(160,120,40,.65)':'rgba(160,60,50,.55)';ctx.fillStyle=sf;ctx.fillRect(sofaX,sofaY,sPxW,sPxH);ctx.strokeStyle=ss;ctx.lineWidth=1.5;ctx.strokeRect(sofaX,sofaY,sPxW,sPxH);ctx.fillStyle=ss;ctx.font=`${Math.max(9,cvScale*14)}px 'Josefin Sans',sans-serif`;ctx.textAlign='center';if(sPxW>60&&sPxH>18)ctx.fillText(`${s.name} ${sWcm}cm`,sofaX+sPxW/2,sofaY+sPxH/2+3);}
@@ -1629,7 +1721,26 @@ function updateSofaMaterial(){
 
 function setFloor(id){floorC=FLOOR_C.find(c=>c.id===id)||floorC;document.getElementById('floorName').textContent=floorC.name;document.querySelectorAll('#floorChips .chip').forEach((el,i)=>el.classList.toggle('on',FLOOR_C[i].id===id));const l=document.getElementById('legFloor');if(l)l.style.background=floorC.hex;drawCanvas();if(curView==='3d'&&t3Scene)rebuild3DEnv();}
 function setWall(id){wallC=WALL_C.find(c=>c.id===id)||wallC;document.getElementById('wallName').textContent=wallC.name;document.querySelectorAll('#wallChips .chip').forEach((el,i)=>el.classList.toggle('on',WALL_C[i].id===id));drawCanvas();if(curView==='3d'&&t3Scene)rebuild3DEnv();}
-function setMat(id){matC=MAT_C.find(m=>m.id===id)||matC;document.getElementById('matName').textContent=matC.name;document.querySelectorAll('#matGrid .mat-sw').forEach((el,i)=>el.classList.toggle('on',MAT_C[i].id===id));if(selId)updateSelPanel();if(curView==='3d'&&t3SofaGroup)updateSofaMaterial();}
+function setMat(artId,colorName){
+  if(!MAT_DATA)return;
+  const art=MAT_DATA.articles.find(a=>a.id===artId);
+  if(!art)return;
+  const col=art.colors.find(c=>c.name===colorName);
+  if(!col)return;
+  const gradeInfo=MAT_DATA.grades.find(g=>g.id===art.grade);
+  matC={id:artId+'__'+colorName,hex:col.hex,name:colorName,type:gradeInfo?gradeInfo.type:'fabric',article:art,grade:art.grade,chip:col.chip||null,care:art.care};
+  buildMatGrid();
+  if(selId)updateSelPanel();
+  if(curView==='3d'&&t3SofaGroup)updateSofaMaterial();
+}
+function setMatFallback(id){
+  const m=FALLBACK_MAT_C.find(f=>f.id===id);
+  if(!m)return;
+  matC={id:m.id,hex:m.hex,name:m.name,type:m.type||'fabric',article:null,grade:null};
+  buildMatGrid();
+  if(selId)updateSelPanel();
+  if(curView==='3d'&&t3SofaGroup)updateSofaMaterial();
+}
 
 
 /* ════════════════════════════════════
@@ -1638,7 +1749,7 @@ function setMat(id){matC=MAT_C.find(m=>m.id===id)||matC;document.getElementById(
 function openStoreModal(){document.getElementById('storeModal').classList.add('open');}
 function closeStoreModal(e){if(e.target===document.getElementById('storeModal'))document.getElementById('storeModal').classList.remove('open');}
 
-window.addEventListener('load',()=>{renderAptGrid();document.getElementById('rW').addEventListener('input',onDirect);document.getElementById('rD').addEventListener('input',onDirect);const canvas=document.getElementById('roomCanvas');if(!canvas)return;canvas.addEventListener('mousedown',e=>{if(propDragging)return;if(!selId)return;const rect=canvas.getBoundingClientRect();const mx=(e.clientX-rect.left)*(canvas.width/rect.width);const my=(e.clientY-rect.top)*(canvas.height/rect.height);const rPxW=room.w*cvScale,rPxH=room.d*cvScale;const ox=(canvas.width-rPxW)/2,oy=(canvas.height-rPxH)/2;if(propHitTest(mx,my,ox,oy,cvScale))return;e.preventDefault();dragging=true;dsx=e.clientX;dsy=e.clientY;dssX=sofaX;dssY=sofaY;});const onM=(cx,cy)=>{if(propDragging||!dragging)return;sofaX=dssX+(cx-dsx);sofaY=dssY+(cy-dsy);drawCanvas();updateStats();};canvas.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));window.addEventListener('mouseup',()=>{dragging=false;});canvas.addEventListener('touchstart',e=>{if(!selId||e.touches.length!==1)return;dragging=true;dsx=e.touches[0].clientX;dsy=e.touches[0].clientY;dssX=sofaX;dssY=sofaY;},{passive:true});canvas.addEventListener('touchmove',e=>onM(e.touches[0].clientX,e.touches[0].clientY),{passive:true});window.addEventListener('touchend',()=>{dragging=false;});window.addEventListener('keydown',e=>{if(!selId)return;const px=moveStep*cvScale;if(e.key==='ArrowLeft'){e.preventDefault();sofaX-=px;}if(e.key==='ArrowRight'){e.preventDefault();sofaX+=px;}if(e.key==='ArrowUp'){e.preventDefault();sofaY-=px;}if(e.key==='ArrowDown'){e.preventDefault();sofaY+=px;}if(e.key.toLowerCase()==='r'){sofaRot=(sofaRot+90)%360;document.getElementById('rotInd').textContent=sofaRot+'°';}drawCanvas();updateStats();});initPropDrag();});
+window.addEventListener('load',()=>{loadManifestMaterials();renderAptGrid();document.getElementById('rW').addEventListener('input',onDirect);document.getElementById('rD').addEventListener('input',onDirect);const canvas=document.getElementById('roomCanvas');if(!canvas)return;canvas.addEventListener('mousedown',e=>{if(propDragging)return;if(!selId)return;const rect=canvas.getBoundingClientRect();const mx=(e.clientX-rect.left)*(canvas.width/rect.width);const my=(e.clientY-rect.top)*(canvas.height/rect.height);const rPxW=room.w*cvScale,rPxH=room.d*cvScale;const ox=(canvas.width-rPxW)/2,oy=(canvas.height-rPxH)/2;if(propHitTest(mx,my,ox,oy,cvScale))return;e.preventDefault();dragging=true;dsx=e.clientX;dsy=e.clientY;dssX=sofaX;dssY=sofaY;});const onM=(cx,cy)=>{if(propDragging||!dragging)return;sofaX=dssX+(cx-dsx);sofaY=dssY+(cy-dsy);drawCanvas();updateStats();};canvas.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));window.addEventListener('mouseup',()=>{dragging=false;});canvas.addEventListener('touchstart',e=>{if(!selId||e.touches.length!==1)return;dragging=true;dsx=e.touches[0].clientX;dsy=e.touches[0].clientY;dssX=sofaX;dssY=sofaY;},{passive:true});canvas.addEventListener('touchmove',e=>onM(e.touches[0].clientX,e.touches[0].clientY),{passive:true});window.addEventListener('touchend',()=>{dragging=false;});window.addEventListener('keydown',e=>{if(!selId)return;const px=moveStep*cvScale;if(e.key==='ArrowLeft'){e.preventDefault();sofaX-=px;}if(e.key==='ArrowRight'){e.preventDefault();sofaX+=px;}if(e.key==='ArrowUp'){e.preventDefault();sofaY-=px;}if(e.key==='ArrowDown'){e.preventDefault();sofaY+=px;}if(e.key.toLowerCase()==='r'){sofaRot=(sofaRot+90)%360;document.getElementById('rotInd').textContent=sofaRot+'°';}drawCanvas();updateStats();});initPropDrag();});
 
 
 /* ══ NAVER PLACE ══ */
