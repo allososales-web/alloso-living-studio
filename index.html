@@ -832,6 +832,40 @@ body{
   background:linear-gradient(135deg,rgba(139,115,85,.18) 0%,transparent 60%);
 }
 .studio-btn:hover{opacity:.88;}
+/* ── Product Preview Card ── */
+.product-card{display:flex;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin:8px 0;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit;}
+.product-card:hover{border-color:var(--gold-lt);background:rgba(139,115,85,.06);}
+.product-card-img{width:80px;height:80px;border-radius:6px;background:var(--bg2);flex-shrink:0;object-fit:cover;}
+.product-card-body{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+.product-card-name{font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;}
+.product-card-ko{font-size:10px;color:var(--muted);margin-top:1px;}
+.product-card-desc{font-size:10px;color:var(--text2);margin-top:4px;line-height:1.5;}
+.product-card-price{font-size:11px;color:var(--gold);margin-top:4px;font-weight:400;}
+.product-card-link{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.06em;}
+@media(max-width:480px){
+  .product-card{padding:12px;gap:12px}
+  .product-card-img{width:68px;height:68px}
+  .product-card-name{font-size:12px}
+  .product-card-price{font-size:12px}
+}
+/* ── Studio Deeplink Button ── */
+.studio-deeplink{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:var(--accent);color:#0C0B0A;border-radius:6px;font-size:11px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-decoration:none;transition:opacity .15s;border:none;font-family:'Noto Sans KR',sans-serif}
+.studio-deeplink:hover{opacity:.85}
+/* ── Home One-Question Hero ── */
+.home-oq{text-align:center;padding:48px 24px 20px;position:relative}
+.home-oq-brand{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.45em;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
+.home-oq-q{font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);line-height:1.6;margin-bottom:20px;letter-spacing:.03em}
+.home-oq-input{width:100%;background:var(--card);border:1.5px solid var(--border2);border-radius:24px;padding:13px 18px;font-size:13px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;transition:border-color .2s}
+.home-oq-input:focus{border-color:var(--accent)}
+.home-oq-input::placeholder{color:var(--muted)}
+.home-oq-scenes{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:16px 0 8px}
+.home-oq-scene{font-size:10px;padding:7px 14px;border-radius:18px;border:1px solid var(--border);color:var(--text2);background:transparent;cursor:pointer;transition:all .14s;font-family:'Noto Sans KR',sans-serif}
+.home-oq-scene:hover{border-color:var(--gold-lt);color:var(--accent)}
+.home-oq-divider{display:flex;align-items:center;gap:10px;margin:20px 0 12px;font-size:8.5px;color:var(--muted);letter-spacing:.12em}
+.home-oq-divider::before,.home-oq-divider::after{content:'';flex:1;height:0.5px;background:var(--border)}
+.home-oq-links{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.home-oq-link{font-size:10px;padding:6px 12px;color:var(--muted);cursor:pointer;transition:color .12s;background:none;border:none;font-family:'Noto Sans KR',sans-serif}
+.home-oq-link:hover{color:var(--accent)}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -1436,59 +1470,32 @@ function renderWelcome(){
   const div=document.createElement('div');
   div.className='home';
   div.innerHTML=`
-    <!-- HERO -->
-    <div class="home-hero">
-      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyODAgNTIiIHdpZHRoPSIxNjgiIGhlaWdodD0iMzIiPgogIDx0ZXh0IHg9IjE0MCIgeT0iMzciIGZvbnQtZmFtaWx5PSInSm9zZWZpbiBTYW5zJywnQ2VudHVyeSBHb3RoaWMnLEFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iY3VycmVudENvbG9yIj5BTExPU088L3RleHQ+Cjwvc3ZnPg==" class="home-hero-logo" alt="ALLOSO" style="height:22px;filter:invert(1) brightness(1.6) sepia(.1) saturate(.4);">
-      <div class="home-hero-sub">Sofa Advisor</div>
-      <div class="home-hero-tag">나의 공간에 어울리는 소파,<br>Alloso와 함께 찾아보세요</div>
-    </div>
-
-    <!-- STUDIO HERO BTN -->
-    <button class="studio-btn" onclick="location.href='/alloso-studio.html'">
-      <div class="sb-eyebrow">Key Feature · New</div>
-      <div class="sb-title">ALLOSO <span>STUDIO</span></div>
-      <div class="sb-desc">우리 집 거실에 소파를 직접 배치해보세요<br>AI가 공간에 맞는 소파를 추천해드려요</div>
-      <div class="sb-arrow">›</div>
-    </button>
-
-    <!-- MENU -->
-    <div class="home-menu">
-      <div class="hm-divider">상담</div>
-      <button class="hm-btn" onclick="renderTypeSelect()">
-        <div class="hm-icon">✦</div>
-        <div class="hm-body">
-          <div class="hm-title">소파 상담 시작하기</div>
-          <div class="hm-sub">나의 취향과 공간 기준으로 찾기</div>
-        </div>
-        <div class="hm-arr">›</div>
-      </button>
-      <button class="hm-btn" onclick="openChat()">
-        <div class="hm-icon">💬</div>
-        <div class="hm-body">
-          <div class="hm-title">자유 문의</div>
-          <div class="hm-sub">AI에게 바로 물어보세요</div>
-        </div>
-        <div class="hm-arr">›</div>
-      </button>
-      <div class="hm-divider">정보</div>
-      <button class="hm-btn" onclick="openCare()">
-        <div class="hm-icon">✦</div>
-        <div class="hm-body">
-          <div class="hm-title">Alloso Care</div>
-          <div class="hm-sub">소재별 관리 가이드</div>
-        </div>
-        <div class="hm-arr">›</div>
-      </button>
-      <button class="hm-btn" onclick="openFAQ()">
-        <div class="hm-icon">?</div>
-        <div class="hm-body">
-          <div class="hm-title">자주 묻는 질문</div>
-          <div class="hm-sub">구매 전 꼭 확인하세요</div>
-        </div>
-        <div class="hm-arr">›</div>
-      </button>
+    <!-- ONE QUESTION HERO -->
+    <div class="home-oq">
+      <div class="home-oq-brand">alloso</div>
+      <div class="home-oq-q">어떤 공간을<br>만들고 싶으세요?</div>
+      <input class="home-oq-input" id="homeInput" placeholder="예: 아이와 함께 쓸 따뜻한 거실" onkeydown="if(event.key==='Enter'){homeAsk(this.value)}">
+      <div class="home-oq-scenes">
+        <button class="home-oq-scene" onclick="homeAsk('아이와 함께 쓸 따뜻한 거실을 꾸미고 싶어요')">우리 가족 거실</button>
+        <button class="home-oq-scene" onclick="homeAsk('혼자 쓰는 서재에 소파 하나 놓고 싶어요')">나만의 서재</button>
+        <button class="home-oq-scene" onclick="homeAsk('신혼 거실에 어울리는 소파 추천해주세요')">신혼 라운지</button>
+        <button class="home-oq-scene" onclick="homeAsk('반려동물이 있는데 어떤 소재가 좋을까요?')">반려동물과 함께</button>
+      </div>
+      <div class="home-oq-divider">또는</div>
+      <div class="home-oq-links">
+        <button class="home-oq-link" onclick="location.href='/alloso-studio.html'">3D 스튜디오 →</button>
+        <button class="home-oq-link" onclick="renderTypeSelect()">단계별 상담 →</button>
+        <button class="home-oq-link" onclick="openFAQ()">자주 묻는 질문</button>
+        <button class="home-oq-link" onclick="openCare()">소재 관리 가이드</button>
+      </div>
     </div>`;
   main.appendChild(div);
+}
+
+function homeAsk(text){
+  if(!text||!text.trim())return;
+  openChat();
+  setTimeout(()=>sendMessage(text.trim()),300);
 }
 
 function renderTypeSelect(){
@@ -2498,6 +2505,27 @@ let chatHistory = [];
 let chatLoading = false;
 let chatUnread = 0;
 
+/* ── 제품 카드 데이터 ── */
+const PRODUCT_CARDS = {
+  '사티':       {en:'SATI',       url:'https://www.alloso.co.kr/collection/detail?categoryNo=83',  img:'https://cdn.alloso.co.kr/AllosoUpload/category/20250318/_9185898b-54f2-44ac-a361-e87373e7e0c1.jpg', price:'57~849만', desc:'모던 클래식 · 모듈 확장 · 분리 조립'},
+  '케렌시아':   {en:'QUERENCIA',  url:'https://www.alloso.co.kr/collection/detail?categoryNo=82',  img:'https://cdn.alloso.co.kr/AllosoUpload/category/20250319/_30e4c4c2-f66d-4c5c-8245-9871bde0128b.jpg', price:'110~948만', desc:'감싸안는 로우 모듈 · 나만의 안식처'},
+  '보눔':       {en:'BONUM',      url:'https://www.alloso.co.kr/collection/detail?categoryNo=81',  img:'https://cdn.alloso.co.kr/AllosoUpload/category/20250319/_b34e667e-42ab-41c9-b3f2-0aa2ad294daf.jpg', price:'64~898만', desc:'오픈암 · 미니멀 프레임 · 공간감'},
+  '바드':       {en:'VARD',       url:'https://www.alloso.co.kr/collection/detail?categoryNo=164', img:'https://cdn.alloso.co.kr/AllosoUpload/category/20250204/_94ff3fb2-f7fe-497f-81b8-08976de4a5a2.jpg', price:'16~798만', desc:'스칸디나비안 · 데이베드 전환'},
+  '밀로':       {en:'MILO',       url:'https://www.alloso.co.kr/collection/detail?categoryNo=147', img:'https://cdn.alloso.co.kr/AllosoUpload/category/20240117/_5cd12390-35db-4564-b9e3-eea5a83fa746.png', price:'~2,176만', desc:'자유 모듈 조합 · 레이아웃 변경'},
+  '엘머':       {en:'ELMER',      url:'https://www.alloso.co.kr/collection/detail?categoryNo=135', img:'https://cdn.alloso.co.kr/AllosoUpload/category/20250319/_02a860c0-9648-43a9-a3dc-7cd2c1ba4289.jpg', price:'458~558만', desc:'1인 전용 · 넓은 팔걸이 · 독서·업무'},
+  '스탠':       {en:'STANN',      url:'https://www.alloso.co.kr/collection/detail?categoryNo=145', img:'https://cdn.alloso.co.kr/AllosoUpload/category/20240117/_4fb7214b-3dfc-4b9b-934c-d9ffdcc7816e.png', price:'~2,049만', desc:'대형 모듈 · 최대 4.7m 풀세트'},
+  '테오':       {en:'THEO',       url:'https://www.alloso.co.kr/collection/detail?categoryNo=146', img:'https://cdn.alloso.co.kr/AllosoUpload/category/20240117/_c53c77fd-c2ee-4143-ad5a-9e7a569e73d8.png', price:'~1,808만', desc:'대형 모듈 · 앰비언트 시리즈'},
+  '비하르':     {en:'BEHAR',      url:'https://www.alloso.co.kr/collection/detail?categoryNo=77',  img:'https://cdn.alloso.co.kr/AllosoUpload/category/20231102/_68e32513-b001-4dfc-968a-2cb6b2795baa.jpg', price:'15~1,066만', desc:'로우 디자인 · 바닥 가까운 높이감'},
+  '에브리데이': {en:'EVERYDAY',   url:'https://www.alloso.co.kr/collection/detail?categoryNo=159', img:'https://cdn.alloso.co.kr/AllosoUpload/category/20241015/_17791806-c5b5-4082-b206-b15318fea611.png', price:'152만~', desc:'캐주얼 · 풍성한 쿠션감'},
+  '홀리데이':   {en:'HOLIDAY',    url:'https://www.alloso.co.kr/collection/list', img:'https://cdn.alloso.co.kr/AllosoUpload/category/20250318/_3a2d99ce-15dd-49f2-a015-f7d686133973.jpg', price:'89만~', desc:'패밀리 · 넉넉한 깊이감'},
+  '카포네':     {en:'CAPONE',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'54~699만', desc:'쿠션백 · 깊은 착석감'},
+  '카포네그랑': {en:'CAPONE GRAND',url:'https://www.alloso.co.kr/collection/list', img:'', price:'318~1,089만', desc:'대형 섹셔널 · 코너 구성'},
+  '카포네 그랑':{en:'CAPONE GRAND',url:'https://www.alloso.co.kr/collection/list', img:'', price:'318~1,089만', desc:'대형 섹셔널 · 코너 구성'},
+  '레지나':     {en:'REGINA',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'219~739만', desc:'클래식 다리형 · 격식 있는 디자인'},
+  '사티모션':   {en:'SATI MOTION',url:'https://www.alloso.co.kr/collection/list', img:'', price:'249~838만', desc:'전동 리클라이너 · 원터치 각도 조절'},
+  '클렉트':     {en:'KLECT',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'26~1,199만', desc:'모듈 시스템 · 높은 커스터마이징'},
+};
+
 const CHAT_SYSTEM = `당신은 Alloso 전용 AI 리빙 어드바이저 'ALMA'입니다.
 
 【핵심 규칙 — 반드시 준수】
@@ -2703,9 +2731,29 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 위 FAQ에 해당하는 질문은 반드시 FAQ 데이터 기반으로 정확히 답변할 것.
 - 2~4문장으로 간결하게. 필요시 짧은 목록 사용.
 - 가격은 소비자가 기준 안내. 정확 견적은 쇼룸 안내.
-- FAQ·케어 패널로 자세한 내용을 안내할 수 있다고 자연스럽게 유도 가능.
 - 반드시 한국어로만 응답.
-- 과도한 칭찬·인사말 반복 금지. 자연스럽고 전문적인 톤.`;
+- 과도한 칭찬·인사말 반복 금지. 자연스럽고 전문적인 톤.
+
+【제품 카드 표시 규칙】
+- 특정 시리즈를 추천하거나 설명할 때, 답변 끝에 [PRODUCT:시리즈명] 마커를 넣으세요.
+- 시리즈명: 사티, 케렌시아, 보눔, 바드, 밀로, 엘머, 스탠, 테오, 비하르, 에브리데이, 홀리데이, 카포네, 카포네그랑, 레지나, 사티모션, 클렉트
+- 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
+- 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
+- 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
+
+【라이프스타일 추천 매핑】
+고객이 생활 장면을 언급하면 제품+소재+컬러를 자연스럽게 연결하세요.
+- "아이가 있어요" → 홀리데이, 에브리데이, 사티 + 노르딕/루소(워터프루프) + 밝은 톤
+- "반려동물" → 사티, 에브리데이 + 루소(더블플로킹) + 소프트프리모
+- "서재/1인" → 엘머, 케렌시아, 바드 데이베드 + 르아테 레더 + 버번/코스믹블루
+- "넓은 거실" → 스탠, 카포네 그랑, 밀로 + 드리밍헤비 + 릴레이트
+- "미니멀/모던" → 사티, 보눔, 테오 + 솔라 + 그레이아울/뮤트블랙
+- "내추럴/북유럽" → 바드, 비하르, 케렌시아 + 부클레위브/노르딕 + 웜톤
+- "럭셔리/고급" → 레지나, 카포네 그랑, 케렌시아 + 베지탄/단테
+- "커플/신혼" → 사티 2인, 바드, 보눔 + 아크레(블러쉬/몬드)
+- "눕기/낮잠" → 바드 데이베드, 사티모션, 케렌시아 + 부클레/드리밍헤비 파우더
+- "TV/영화" → 사티모션, 홀리데이, 스탠 + 소프트프리모/솔라
+- "접대/손님" → 레지나, 카포네, 보눔 + 드리밍헤비/릴레이트`;
 
 const QUICK_CHIPS = [
   '추천 소파 알려줘',
@@ -2822,10 +2870,45 @@ function scrollMsgs(){
 }
 
 function formatMsg(text){
-  return escHtml(text)
+  let html = escHtml(text)
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\n/g,'<br>')
     .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" style="color:var(--gold);word-break:break-all;">$1</a>');
+  // [PRODUCT:시리즈명] → 제품 미리보기 카드
+  html = html.replace(/\[PRODUCT:([^\]]+)\]/g, function(match, name){
+    const p = PRODUCT_CARDS[name.trim()];
+    if(!p) return '';
+    const imgHtml = p.img
+      ? `<img class="product-card-img" src="${p.img}" alt="${p.en}" onerror="this.style.display='none'">`
+      : `<div class="product-card-img" style="display:flex;align-items:center;justify-content:center;font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--muted);letter-spacing:.1em;">${p.en}</div>`;
+    return `<a class="product-card" href="${p.url}" target="_blank">
+      ${imgHtml}
+      <div class="product-card-body">
+        <div class="product-card-name">${p.en}</div>
+        <div class="product-card-ko">${name.trim()}</div>
+        <div class="product-card-desc">${p.desc}</div>
+        <div class="product-card-price">${p.price}원</div>
+        <div class="product-card-link">자세히 보기 →</div>
+      </div>
+    </a>`;
+  });
+  // [STUDIO_LINK] → 3D 스튜디오 딥링크 버튼
+  html = html.replace(/\[STUDIO_LINK\]/g, function(){
+    return `<a class="studio-deeplink" href="${buildStudioDeeplink()}" target="_blank">3D 스튜디오 열기 →</a>`;
+  });
+  return html;
+}
+
+function buildStudioDeeplink(){
+  let url = '/alloso-studio.html';
+  const params = [];
+  const lastMsgs = chatHistory.slice(-6).map(m=>m.content).join(' ');
+  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','클렉트'];
+  for(const s of seriesNames){
+    if(lastMsgs.includes(s)){params.push('sofa='+encodeURIComponent(s));break;}
+  }
+  if(params.length) url += '?' + params.join('&');
+  return url;
 }
 
 function escHtml(s){
@@ -2861,14 +2944,22 @@ async function sendMessage(text){
   let followChips = [];
   let usedAPI = false;
 
-  // ── 1차: Anthropic API 시도 ──
+  // ── 1차: Anthropic API 시도 (맥락 요약 포함) ──
   try {
+    let apiMessages = chatHistory.filter(m=>m.role==='user'||m.role==='assistant');
+    let systemWithContext = CHAT_SYSTEM;
+    if(apiMessages.length > 10){
+      const oldMsgs = apiMessages.slice(0, apiMessages.length - 8);
+      const summary = oldMsgs.map(m => (m.role==='user'?'고객':'AI') + ': ' + m.content.slice(0,60)).join(' | ');
+      systemWithContext = CHAT_SYSTEM + '\n\n【이전 대화 요약】\n' + summary;
+      apiMessages = apiMessages.slice(-8);
+    }
     const apiRes = await fetch('/api/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        system: CHAT_SYSTEM,
-        messages: chatHistory.filter(m=>m.role==='user'||m.role==='assistant')
+        system: systemWithContext,
+        messages: apiMessages
       })
     });
     if(apiRes.ok){
@@ -3144,9 +3235,9 @@ function getDemoReply(text){
   if(t.includes('퍼시스')||t.includes('alloso')||t.includes('알로소'))
     return R('Alloso는 **퍼시스그룹**의 하이엔드 소파 브랜드예요. 일룸·시디즈·퍼시스 등 국내 대표 가구 브랜드를 보유한 그룹이에요.',['추천 소파 알려줘','매장 어디 있어?']);
 
-  // ── 3D 스튜디오 연결 ──
+  // ── 3D 스튜디오 연결 (딥링크) ──
   if(t.includes('스튜디오')||t.includes('3d')||t.includes('배치'))
-    return R('**Alloso Studio**에서 거실 사이즈를 입력하면 소파를 3D로 배치해 볼 수 있어요. 바닥·벽 색상도 변경 가능.\n\n👉 상단 **ALLOSO STUDIO** 버튼을 눌러보세요.',['추천 소파 알려줘','매장 상담 예약하고 싶어']);
+    return R('**Alloso Studio**에서 소파를 3D로 배치해 볼 수 있어요.\n바닥·벽 색상, 마감재 시뮬레이션까지 가능해요.\n\n[STUDIO_LINK]',['추천 소파 알려줘','매장 상담 예약하고 싶어']);
 
   // ── fallback (고도화) ──
   const origText = text.trim();
