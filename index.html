@@ -866,6 +866,45 @@ body{
 .home-oq-links{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .home-oq-link{font-size:10px;padding:6px 12px;color:var(--muted);cursor:pointer;transition:color .12s;background:none;border:none;font-family:'Noto Sans KR',sans-serif}
 .home-oq-link:hover{color:var(--accent)}
+/* ── Session Resume Banner ── */
+.session-banner{margin:0 24px 12px;background:var(--card);border:1px solid var(--accent2);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+.session-banner:hover{background:rgba(200,176,122,.06)}
+.session-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8B7355,#C4A882);display:flex;align-items:center;justify-content:center;font-family:'Josefin Sans',sans-serif;font-size:14px;color:rgba(255,255,255,.9);flex-shrink:0}
+.session-body{flex:1;min-width:0}
+.session-title{font-size:12px;font-weight:400;color:var(--accent)}
+.session-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.session-actions{display:flex;gap:6px;margin-top:8px}
+.session-btn{font-size:10px;padding:5px 12px;border-radius:14px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s}
+.session-btn.pri{background:var(--accent);color:#0C0B0A}
+.session-btn.sec{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.session-btn.sec:hover{color:var(--text)}
+/* ── Lead Collection CTA ── */
+.lead-cta{background:var(--card);border:1px solid var(--accent2);border-radius:10px;padding:14px 16px;margin:10px 0;animation:leadFadeIn .4s ease}
+@keyframes leadFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.lead-cta-title{font-size:12px;font-weight:400;color:var(--accent);margin-bottom:4px}
+.lead-cta-desc{font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:10px}
+.lead-form{display:flex;flex-direction:column;gap:8px}
+.lead-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;transition:border-color .2s}
+.lead-input:focus{border-color:var(--accent)}
+.lead-input::placeholder{color:var(--muted)}
+.lead-row{display:flex;gap:6px}
+.lead-submit{background:var(--accent);border:none;border-radius:6px;padding:9px 16px;font-size:11px;font-weight:500;color:#0C0B0A;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;flex-shrink:0}
+.lead-submit:hover{opacity:.85}
+.lead-submit:disabled{opacity:.4;cursor:default}
+.lead-dismiss{background:none;border:none;font-size:10px;color:var(--muted);cursor:pointer;padding:4px 0;font-family:'Noto Sans KR',sans-serif}
+.lead-dismiss:hover{color:var(--text)}
+.lead-done{font-size:11px;color:var(--green);text-align:center;padding:8px 0}
+/* ── Wizard ↔ Chat Transition ── */
+.guide-suggest{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:10px 0;animation:leadFadeIn .4s ease}
+.guide-suggest-title{font-size:11px;font-weight:400;color:var(--accent);margin-bottom:4px}
+.guide-suggest-desc{font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+.guide-suggest-btns{display:flex;gap:6px}
+.guide-suggest-btn{font-size:10px;padding:6px 14px;border-radius:14px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s}
+.guide-suggest-btn.pri{background:var(--accent);color:#0C0B0A}
+.guide-suggest-btn.sec{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.guide-suggest-btn.sec:hover{color:var(--text)}
+.wizard-chat-btn{display:flex;align-items:center;gap:6px;margin:10px 0;padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .14s;font-size:10px;color:var(--muted);width:100%;text-align:left;font-family:'Noto Sans KR',sans-serif}
+.wizard-chat-btn:hover{border-color:var(--gold-lt);color:var(--accent)}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -1490,6 +1529,25 @@ function renderWelcome(){
       </div>
     </div>`;
   main.appendChild(div);
+
+  // 세션 복원 배너
+  const session = getSessionSummary();
+  if(session){
+    const banner = document.createElement('div');
+    banner.className = 'session-banner';
+    banner.innerHTML = `
+      <div class="session-av">A</div>
+      <div class="session-body">
+        <div class="session-title">${session.topSeries ? session.topSeries+'에 관심 보이셨어요' : '이전 상담 내역이 있어요'}</div>
+        <div class="session-desc">${session.elapsedText} · ${session.userMsgCount}개 질문</div>
+        <div class="session-actions">
+          <button class="session-btn pri" onclick="event.stopPropagation();resumeSession()">이어서 상담하기</button>
+          <button class="session-btn sec" onclick="event.stopPropagation();clearSession();this.closest('.session-banner').remove()">새로 시작</button>
+        </div>
+      </div>`;
+    const oqDiv = div.querySelector('.home-oq');
+    if(oqDiv) oqDiv.after(banner);
+  }
 }
 
 function homeAsk(text){
@@ -1696,6 +1754,12 @@ function renderStep(idx){
   slide.className='slide active';
   main.appendChild(slide);
   buildStepContent(idx,slide);
+  // P7: 위저드 내 자유 문의 버튼
+  const chatBtn = document.createElement('button');
+  chatBtn.className = 'wizard-chat-btn';
+  chatBtn.innerHTML = '💬 AI에게 자유롭게 물어보기';
+  chatBtn.onclick = openChatFromWizard;
+  slide.appendChild(chatBtn);
   updateNavBtn();
 }
 
@@ -2502,6 +2566,178 @@ function onFaqSearch(v){
 // CHAT ENGINE
 // ════════════════════════════════════
 let chatHistory = [];
+
+/* ── P5: 세션 기억 (localStorage) ── */
+const STORAGE_KEY = 'alma_chat_session';
+const STORAGE_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000; // 7일
+
+function saveSession(){
+  try {
+    const data = { history: chatHistory, ts: Date.now() };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e){ console.warn('[Session] Save failed:', e.message); }
+}
+
+function loadSession(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    if(Date.now() - data.ts > STORAGE_EXPIRE_MS){ clearSession(); return null; }
+    return data;
+  } catch(e){ return null; }
+}
+
+function clearSession(){
+  localStorage.removeItem(STORAGE_KEY);
+  chatHistory = [];
+}
+
+function getSessionSummary(){
+  const session = loadSession();
+  if(!session || !session.history || session.history.length < 2) return null;
+  // 가장 많이 언급된 시리즈 찾기
+  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','사티모션','클렉트'];
+  const allText = session.history.map(m=>m.content).join(' ');
+  let topSeries = null, topCount = 0;
+  for(const s of seriesNames){
+    const cnt = (allText.match(new RegExp(s,'g'))||[]).length;
+    if(cnt > topCount){ topCount = cnt; topSeries = s; }
+  }
+  const userMsgCount = session.history.filter(m=>m.role==='user').length;
+  const elapsed = Date.now() - session.ts;
+  const elapsedText = elapsed < 3600000 ? '방금 전' : elapsed < 86400000 ? '오늘' : Math.floor(elapsed/86400000)+'일 전';
+  return { topSeries, userMsgCount, elapsedText, history: session.history };
+}
+
+/* ── P6: 리드 수집 ── */
+let leadShown = false;
+let leadSubmitted = false;
+const LEAD_THRESHOLD = 4; // 4턴 이상 대화 후 CTA 표시
+
+function shouldShowLead(){
+  if(leadShown || leadSubmitted) return false;
+  const userMsgs = chatHistory.filter(m=>m.role==='user').length;
+  return userMsgs >= LEAD_THRESHOLD;
+}
+
+function injectLeadCTA(){
+  if(!shouldShowLead()) return;
+  leadShown = true;
+  const msgs = document.getElementById('chatMsgs');
+  const cta = document.createElement('div');
+  cta.className = 'lead-cta';
+  cta.id = 'leadCta';
+  const session = getSessionSummary();
+  const seriesText = session && session.topSeries ? session.topSeries + ' 관련 ' : '';
+  cta.innerHTML = `
+    <div class="lead-cta-title">📋 ${seriesText}상담 내용을 보내드릴까요?</div>
+    <div class="lead-cta-desc">연락처를 남겨주시면 상담 요약과 추천 제품을 보내드려요.<br>매장 방문 전 참고하시기 좋아요.</div>
+    <div class="lead-form" id="leadForm">
+      <input class="lead-input" id="leadName" placeholder="이름" maxlength="20">
+      <input class="lead-input" id="leadContact" placeholder="휴대폰 또는 이메일" maxlength="60">
+      <div class="lead-row">
+        <button class="lead-submit" onclick="submitLead()">보내기</button>
+        <button class="lead-dismiss" onclick="dismissLead()">다음에 할게요</button>
+      </div>
+    </div>`;
+  msgs.appendChild(cta);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function dismissLead(){
+  const el = document.getElementById('leadCta');
+  if(el) el.remove();
+  leadSubmitted = true; // 다시 안 보이게
+}
+
+async function submitLead(){
+  const name = document.getElementById('leadName').value.trim();
+  const contact = document.getElementById('leadContact').value.trim();
+  if(!contact){ document.getElementById('leadContact').focus(); return; }
+
+  const btn = document.querySelector('.lead-submit');
+  btn.disabled = true;
+  btn.textContent = '전송 중...';
+
+  // 관심 시리즈 + 대화 요약 추출
+  const session = getSessionSummary();
+  const summary = chatHistory.slice(-6).map(m => (m.role==='user'?'Q':'A') + ': ' + m.content.slice(0,80)).join('\n');
+
+  try {
+    await fetch('/api/lead', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: name || '미입력',
+        contact,
+        series: session?.topSeries || '',
+        msgCount: chatHistory.filter(m=>m.role==='user').length,
+        summary,
+        ts: new Date().toISOString()
+      })
+    });
+  } catch(e){
+    console.warn('[Lead] Submit failed:', e.message);
+  }
+
+  // 성공 표시 (API 실패해도 UX는 성공으로)
+  const form = document.getElementById('leadForm');
+  form.innerHTML = '<div class="lead-done">✓ 감사합니다! 빠른 시일 내 연락드릴게요.</div>';
+  leadSubmitted = true;
+}
+
+/* ── P7: 위저드 ↔ 자유대화 전환 ── */
+let guideSuggested = false;
+
+function shouldSuggestGuide(){
+  if(guideSuggested) return false;
+  const userMsgs = chatHistory.filter(m=>m.role==='user');
+  if(userMsgs.length < 3) return false;
+  // 최근 3턴 내 추천/선택 고민 키워드
+  const recent = userMsgs.slice(-3).map(m=>m.content).join(' ');
+  const triggers = ['추천','뭐가 좋','어떤 소파','고르기','선택','비교','차이','모르겠'];
+  return triggers.some(k => recent.includes(k));
+}
+
+function injectGuideSuggest(){
+  if(!shouldSuggestGuide()) return;
+  guideSuggested = true;
+  const msgs = document.getElementById('chatMsgs');
+  const card = document.createElement('div');
+  card.className = 'guide-suggest';
+  card.id = 'guideSuggest';
+  card.innerHTML = `
+    <div class="guide-suggest-title">✦ 단계별 상담도 가능해요</div>
+    <div class="guide-suggest-desc">공간 크기·라이프스타일 기준으로 체계적으로 소파를 좁혀볼 수 있어요.</div>
+    <div class="guide-suggest-btns">
+      <button class="guide-suggest-btn pri" onclick="switchToGuide('T')">공간 기반으로 찾기</button>
+      <button class="guide-suggest-btn pri" onclick="switchToGuide('F')">라이프스타일로 찾기</button>
+      <button class="guide-suggest-btn sec" onclick="this.closest('.guide-suggest').remove()">괜찮아요</button>
+    </div>`;
+  msgs.appendChild(card);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function switchToGuide(type){
+  // 자유대화 → 위저드 전환 (대화 맥락 유지)
+  const el = document.getElementById('guideSuggest');
+  if(el) el.remove();
+  closeOverlay('chatPanel');
+  consultant = type;
+  pickType(type);
+  startFlow();
+}
+
+function openChatFromWizard(){
+  // 위저드 → 자유대화 전환 (현재 단계 맥락 전달)
+  const stepInfo = steps()[curStep];
+  const context = stepInfo ? stepInfo.label + ' 단계에서 궁금한 점이 있어요' : '';
+  openChat();
+  if(context && chatHistory.length === 0){
+    setTimeout(()=>sendMessage(context), 300);
+  }
+}
 let chatLoading = false;
 let chatUnread = 0;
 
@@ -2740,6 +2976,7 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
+- 고객이 체계적 추천을 원하는 느낌이면("뭐가 좋을지 모르겠어요", "비교해주세요") 답변 마지막에 "체계적으로 찾아보고 싶으시면 **단계별 상담**도 준비되어 있어요." 정도로 자연스럽게 안내. 강제 유도하지 마세요.
 
 【라이프스타일 추천 매핑】
 고객이 생활 장면을 언급하면 제품+소재+컬러를 자연스럽게 연결하세요.
@@ -2763,6 +3000,32 @@ const QUICK_CHIPS = [
   '3D 스튜디오에서 배치해볼래요',
   '매장 어디 있어?',
 ];
+
+function resumeSession(){
+  const session = loadSession();
+  if(!session || !session.history) { openChat(); return; }
+  chatHistory = session.history;
+  // 채팅 패널 열고 이전 대화 복원
+  const msgs = document.getElementById('chatMsgs');
+  msgs.innerHTML = '';
+  // 복원 헤더
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'text-align:center;padding:12px 0 8px;font-size:10px;color:var(--muted);letter-spacing:.08em;';
+  hdr.textContent = '— 이전 상담 내역 —';
+  msgs.appendChild(hdr);
+  // 메시지 복원
+  chatHistory.forEach(m => {
+    if(m.role === 'user') appendUserMsg(m.content);
+    else appendBotMsg(m.content);
+  });
+  // 이어서 상담 안내
+  appendBotMsg('이전 상담 내역을 불러왔어요. 이어서 궁금한 점을 물어보세요.');
+  openOverlay('chatPanel');
+  chatUnread = 0;
+  updateFabBadge();
+  setTimeout(()=>{ document.getElementById('chatTa').focus(); }, 400);
+  renderChips();
+}
 
 function openChat(){
   if(!document.getElementById('chatMsgs').children.length){
@@ -2938,6 +3201,7 @@ async function sendMessage(text){
 
   appendUserMsg(text);
   chatHistory.push({role:'user', content:text});
+  saveSession();
   showTyping();
 
   let reply = '';
@@ -2986,6 +3250,7 @@ async function sendMessage(text){
   hideTyping();
 
   chatHistory.push({role:'assistant', content:reply});
+  saveSession();
   appendBotMsg(reply);
 
   // 후속 질문 칩 표시
@@ -2999,6 +3264,12 @@ async function sendMessage(text){
 
   const panel = document.getElementById('chatPanel');
   if(!panel.classList.contains('open')){ chatUnread++; updateFabBadge(); }
+
+  // 리드 수집 CTA (충분한 대화 후)
+  injectLeadCTA();
+
+  // 위저드 전환 제안 (추천 고민 감지 시)
+  injectGuideSuggest();
 
   chatLoading = false;
   document.getElementById('chatSend').disabled = false;
