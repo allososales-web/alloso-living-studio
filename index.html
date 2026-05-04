@@ -905,6 +905,12 @@ body{
 .guide-suggest-btn.sec:hover{color:var(--text)}
 .wizard-chat-btn{display:flex;align-items:center;gap:6px;margin:10px 0;padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .14s;font-size:10px;color:var(--muted);width:100%;text-align:left;font-family:'Noto Sans KR',sans-serif}
 .wizard-chat-btn:hover{border-color:var(--gold-lt);color:var(--accent)}
+/* ── Inline Color Swatch ── */
+.color-swatch{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2px 10px 2px 2px;margin:2px 1px;vertical-align:middle;text-decoration:none;color:inherit;transition:border-color .12s}
+.color-swatch:hover{border-color:var(--gold-lt)}
+.color-swatch-chip{width:22px;height:22px;border-radius:50%;flex-shrink:0;background-size:cover;background-position:center;border:1px solid rgba(0,0,0,.08)}
+.color-swatch-name{font-size:10px;color:var(--text2);white-space:nowrap}
+.color-swatch-art{font-size:8px;color:var(--muted);margin-left:1px}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -2762,6 +2768,66 @@ const PRODUCT_CARDS = {
   '클렉트':     {en:'KLECT',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'26~1,199만', desc:'모듈 시스템 · 높은 커스터마이징'},
 };
 
+const MATERIAL_LIBRARY_URL = 'https://www.alloso.co.kr/decology/material_library';
+const R2_CHIP_BASE = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/materials/';
+const COLOR_CHIPS = {
+  '클라우드':{a:'소프트프리모',h:'#E8E4DF',c:'가죽_클라우드(Cloud).jpg'},
+  '카멜':{a:'소프트프리모',h:'#C4956A',c:'가죽_카멜(Camel).jpg'},
+  '피오니':{a:'소프트프리모',h:'#D4869C',c:'가죽_피오니.jpg'},
+  '파우더':{a:'드리밍헤비',h:'#DDD0C4',c:'가죽_파우더(Powder).jpg'},
+  '노체':{a:'드리밍헤비',h:'#6B4E3D',c:'가죽_노체(Noce).jpg'},
+  '세이지':{a:'드리밍헤비',h:'#9AAA8C',c:'가죽_세이지(Sage).jpg'},
+  '템즈그레이':{a:'드리밍헤비',h:'#7A7570',c:'가죽_템즈그레이(Thames Gray).jpg'},
+  '뮤트블랙':{a:'드리밍헤비',h:'#1E1E1E'},
+  '테라코타':{a:'드리밍헤비',h:'#C07050',c:'가죽_테라크타(Terra cotta).jpg'},
+  '카도마리노':{a:'드리밍헤비',h:'#2A5A38',c:'가죽_카도마리노(Cardo Marino).jpg'},
+  '조이풀옐로우':{a:'드리밍헤비',h:'#E8D060'},
+  '올드로즈':{a:'드리밍헤비',h:'#C89898'},
+  '블루피코크':{a:'드리밍헤비',h:'#3A5A6A'},
+  '셔우드탠':{a:'르아테',h:'#A07C5C',c:'가죽_셔우드탠(Sherwood Tan).jpg'},
+  '모빅':{a:'르아테',h:'#4A4540',c:'가죽_모빅(Movik).jpg'},
+  '버번':{a:'르아테',h:'#8B5E3C',c:'가죽_버번(Bourbon).jpg'},
+  '온드':{a:'르아테',h:'#D8CFD0',c:'가죽_온드(Onde).jpg'},
+  '오비드':{a:'르아테',h:'#5A4A3A',c:'가죽_오비드(Ovid).jpg'},
+  '모튼':{a:'르아테',h:'#8A7060',c:'가죽_모튼(Mouton).jpg'},
+  '프렌치모이어':{a:'베지탄',h:'#8CB4D8',c:'가죽_프렌치 모이어(French Moire).jpg'},
+  '쿠오이오':{a:'베지탄',h:'#9A6E48',c:'가죽_쿠오이오(Quoio).jpg'},
+  '오키드':{a:'베지탄',h:'#8A6880',c:'가죽_오키드(Orchid).jpg'},
+  '아이리쉬':{a:'베지탄',h:'#5E7A5E',c:'가죽_아이리쉬(Irish).jpg'},
+  '마쉬':{a:'단테',h:'#6A7A6A',c:'가죽_마쉬(Marsh).jpg'},
+  '머스키블랙':{a:'단테',h:'#1E1E1E',c:'가죽_머스키블랙(Musky Black).jpg'},
+  '녹스':{a:'단테',h:'#2A2520',c:'가죽_녹스(Nox).jpg'},
+  '토프':{a:'단테',h:'#8A7E70'},
+  '멜로우크림':{a:'노르딕',h:'#F0E6D0',c:'패브릭_멜로우크림(Mellow Cream).jpg'},
+  '핑크블리스':{a:'노르딕',h:'#E8B4B8'},
+  '딥올리브':{a:'노르딕',h:'#5A6E4A',c:'패브릭_딥 올리브(Deep Olive).jpg'},
+  '그레이아울':{a:'솔라',h:'#8A8580',c:'패브릭_그레이 아울(Gray Owl).jpg'},
+  '웜브리즈':{a:'솔라',h:'#E8DDD0'},
+  '이브닝허쉬':{a:'솔라',h:'#5A5550'},
+  '샤모아':{a:'아크레',h:'#D8C8A8'},
+  '블루베이':{a:'아크레',h:'#5A8AA0'},
+  '블러쉬':{a:'아크레',h:'#DAA8A0'},
+  '몬드':{a:'아크레',h:'#C4B090',c:'패브릭_몬드(Mond).jpg'},
+  '쉘':{a:'스칼렛',h:'#E8DCD0'},
+  '머스탱':{a:'스칼렛',h:'#6A4A3A',c:'패브릭_머스탱(Mustang).jpg'},
+  '마리골드':{a:'스칼렛',h:'#D4A040',c:'패브릭_마리골드(Marigold).jpg'},
+  '클레이':{a:'스칼렛',h:'#B09080'},
+  '아이린':{a:'루소',h:'#D0C8C0'},
+  '뮤티드핑크':{a:'루소',h:'#C8A0A0',c:'패브릭_뮤티드 핑크(Muted pink).jpg'},
+  '셀릭':{a:'루소',h:'#7A7A7A'},
+  '시나몬':{a:'라리오',h:'#A06040'},
+  '우드랜드':{a:'라리오',h:'#5A6850'},
+  '코스믹블루':{a:'라리오',h:'#3A4A6A'},
+  '마누카':{a:'릴레이트',h:'#D0B890',c:'패브릭_마누카(Manuka).jpg'},
+  '미모사':{a:'릴레이트',h:'#E0C848',c:'패브릭_미모사(Mimosa).jpg'},
+  '모스':{a:'릴레이트',h:'#5A6A48',c:'패브릭_모스(Moss).jpg'},
+  '민트밤':{a:'릴레이트',h:'#A0C0A8',c:'패브릭_민트 밤(Mint Balm).jpg'},
+  '번트엄버':{a:'릴레이트',h:'#6A4A38'},
+  '카놀리크림':{a:'부클레',h:'#F0E8D0'},
+  '허니콤':{a:'부클레',h:'#D4B060'},
+  '아이스블루':{a:'부클레',h:'#B0C8D8'},
+};
+
 const CHAT_SYSTEM = `당신은 Alloso 전용 AI 리빙 어드바이저 'ALMA'입니다.
 
 【핵심 규칙 — 반드시 준수】
@@ -2978,6 +3044,13 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
 - 고객이 체계적 추천을 원하는 느낌이면("뭐가 좋을지 모르겠어요", "비교해주세요") 답변 마지막에 "체계적으로 찾아보고 싶으시면 **단계별 상담**도 준비되어 있어요." 정도로 자연스럽게 안내. 강제 유도하지 마세요.
 
+【컬러 스와치 표시 규칙】
+- 특정 컬러를 추천하거나 언급할 때 [SWATCH:컬러명] 마커를 사용하세요.
+- 컬러명은 공백 없이: 멜로우크림, 핑크블리스, 카도마리노, 그레이아울, 뮤트블랙, 버번, 코스믹블루 등
+- 고객이 실제 색감을 볼 수 있도록 칩 이미지가 인라인으로 표시됩니다.
+- 예시: "따뜻한 느낌을 원하시면 [SWATCH:멜로우크림]이나 [SWATCH:카놀리크림] 컬러가 잘 어울려요."
+- 한 답변에 최대 4~5개까지. 컬러를 단순 나열하지 말고 추천 이유와 함께 자연스럽게 배치하세요.
+
 【라이프스타일 추천 매핑】
 고객이 생활 장면을 언급하면 제품+소재+컬러를 자연스럽게 연결하세요.
 - "아이가 있어요" → 홀리데이, 에브리데이, 사티 + 노르딕/루소(워터프루프) + 밝은 톤
@@ -3189,6 +3262,20 @@ function formatMsg(text){
   // [STUDIO_LINK] → 3D 스튜디오 딥링크 버튼
   html = html.replace(/\[STUDIO_LINK\]/g, function(){
     return `<a class="studio-deeplink" href="${buildStudioDeeplink()}" target="_blank">3D 스튜디오 열기 →</a>`;
+  });
+  // [SWATCH:컬러명] → 인라인 컬러 칩 스와치
+  html = html.replace(/\[SWATCH:([^\]]+)\]/g, function(match, name){
+    const key = name.trim().replace(/\s/g,'');
+    const c = COLOR_CHIPS[key] || COLOR_CHIPS[name.trim()];
+    if(!c) return name.trim();
+    const chipStyle = c.c
+      ? `background-image:url('${R2_CHIP_BASE}${encodeURI(c.c)}');background-color:${c.h}`
+      : `background:${c.h}`;
+    return `<a class="color-swatch" href="${MATERIAL_LIBRARY_URL}" target="_blank">
+      <div class="color-swatch-chip" style="${chipStyle}"></div>
+      <span class="color-swatch-name">${name.trim()}</span>
+      <span class="color-swatch-art">${c.a}</span>
+    </a>`;
   });
   return html;
 }
