@@ -3111,6 +3111,37 @@ function appendBotMsg(text){
   scrollMsgs();
 }
 
+/* 스트리밍용: 빈 버블 생성 → 텍스트 점진 업데이트 → 완료 시 formatMsg 적용 */
+function createStreamBubble(){
+  const msgs = document.getElementById('chatMsgs');
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.innerHTML = `
+    <div class="msg-av">A</div>
+    <div>
+      <div class="msg-bubble bot" id="streamBubble"></div>
+      <div class="msg-time">${nowTime()}</div>
+    </div>`;
+  msgs.appendChild(row);
+  scrollMsgs();
+  return document.getElementById('streamBubble');
+}
+
+function updateStreamBubble(bubble, text){
+  // 스트리밍 중에는 간단한 포맷만 (볼드 + 줄바꿈)
+  bubble.innerHTML = escHtml(text)
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+  scrollMsgs();
+}
+
+function finalizeStreamBubble(bubble, text){
+  // 스트리밍 완료 후 제품카드 등 풀 포맷 적용
+  bubble.innerHTML = formatMsg(text);
+  bubble.removeAttribute('id');
+  scrollMsgs();
+}
+
 function showTyping(){
   const msgs = document.getElementById('chatMsgs');
   const row = document.createElement('div');
@@ -3207,8 +3238,9 @@ async function sendMessage(text){
   let reply = '';
   let followChips = [];
   let usedAPI = false;
+  let streamRendered = false;
 
-  // ── 1차: Anthropic API 시도 (맥락 요약 포함) ──
+  // ── 1차: Anthropic API 시도 (스트리밍 + 맥락 요약) ──
   try {
     let apiMessages = chatHistory.filter(m=>m.role==='user'||m.role==='assistant');
     let systemWithContext = CHAT_SYSTEM;
@@ -3226,12 +3258,50 @@ async function sendMessage(text){
         messages: apiMessages
       })
     });
-    if(apiRes.ok){
+    if(apiRes.ok && apiRes.headers.get('content-type')?.includes('text/event-stream')){
+      // ── 스트리밍 응답 처리 ──
+      hideTyping();
+      const bubble = createStreamBubble();
+      const reader = apiRes.body.getReader();
+      const decoder = new TextDecoder();
+      let streamText = '';
+      let buffer = '';
+
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        buffer += decoder.decode(value, {stream:true});
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for(const line of lines){
+          if(!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if(data === '[DONE]') continue;
+          try {
+            const evt = JSON.parse(data);
+            if(evt.text){
+              streamText += evt.text;
+              updateStreamBubble(bubble, streamText);
+            }
+          } catch(e){}
+        }
+      }
+
+      if(streamText.length > 5){
+        reply = streamText;
+        usedAPI = true;
+        streamRendered = true;
+        finalizeStreamBubble(bubble, streamText);
+        followChips = ['추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어'];
+      } else {
+        bubble.closest('.msg-row')?.remove();
+      }
+    } else if(apiRes.ok){
+      // ── 비스트리밍 폴백 (JSON 응답) ──
       const data = await apiRes.json();
       if(data.reply && data.reply.length > 5){
         reply = data.reply;
         usedAPI = true;
-        // API 응답 후 기본 후속 칩
         followChips = ['추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어'];
       }
     }
@@ -3245,13 +3315,18 @@ async function sendMessage(text){
     const result = getDemoReply(text);
     reply = typeof result === 'string' ? result : result.text;
     followChips = typeof result === 'string' ? [] : (result.chips || []);
+    hideTyping();
+    appendBotMsg(reply);
   }
 
-  hideTyping();
+  // 비스트리밍 API 응답 렌더링
+  if(usedAPI && !streamRendered){
+    hideTyping();
+    appendBotMsg(reply);
+  }
 
   chatHistory.push({role:'assistant', content:reply});
   saveSession();
-  appendBotMsg(reply);
 
   // 후속 질문 칩 표시
   if(followChips.length > 0){
