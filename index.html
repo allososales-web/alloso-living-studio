@@ -911,6 +911,21 @@ body{
 .color-swatch-chip{width:22px;height:22px;border-radius:50%;flex-shrink:0;background-size:cover;background-position:center;border:1px solid rgba(0,0,0,.08)}
 .color-swatch-name{font-size:10px;color:var(--text2);white-space:nowrap}
 .color-swatch-art{font-size:8px;color:var(--muted);margin-left:1px}
+/* ── Compare Card ── */
+.compare-card{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:10px 0;background:var(--card)}
+.compare-col{padding:12px}
+.compare-col+.compare-col{border-left:1px solid var(--border)}
+.compare-img{width:100%;aspect-ratio:4/3;border-radius:6px;background:var(--bg2);object-fit:cover;margin-bottom:8px}
+.compare-name{font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
+.compare-ko{font-size:9px;color:var(--muted);margin-top:1px;margin-bottom:8px}
+.compare-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px}
+.compare-row:last-child{border-bottom:none}
+.compare-label{color:var(--muted)}
+.compare-val{color:var(--text2);text-align:right;max-width:60%}
+.compare-price{font-size:11px;color:var(--gold);margin-top:8px;font-weight:400}
+.compare-link{display:block;text-align:center;font-size:9px;color:var(--muted);margin-top:6px;text-decoration:none;letter-spacing:.06em}
+.compare-link:hover{color:var(--accent)}
+@media(max-width:360px){.compare-card{grid-template-columns:1fr;}.compare-col+.compare-col{border-left:none;border-top:1px solid var(--border)}}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -1371,7 +1386,7 @@ body{
 // DATA
 // ════════════════════════════════════
 const SERIES = {
-  '레지나':    {type:'다리형', mood:['classic','refined'],           minSqm:14, w:[2200,3070], desc:'아치형 다리와 클래식한 실루엣.',
+  '레지나':    {type:'다리형', mood:['classic','refined'],           minSqm:14, w:[2200,3070], desc:'클래식 다리형. 단종 예정, 재고 한정 운영.',
     price:{ess_f:[2190000,3090000],prem_f:[2390000,3990000],design_f:[2390000,3390000],ess_l:[2490000,3790000],prem_l:[2990000,4990000],hi_l:[4990000,7390000]}},
   '보눔OP':   {type:'오픈암', mood:['modern','minimal'],            minSqm:16, w:[2320,3200], desc:'팔걸이 없이 공간감을 극대화.',
     price:{ess_f:[2790000,3890000],prem_f:[2890000,4870000],design_f:[2890000,4140000],ess_l:[3390000,4900000],prem_l:[3880000,6190000],hi_l:[5980000,8190000]}},
@@ -1385,9 +1400,9 @@ const SERIES = {
     price:{ess_f:[570000,4390000],prem_f:[590000,5090000],design_f:[570000,5090000],ess_l:[670000,5390000],prem_l:[730000,6750000],hi_l:[990000,8490000]}},
   '사티모션': {type:'리클라이너', mood:['relaxation','luxury'],    minSqm:18, w:[2080], desc:'전동 리클라이너. 완전한 휴식 자세.',
     price:{ess_f:[2490000,4980000],prem_f:[2540000,5380000],design_f:[2540000,5380000],ess_l:[2790000,5580000],prem_l:[3090000,6580000],hi_l:[4190000,8380000]}},
-  '케렌시아': {type:'로우 모듈', mood:['natural','warm'],          minSqm:20, w:[2050,3000,3150], desc:'자유 모듈, 트렌디한 낮은 높이.',
+  '케렌시아': {type:'로우 모듈', mood:['natural','warm'],          minSqm:20, w:[2050,3000,3150], desc:'애쉬 원목 다리(5cm/15cm 선택), 감싸안는 로우 디자인.',
     price:{ess_f:[1100000,5080000],prem_f:[1200000,6180000],design_f:[1200000,6180000],ess_l:[1200000,5580000],prem_l:[1500000,7580000],hi_l:[2200000,9480000]}},
-  '바드':     {type:'스칸디', mood:['scandinavian','minimal'],     minSqm:14, w:[1800,1900,2600], desc:'가느다란 원목 다리, 스칸디 감성.',
+  '바드':     {type:'스칸디', mood:['scandinavian','minimal'],     minSqm:14, w:[1900,2600], desc:'스틸다리(블랙/크롬), 간결한 직선형 스칸디 감성. 데이베드 전환 가능.',
     price:{ess_f:[160000,3580000],prem_f:[180000,4260000],design_f:[180000,4260000],ess_l:[190000,3980000],prem_l:[230000,5280000],hi_l:[390000,7980000]}},
   '스탠':     {type:'대형',   mood:['luxury','contemporary'],     minSqm:24, w:[2580,3580,4780], desc:'넓고 깊은 프리미엄 대형 소파.',
     price:{prem_f:[1500000,12130000],design_f:[1500000,12130000],prem_l:[1900000,14980000],hi_l:[2700000,20490000]}},
@@ -2637,14 +2652,14 @@ function injectLeadCTA(){
   const session = getSessionSummary();
   const seriesText = session && session.topSeries ? session.topSeries + ' 관련 ' : '';
   cta.innerHTML = `
-    <div class="lead-cta-title">📋 ${seriesText}상담 내용을 보내드릴까요?</div>
-    <div class="lead-cta-desc">연락처를 남겨주시면 상담 요약과 추천 제품을 보내드려요.<br>매장 방문 전 참고하시기 좋아요.</div>
+    <div class="lead-cta-title">📋 ${seriesText}상담 연결해 드릴까요?</div>
+    <div class="lead-cta-desc">연락처를 남겨주시면 전문 컨설턴트가 직접 연락드려요.<br>매장 방문 예약이나 추가 상담을 도와드립니다.</div>
     <div class="lead-form" id="leadForm">
-      <input class="lead-input" id="leadName" placeholder="이름" maxlength="20">
-      <input class="lead-input" id="leadContact" placeholder="휴대폰 또는 이메일" maxlength="60">
+      <input class="lead-input" id="leadName" placeholder="이름 (선택)" maxlength="20">
+      <input class="lead-input" id="leadContact" placeholder="휴대폰 번호" maxlength="60">
       <div class="lead-row">
-        <button class="lead-submit" onclick="submitLead()">보내기</button>
-        <button class="lead-dismiss" onclick="dismissLead()">다음에 할게요</button>
+        <button class="lead-submit" onclick="submitLead()">상담 신청</button>
+        <button class="lead-dismiss" onclick="dismissLead()">괜찮아요</button>
       </div>
     </div>`;
   msgs.appendChild(cta);
@@ -2664,7 +2679,7 @@ async function submitLead(){
 
   const btn = document.querySelector('.lead-submit');
   btn.disabled = true;
-  btn.textContent = '전송 중...';
+  btn.textContent = '신청 중...';
 
   // 관심 시리즈 + 대화 요약 추출
   const session = getSessionSummary();
@@ -2687,9 +2702,9 @@ async function submitLead(){
     console.warn('[Lead] Submit failed:', e.message);
   }
 
-  // 성공 표시 (API 실패해도 UX는 성공으로)
+  // 성공 표시
   const form = document.getElementById('leadForm');
-  form.innerHTML = '<div class="lead-done">✓ 감사합니다! 빠른 시일 내 연락드릴게요.</div>';
+  form.innerHTML = '<div class="lead-done">✓ 신청 완료! 컨설턴트가 곧 연락드릴게요.</div>';
   leadSubmitted = true;
 }
 
@@ -2765,7 +2780,11 @@ const PRODUCT_CARDS = {
   '카포네 그랑':{en:'CAPONE GRAND',url:'https://www.alloso.co.kr/collection/list', img:'', price:'318~1,089만', desc:'대형 섹셔널 · 코너 구성'},
   '레지나':     {en:'REGINA',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'219~739만', desc:'클래식 다리형 · 격식 있는 디자인'},
   '사티모션':   {en:'SATI MOTION',url:'https://www.alloso.co.kr/collection/list', img:'', price:'249~838만', desc:'전동 리클라이너 · 원터치 각도 조절'},
-  '클렉트':     {en:'KLECT',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'26~1,199만', desc:'모듈 시스템 · 높은 커스터마이징'},
+  '사티큐브':   {en:'SATI CUBE',  url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'1인 감싸안는 구조 · 스위블 360° 회전'},
+  '디딤':       {en:'DIDIM',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'좌식+입식 모듈 · Note Design Studio · 2026 신제품'},
+  '클렉트':     {en:'KLECT',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'26~1,199만', desc:'모듈 시스템 · 단종 예정 · 재고 한정'},
+  '레지나':     {en:'REGINA',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'219~739만', desc:'클래식 다리형 · 단종 예정 · 재고 한정'},
+  '케렌시아1인':{en:'QUERENCIA 1P',url:'https://www.alloso.co.kr/collection/detail?categoryNo=82', img:'', price:'미정', desc:'아트 오브제형 1인 · 유선형 디자인'},
 };
 
 const MATERIAL_LIBRARY_URL = 'https://www.alloso.co.kr/decology/material_library';
@@ -2850,11 +2869,49 @@ const CHAT_SYSTEM = `당신은 Alloso 전용 AI 리빙 어드바이저 'ALMA'입
 
 【브랜드】 Alloso — 퍼시스그룹 하이엔드 소파 브랜드. 주문제작. 친환경 E0 목재.
 
-【소파 시리즈 16종】
-- 레지나(다리형, 219~739만) 바드(스칸디나비안, 16~798만) 보눔OP(오픈암, 279~819만) 보눔FU(모듈, 64~898만)
-- 카포네(쿠션백, 54~699만) 카포네그랑(섹셔널, 318~1089만) 사티(모던, 57~849만) 사티모션(리클라이너, 249~838만)
-- 케렌시아(로우모듈, 110~948만) 스탠(대형, ~2049만) 테오(대형, ~1808만) 밀로(모듈, ~2176만)
-- 비하르(로우, 15~1066만) 클렉트(모듈, 26~1199만) 에브리데이(캐주얼, 152만~) 홀리데이(가족, 89만~)
+【소파 시리즈 — 현재 운영】
+- 사티(모던, 57~849만) 사티모션(리클라이너, 249~838만) 사티큐브(1인 감싸안는 구조, 스위블 360°회전)
+- 케렌시아(로우모듈, 110~948만) 케렌시아1인(아트 오브제형) 보눔OP(오픈암, 279~819만) 보눔FU(모듈, 64~898만)
+- 바드(스칸디나비안, 16~798만) 홀리데이(가족, 89만~) 에브리데이(캐주얼, 152만~)
+- 카포네(쿠션백, 54~699만) 카포네그랑(섹셔널, 318~1089만)
+- 스탠(대형, ~2049만) 밀로(모듈, ~2176만) 비하르(로우, 15~1066만)
+- 디딤(좌식+입식 모듈, 2026 신제품) 엘머(1인 전용, 458~558만)
+- 단종: 레지나(재고 한정), 클렉트(재고 한정), 테오(재고 한정)
+- 테이블: 케렌시아 테이블(사이드, Ø400 H535, 애쉬원목+스틸), 디딤 소반
+
+【바드 상세 — AI가 반드시 참조】
+- 품목: 3인(W2600 D900 H860), 2인 싱글베드(W1900 D900 H860), 데이베드, 오토만(W840 D600 H380), 플랫쿠션(W580 D580 H120)
+- 다리: 스틸다리 2색(블랙/크롬). 원목 다리 아님. 높이 조절 불가.
+- 헤드레스트: 없음. 조절형 헤드레스트 미지원.
+- 등받이: 등받이를 뒤로 눕히면 데이베드(침대)로 전환 가능 (데이베드 구성만)
+- 내장재: 40K 고밀도 폼 + 마이크로파이버(26년 2월 구스에서 변경) + 다운필 등쿠션 + 새니타이즈 항균 솜
+- 기타: 이탈리아 Intes 고탄성 밴드, S자 스프링, 하부 메쉬 마감
+- 쿠션: 등받이쿠션 + 플랫쿠션 포함 (3인: 각 2EA, 2인: 각 1EA)
+- 컨셉: 덴마크어로 '가치'. 간결한 직선형, 미니멀 스케일, 슬림한 팔걸이+등받이
+- 타겟: 20평 이상, 깔끔하고 모던한 스타일 선호, 로봇청소기 사용 가능
+
+【케렌시아 상세 — AI가 반드시 참조】
+- 품목: 3모듈 라운지(W2040 D2050 H750), 코너 라운지(W3180 D2140 H750), 싱글라운지(W2050 D1020 H750), 싱글(W1085 D1020 H750), 1인(W1145 D945 H750)
+- 다리: 애쉬 원목 다리 (24/11/15 리뉴얼). 5cm(로우) / 15cm(하이) 구매 시 선택 가능 (추가요금 없음). 추후 별도 추가구매도 가능.
+- 디자이너: Claudio Bellini. 2020 IDEA, 2021 Design Award 수상.
+- 컨셉: 한국 좌식 문화를 반영한 저상형 소파. '케렌시아'는 투우가 쉬는 안식처를 뜻함.
+- 특징: 팔걸이~등받이 아치형 실루엣, 깊은 좌판(눕기 가능), 럼버쿠션으로 허리 지지, 어린 자녀·반려동물에 안전한 낮은 좌고.
+- 쿠션: 럼버 쿠션 + 사이드 쿠션 포함.
+
+【디딤 상세 — 2026 신제품, AI가 반드시 참조】
+- 품목: 4모듈 라운지(W1920 D1920 H650, 102kg), 패밀리 라운지(W1920 D1920 H650, 95kg), 4인(W2880 D960 H650, 94kg), 1인 코너(W960 D960 H650), 암리스(W960 D960 H650), 오토만(W960 D960 H375)
+- 다리: 글라이더 (스틸다리·원목 아님)
+- 디자이너: Note Design Studio
+- 컨셉: 좌식 생활과 전통 가옥에서 영감. '디디다(밟다)'에서 비롯된 이름. 좌식+입식 모두 아우르는 소파.
+- 특징: 4개 모듈 좌/우 구분 없이 4방향 사용 가능, 단차를 통해 어린이~반려동물까지 자유 사용, 라지 쿠션+서포트 쿠션 옵션.
+- 내장재: 40K+35K 고밀도 폼 + 마이크로파이버, 스위스 simalfa 수성 접착제, 이태리 Intes 고탄성 밴드
+- 디딤 소반: 디딤과 함께 사용하는 사이드 테이블
+
+【사티 큐브 상세 — 신제품, AI가 반드시 참조】
+- 품목: 1인(W920 D900 H740, 32kg), 스위블 1인(W920 D900 H750, 360° 회전 기능)
+- 컨셉: "나에게 꼭 맞는 거실 속 작은 방". 감싸안는 형상으로 어깨 라인 안정적 지지.
+- 스위블: 360도 회전으로 풍요로운 소파 위 생활 지원. 오프라인 매장 전용(테스트 운영 중).
+- 디자이너: Studio One
 
 【가죽 — 3개 등급·6개 아티클】
 
@@ -3051,19 +3108,26 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 예시: "따뜻한 느낌을 원하시면 [SWATCH:멜로우크림]이나 [SWATCH:카놀리크림] 컬러가 잘 어울려요."
 - 한 답변에 최대 4~5개까지. 컬러를 단순 나열하지 말고 추천 이유와 함께 자연스럽게 배치하세요.
 
+【소파 비교 표시 규칙】
+- 고객이 두 시리즈를 비교하거나 "차이점", "vs", "뭐가 다른지" 물으면 답변 끝에 [COMPARE:시리즈A,시리즈B] 마커를 넣으세요.
+- 예시: "사티와 보눔은 이런 차이가 있어요.\n\n[COMPARE:사티,보눔OP]"
+- 한 답변에 비교 카드는 1개만. 비교 전에 텍스트로 핵심 차이를 설명해주세요.
+
 【라이프스타일 추천 매핑】
 고객이 생활 장면을 언급하면 제품+소재+컬러를 자연스럽게 연결하세요.
-- "아이가 있어요" → 홀리데이, 에브리데이, 사티 + 노르딕/루소(워터프루프) + 밝은 톤
-- "반려동물" → 사티, 에브리데이 + 루소(더블플로킹) + 소프트프리모
-- "서재/1인" → 엘머, 케렌시아, 바드 데이베드 + 르아테 레더 + 버번/코스믹블루
+- "아이가 있어요" → 홀리데이, 에브리데이, 디딤(좌식+입식, 단차 안전) + 노르딕/루소(워터프루프) + 밝은 톤
+- "반려동물" → 사티, 에브리데이, 디딤(낮은 높이, 안전) + 루소(더블플로킹) + 소프트프리모
+- "서재/1인" → 엘머, 사티큐브(감싸안는 1인+스위블), 케렌시아1인 + 르아테 레더 + 버번/코스믹블루
 - "넓은 거실" → 스탠, 카포네 그랑, 밀로 + 드리밍헤비 + 릴레이트
-- "미니멀/모던" → 사티, 보눔, 테오 + 솔라 + 그레이아울/뮤트블랙
+- "미니멀/모던" → 사티, 보눔, 바드 + 솔라 + 그레이아울/뮤트블랙
 - "내추럴/북유럽" → 바드, 비하르, 케렌시아 + 부클레위브/노르딕 + 웜톤
-- "럭셔리/고급" → 레지나, 카포네 그랑, 케렌시아 + 베지탄/단테
+- "좌식/바닥 생활" → 디딤(좌식+입식 전환), 케렌시아(5cm 로우), 비하르 + 부클레/노르딕
+- "럭셔리/고급" → 카포네 그랑, 케렌시아, 스탠 + 베지탄/단테
 - "커플/신혼" → 사티 2인, 바드, 보눔 + 아크레(블러쉬/몬드)
 - "눕기/낮잠" → 바드 데이베드, 사티모션, 케렌시아 + 부클레/드리밍헤비 파우더
 - "TV/영화" → 사티모션, 홀리데이, 스탠 + 소프트프리모/솔라
-- "접대/손님" → 레지나, 카포네, 보눔 + 드리밍헤비/릴레이트`;
+- "접대/손님" → 카포네(쿠션백, 세련된 인상), 보눔(오픈암, 공간감) + 드리밍헤비/릴레이트
+- 단종 시리즈(레지나, 클렉트, 테오) 문의 시: "현재 재고 한정으로 운영 중이에요. 매장에 재고 확인 후 안내드릴 수 있어요."라고 안내`;
 
 const QUICK_CHIPS = [
   '추천 소파 알려줘',
@@ -3276,6 +3340,35 @@ function formatMsg(text){
       <span class="color-swatch-name">${name.trim()}</span>
       <span class="color-swatch-art">${c.a}</span>
     </a>`;
+  });
+  // [COMPARE:시리즈A,시리즈B] → 나란히 비교 카드
+  html = html.replace(/\[COMPARE:([^\]]+)\]/g, function(match, names){
+    const parts = names.split(',').map(n=>n.trim());
+    if(parts.length < 2) return '';
+    const cols = parts.slice(0,2).map(name => {
+      const s = SERIES[name];
+      const p = PRODUCT_CARDS[name];
+      if(!s) return null;
+      const minP = s.price?.ess_f?.[0] || s.price?.prem_f?.[0] || 0;
+      const maxP = Object.values(s.price||{}).reduce((mx,arr)=>Math.max(mx,arr[1]||0),0);
+      const priceText = minP && maxP ? Math.round(minP/10000)+'~'+Math.round(maxP/10000)+'만원' : '';
+      const widths = s.w.map(w=>Math.round(w/10)+'cm').join(' / ');
+      const imgHtml = p?.img ? `<img class="compare-img" src="${p.img}" alt="${name}" onerror="this.style.display='none'">` : '';
+      const url = p?.url || MATERIAL_LIBRARY_URL;
+      return `<div class="compare-col">
+        ${imgHtml}
+        <div class="compare-name">${p?.en||name}</div>
+        <div class="compare-ko">${name}</div>
+        <div class="compare-row"><span class="compare-label">유형</span><span class="compare-val">${s.type}</span></div>
+        <div class="compare-row"><span class="compare-label">폭</span><span class="compare-val">${widths}</span></div>
+        <div class="compare-row"><span class="compare-label">최소 공간</span><span class="compare-val">${s.minSqm}평~</span></div>
+        <div class="compare-row"><span class="compare-label">특징</span><span class="compare-val">${s.desc.slice(0,30)}</span></div>
+        <div class="compare-price">${priceText}</div>
+        <a class="compare-link" href="${url}" target="_blank">자세히 보기 →</a>
+      </div>`;
+    }).filter(Boolean);
+    if(cols.length < 2) return '';
+    return `<div class="compare-card">${cols.join('')}</div>`;
   });
   return html;
 }
@@ -3517,8 +3610,15 @@ function getDemoReply(text){
     return R('고객님의 공간과 생활 패턴에 따라 추천이 달라져요.\n\n· **1인 가구** → 사티 1인, 바드\n· **패밀리** → 카포네그랑, 홀리데이\n· **반려동물** → 루소 패브릭 + 카포네\n· **럭셔리 로우** → 케렌시아, 비하르\n\n**Alloso Studio**에서 공간 사이즈를 입력하면 AI가 맞춤 추천해 드려요.',['3D 스튜디오에서 배치해볼래요','반려동물 추천 소재는?','가격대가 궁금해요']);
 
   // ── 비교 (신규) ──
-  if(t.includes('비교'))
-    return R('어떤 시리즈를 비교하고 싶으신가요?\n\n· **사티 vs 레지나** — 모던 미니멀 vs 클래식\n· **카포네 vs 보눔** — 쿠션백 vs 오픈암\n· **케렌시아 vs 비하르** — 럭셔리 로우 vs 내추럴 로우\n\n구체적인 시리즈명을 말씀해주시면 상세 비교해 드려요.',['사티 vs 레지나 차이가 뭐야?','카포네 vs 보눔 비교해줘']);
+  if(t.includes('비교')){
+    // 특정 시리즈 2개가 언급된 경우 자동 비교
+    const seriesNames = Object.keys(SERIES);
+    const mentioned = seriesNames.filter(s => t.includes(s));
+    if(mentioned.length >= 2){
+      return R(`**${mentioned[0]}**와 **${mentioned[1]}**를 비교해 드릴게요.\n\n[COMPARE:${mentioned[0]},${mentioned[1]}]`,['다른 시리즈도 비교해줘','매장에서 직접 보고 싶어']);
+    }
+    return R('어떤 시리즈를 비교하고 싶으신가요?\n\n· **사티 vs 레지나** — 모던 미니멀 vs 클래식\n· **카포네 vs 보눔** — 쿠션백 vs 오픈암\n· **케렌시아 vs 비하르** — 럭셔리 로우 vs 내추럴 로우\n\n구체적인 시리즈명을 말씀해주시면 상세 비교해 드려요.',['사티 vs 레지나 비교해줘','카포네 vs 보눔 비교해줘']);
+  }
 
   // ── 상담/예약 ──
   if(t.includes('상담 예약')||t.includes('인테리어 상담')||t.includes('상담 받'))
