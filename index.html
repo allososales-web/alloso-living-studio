@@ -3380,12 +3380,26 @@ function buildStudioDeeplink(){
   let url = '/alloso-studio.html';
   const params = [];
   const lastMsgs = chatHistory.slice(-6).map(m=>m.content).join(' ');
-  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','클렉트'];
+  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','클렉트','로바','라임','사티큐브','디딤'];
   for(const s of seriesNames){
     if(lastMsgs.includes(s)){params.push('sofa='+encodeURIComponent(s));break;}
   }
   if(params.length) url += '?' + params.join('&');
   return url;
+}
+
+/* ── C: 맥락 기반 동적 후속 칩 ── */
+function generateContextChips(reply, userMsg){
+  const combined = (reply + ' ' + userMsg);
+  const chips = [];
+  const series = ['사티','케렌시아','보눔','바드','엘머','스탠','비하르','카포네','홀리데이','에브리데이','밀로','디딤'].filter(s=>reply.includes(s));
+  if(series.length >= 2) chips.push(series[0]+' vs '+series[1]+' 비교해줘');
+  if(series.length >= 1 && !combined.includes('가격') && !combined.includes('얼마')) chips.push(series[0]+' 가격 알려줘');
+  if(combined.includes('패브릭')||combined.includes('레더')||combined.includes('가죽')||combined.includes('소재')) chips.push('소재 샘플 받고 싶어');
+  if(combined.includes('가격')||combined.includes('얼마')||combined.includes('만원')){chips.push('패브릭 vs 레더 차이는?');chips.push('매장에서 직접 보고 싶어');}
+  if(combined.includes('추천')||combined.includes('어울')){chips.push('3D 스튜디오에서 배치해볼래요');chips.push('소재 차이 알려줘');}
+  if(chips.length === 0) chips.push('추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어');
+  return chips.slice(0, 3);
 }
 
 function escHtml(s){
@@ -3475,7 +3489,7 @@ async function sendMessage(text){
         usedAPI = true;
         streamRendered = true;
         finalizeStreamBubble(bubble, streamText);
-        followChips = ['추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어'];
+        followChips = generateContextChips(reply, text);
       } else {
         bubble.closest('.msg-row')?.remove();
       }
@@ -3485,7 +3499,7 @@ async function sendMessage(text){
       if(data.reply && data.reply.length > 5){
         reply = data.reply;
         usedAPI = true;
-        followChips = ['추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어'];
+        followChips = generateContextChips(reply, text);
       }
     }
   } catch(e){
@@ -3561,11 +3575,11 @@ function getDemoReply(text){
 
   // ── 아이·자녀 + 소재 ──
   if((t.includes('아이')||t.includes('아기')||t.includes('자녀')||t.includes('어린이')||t.includes('유아')||t.includes('육아'))&&(t.includes('추천')||t.includes('패브릭')||t.includes('소재')||t.includes('뭐가')||t.includes('어떤')))
-    return R('아이가 있는 가정이라면 **이지 케어 패브릭** 또는 **노르딕(Aquaclean 워터프루프)**이 최적이에요.\n\n· 음료·음식 흘려도 **물만으로 세척** 가능\n· 오코텍스 CLASS 1 인증으로 **유아 안전** 보장\n· 어두운 색상(차콜·네이비)보다 **중간 톤(샌드·웜그레이)**이 오염이 덜 눈에 띄어요\n\n시리즈는 **홀리데이**(패밀리·포근)나 **카포네그랑**(내구성·대가족)을 추천드려요.',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요','매장에서 직접 보고 싶어']);
+    return R('아이가 있는 가정이라면 **이지 케어 패브릭** 또는 **노르딕(Aquaclean 워터프루프)**이 최적이에요.\n\n· 음료·음식 흘려도 **물만으로 세척** 가능\n· 오코텍스 CLASS 1 인증으로 **유아 안전** 보장\n\n시리즈는 **홀리데이**(패밀리·포근)나 **카포네그랑**(내구성·대가족)을 추천드려요. [SWATCH:멜로우크림]이나 [SWATCH:웜브리즈] 같은 밝은 톤이 따뜻해요.\n\n[PRODUCT:홀리데이]\n[PRODUCT:에브리데이]',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요','매장에서 직접 보고 싶어']);
 
   // ── 고양이/강아지 + 발톱/내구성/스크래치 ──
   if((t.includes('고양이')||t.includes('강아지')||t.includes('발톱')||t.includes('스크래치'))&&(t.includes('내구')||t.includes('색상')||t.includes('추천')||t.includes('어떤')||t.includes('좋')||t.includes('컬러')))
-    return R('반려동물 발톱 내구성에는 **루소 패브릭**(직조감이 촘촘해서 올이 안 뜯김)이 가장 강해요.\n\n· 색상은 **중간 톤(샌드·웜그레이·세이지)**이 털과 스크래치가 덜 눈에 띄어요\n· 짙은 색(미드나잇·차콜)은 밝은 털이, 밝은 색(아이보리)은 어두운 털이 눈에 띄니 **반려동물 털 색상과 비슷한 톤**을 고르세요\n· 노르딕 워터프루프도 좋지만 발톱 내구성은 루소가 한 수 위예요\n\n시리즈는 **카포네**(쿠션백, 낮은 높이)가 반려동물 가정에 인기 많아요.',['소재 샘플 받고 싶어','매장에서 직접 보고 싶어']);
+    return R('반려동물 발톱 내구성에는 **루소 패브릭**(직조감이 촘촘해서 올이 안 뜯김)이 가장 강해요.\n\n· **반려동물 털 색상과 비슷한 톤**을 고르면 털이 덜 눈에 띄어요\n· 노르딕 워터프루프도 좋지만 발톱 내구성은 루소가 한 수 위예요\n\n시리즈는 **카포네**(쿠션백, 낮은 높이)가 반려동물 가정에 인기 많아요.\n\n[PRODUCT:카포네]\n[PRODUCT:에브리데이]',['소재 샘플 받고 싶어','매장에서 직접 보고 싶어']);
 
   // ── 3+1 vs 4인 / 조합 고민 ──
   if((t.includes('3인')||t.includes('3+1')||t.includes('3인+1인'))&&(t.includes('4인')||t.includes('고민')||t.includes('기준')||t.includes('vs')||t.includes('어떤')))
@@ -3577,19 +3591,25 @@ function getDemoReply(text){
 
   // ── 좁은 공간 / 원룸 / 작은 거실 ──
   if(t.includes('좁')||t.includes('작은 거실')||t.includes('원룸')||t.includes('소형'))
-    return R('작은 공간에는 **컴팩트한 시리즈**가 좋아요.\n\n· **사티 1인** (W85cm) — 원룸·서재에 딱\n· **바드** (W180cm~) — 스칸디 감성, 슬림한 깊이 88cm\n· **사티 2인** (W220cm) — 미니멀하지만 충분한 좌석\n\n소파 앞 통행 공간 **최소 45cm**만 확보하면 돼요.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
+    return R('작은 공간에는 **컴팩트한 시리즈**가 좋아요.\n\n· **바드** (W190cm~) — 스칸디 감성, 슬림한 깊이\n· **사티 2인** (W220cm) — 미니멀하지만 충분한 좌석\n· **엘머** — 1인 전용, 서재·원룸에 딱\n\n소파 앞 통행 공간 **최소 45cm**만 확보하면 돼요.\n\n[PRODUCT:바드]\n[PRODUCT:엘머]',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
 
   // ── 넓은 공간 / 대형 ──
   if(t.includes('넓')||t.includes('대형')||t.includes('큰 거실')||t.includes('30평'))
-    return R('넓은 거실에는 존재감 있는 시리즈가 어울려요.\n\n· **스탠** — 대형 모듈 풀세트 W478cm, 압도적 스케일\n· **카포네그랑** — 코너 배치로 L자형 구성\n· **케렌시아** — 3.5인 로우형으로 고급스러운 라운지\n\n공간 비율 60~70% 이하로 배치하면 여유로워 보여요.',['3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어']);
+    return R('넓은 거실에는 존재감 있는 시리즈가 어울려요.\n\n· **스탠** — 대형 모듈 풀세트 W478cm, 압도적 스케일\n· **카포네그랑** — 코너 배치로 L자형 구성\n· **케렌시아** — 3.5인 로우형으로 고급스러운 라운지\n\n공간 비율 60~70% 이하로 배치하면 여유로워 보여요.\n\n[PRODUCT:스탠]\n[PRODUCT:케렌시아]',['3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어']);
 
   // ── 신혼 / 커플 ──
   if(t.includes('신혼')||t.includes('커플')||t.includes('둘이'))
-    return R('신혼·커플에게 추천드려요.\n\n· **사티 2인** (W220cm) — 모던·미니멀, 첫 소파로 인기\n· **보눔OP 2인** (W232cm) — 오픈암으로 개방감\n· **바드 2인** (W190cm) — 북유럽 감성, 가성비\n\n처음 소파를 구입하시면 **소재 샘플**을 먼저 받아보시는 걸 추천해요.',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요']);
+    return R('신혼 거실 꾸미시는군요! 딱 맞는 소파를 찾아드릴게요.\n\n먼저, 거실이 몇 평 정도예요?',['20평 이하','25평 정도','30평 이상','잘 모르겠어']);
+
+  if(t.includes('20평 이하')&&chatHistory.some(m=>m.content.includes('신혼')))
+    return R('20평 이하 신혼 거실이라면 슬림한 디자인이 좋아요.\n\n· **바드 2인** (W190cm) — 스칸디 감성, 슬림한 깊이로 공간 절약\n· **사티 2인** (W220cm) — 모던 미니멀, 첫 소파로 인기\n\n[SWATCH:멜로우크림]이나 [SWATCH:그레이아울] 컬러가 밝고 넓어 보여요.\n\n[PRODUCT:바드]\n[PRODUCT:사티]',['소재 샘플 받고 싶어','바드 vs 사티 비교해줘','가격이 궁금해요']);
+
+  if((t.includes('25평')||t.includes('30평'))&&chatHistory.some(m=>m.content.includes('신혼')))
+    return R('25평 이상 신혼 거실이면 3인 소파도 여유롭게 놓을 수 있어요.\n\n· **사티 3인** (W280cm) — 모던·미니멀의 정석\n· **보눔OP 3인** (W320cm) — 오픈암으로 넓은 개방감\n· **케렌시아** — 로우 모듈, 럭셔리한 분위기\n\n[SWATCH:셀릭]이나 [SWATCH:몬드] 컬러가 세련된 신혼 거실에 어울려요.\n\n[PRODUCT:사티]\n[PRODUCT:보눔]',['소재 차이 알려줘','케렌시아도 궁금해','3D 스튜디오에서 배치해볼래요']);
 
   // ── 눕기 / 낮잠 ──
   if(t.includes('눕')||t.includes('낮잠')||t.includes('누워'))
-    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n· **로바 / 라임** — 전동 리클라이너, 콤팩트 사이즈\n\n매장에서 직접 누워보시는 걸 강력 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n· **로바 / 라임** — 전동 리클라이너, 콤팩트 사이즈\n\n[PRODUCT:케렌시아]\n[PRODUCT:비하르]',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
 
   // ── 예산 / 가성비 ──
   if(t.includes('가성비')||t.includes('저렴')||t.includes('싼')||t.includes('예산'))
@@ -3605,12 +3625,12 @@ function getDemoReply(text){
 
   // ── 기존 인테리어 매칭 ──
   if(t.includes('인테리어')||t.includes('분위기')||t.includes('스타일'))
-    return R('인테리어 스타일별 소파 추천이에요.\n\n· **모던·미니멀** → 사티, 보눔OP\n· **클래식·고급** → 레지나\n· **내추럴·북유럽** → 바드, 카포네, 비하르\n· **럭셔리·로우** → 케렌시아, 스탠\n· **캐주얼·패밀리** → 에브리데이, 홀리데이\n\n**Alloso Studio**에서 바닥·벽 색상과 함께 확인해 보세요.',['3D 스튜디오에서 배치해볼래요','소재 샘플 받고 싶어']);
+    return R('인테리어 스타일별 소파 추천이에요.\n\n· **모던·미니멀** → 사티, 보눔OP\n· **내추럴·북유럽** → 바드, 비하르\n· **럭셔리·로우** → 케렌시아, 스탠\n· **캐주얼·패밀리** → 에브리데이, 홀리데이\n\n어떤 스타일이 끌리세요?',['모던 스타일 더 보여줘','내추럴 스타일 추천해줘','3D 스튜디오에서 배치해볼래요']);
 
 
   // ── 추천 (신규) ──
   if(t.includes('추천'))
-    return R('고객님의 공간과 생활 패턴에 따라 추천이 달라져요.\n\n· **1인 가구** → 사티 1인, 바드\n· **패밀리** → 카포네그랑, 홀리데이\n· **반려동물** → 루소 패브릭 + 카포네\n· **럭셔리 로우** → 케렌시아, 비하르\n\n**Alloso Studio**에서 공간 사이즈를 입력하면 AI가 맞춤 추천해 드려요.',['3D 스튜디오에서 배치해볼래요','반려동물 추천 소재는?','가격대가 궁금해요']);
+    return R('고객님의 공간과 생활 패턴에 따라 추천이 달라져요.\n\n· **신혼·커플** → 사티, 바드\n· **패밀리** → 카포네그랑, 홀리데이\n· **1인 공간** → 엘머, 사티큐브\n· **럭셔리 로우** → 케렌시아, 비하르\n\n거실 크기와 분위기를 알려주시면 더 정확하게 추천해 드릴게요.',['신혼 거실 추천해줘','넓은 거실에 큰 소파 원해','1인용 소파 찾고 있어','가격대가 궁금해요']);
 
   // ── 비교 (신규) ──
   if(t.includes('비교')){
