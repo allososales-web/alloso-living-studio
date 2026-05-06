@@ -849,12 +849,12 @@ body{
   .product-card-price{font-size:12px}
 }
 /* ── Studio Deeplink Button ── */
-.studio-deeplink{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:var(--accent);color:#0C0B0A;border-radius:6px;font-size:11px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-decoration:none;transition:opacity .15s;border:none;font-family:'Noto Sans KR',sans-serif}
+.studio-deeplink{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:#8B7355;color:#fff;border-radius:6px;font-size:11px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-decoration:none;transition:opacity .15s;border:none;font-family:'Noto Sans KR',sans-serif}
 .studio-deeplink:hover{opacity:.85}
 /* ── Home One-Question Hero ── */
 .home-oq{text-align:center;padding:48px 24px 20px;position:relative}
 .home-oq-brand{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.45em;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
-.home-oq-q{font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);line-height:1.6;margin-bottom:20px;letter-spacing:.03em}
+.home-oq-q{font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:#8B7355;line-height:1.6;margin-bottom:20px;letter-spacing:.03em}
 .home-oq-input{width:100%;background:var(--card);border:1.5px solid var(--border2);border-radius:24px;padding:13px 18px;font-size:13px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;transition:border-color .2s}
 .home-oq-input:focus{border-color:var(--accent)}
 .home-oq-input::placeholder{color:var(--muted)}
@@ -875,7 +875,7 @@ body{
 .session-desc{font-size:10px;color:var(--muted);margin-top:2px}
 .session-actions{display:flex;gap:6px;margin-top:8px}
 .session-btn{font-size:10px;padding:5px 12px;border-radius:14px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s}
-.session-btn.pri{background:var(--accent);color:#0C0B0A}
+.session-btn.pri{background:#8B7355;color:#fff}
 .session-btn.sec{background:transparent;border:1px solid var(--border);color:var(--muted)}
 .session-btn.sec:hover{color:var(--text)}
 /* ── Lead Collection CTA ── */
@@ -888,7 +888,7 @@ body{
 .lead-input:focus{border-color:var(--accent)}
 .lead-input::placeholder{color:var(--muted)}
 .lead-row{display:flex;gap:6px}
-.lead-submit{background:var(--accent);border:none;border-radius:6px;padding:9px 16px;font-size:11px;font-weight:500;color:#0C0B0A;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;flex-shrink:0}
+.lead-submit{background:#8B7355;border:none;border-radius:6px;padding:9px 16px;font-size:11px;font-weight:500;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;flex-shrink:0}
 .lead-submit:hover{opacity:.85}
 .lead-submit:disabled{opacity:.4;cursor:default}
 .lead-dismiss{background:none;border:none;font-size:10px;color:var(--muted);cursor:pointer;padding:4px 0;font-family:'Noto Sans KR',sans-serif}
@@ -900,7 +900,7 @@ body{
 .guide-suggest-desc{font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:8px}
 .guide-suggest-btns{display:flex;gap:6px}
 .guide-suggest-btn{font-size:10px;padding:6px 14px;border-radius:14px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s}
-.guide-suggest-btn.pri{background:var(--accent);color:#0C0B0A}
+.guide-suggest-btn.pri{background:#8B7355;color:#fff}
 .guide-suggest-btn.sec{background:transparent;border:1px solid var(--border);color:var(--muted)}
 .guide-suggest-btn.sec:hover{color:var(--text)}
 .wizard-chat-btn{display:flex;align-items:center;gap:6px;margin:10px 0;padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .14s;font-size:10px;color:var(--muted);width:100%;text-align:left;font-family:'Noto Sans KR',sans-serif}
@@ -2618,7 +2618,7 @@ function getSessionSummary(){
   const session = loadSession();
   if(!session || !session.history || session.history.length < 2) return null;
   // 가장 많이 언급된 시리즈 찾기
-  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','사티모션','클렉트'];
+  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','사티모션','클렉트','로바','라임','사티큐브','디딤'];
   const allText = session.history.map(m=>m.content).join(' ');
   let topSeries = null, topCount = 0;
   for(const s of seriesNames){
@@ -2781,6 +2781,8 @@ const PRODUCT_CARDS = {
   '레지나':     {en:'REGINA',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'219~739만', desc:'클래식 다리형 · 격식 있는 디자인'},
   '사티모션':   {en:'SATI MOTION',url:'https://www.alloso.co.kr/collection/list', img:'', price:'249~838만', desc:'전동 리클라이너 · 원터치 각도 조절'},
   '사티큐브':   {en:'SATI CUBE',  url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'1인 감싸안는 구조 · 스위블 360° 회전'},
+  '로바':       {en:'LOVA',       url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'전동 리클라이너 · 콤팩트 디자인'},
+  '라임':       {en:'LIME',       url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'전동 리클라이너 · 슬림한 팔걸이'},
   '디딤':       {en:'DIDIM',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'좌식+입식 모듈 · Note Design Studio · 2026 신제품'},
   '클렉트':     {en:'KLECT',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'26~1,199만', desc:'모듈 시스템 · 단종 예정 · 재고 한정'},
   '레지나':     {en:'REGINA',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'219~739만', desc:'클래식 다리형 · 단종 예정 · 재고 한정'},
@@ -2871,6 +2873,7 @@ const CHAT_SYSTEM = `당신은 Alloso 전용 AI 리빙 어드바이저 'ALMA'입
 
 【소파 시리즈 — 현재 운영】
 - 사티(모던, 57~849만) 사티모션(리클라이너, 249~838만) 사티큐브(1인 감싸안는 구조, 스위블 360°회전)
+- 로바(전동 리클라이너) 라임(전동 리클라이너, 슬림 팔걸이)
 - 케렌시아(로우모듈, 110~948만) 케렌시아1인(아트 오브제형) 보눔OP(오픈암, 279~819만) 보눔FU(모듈, 64~898만)
 - 바드(스칸디나비안, 16~798만) 홀리데이(가족, 89만~) 에브리데이(캐주얼, 152만~)
 - 카포네(쿠션백, 54~699만) 카포네그랑(섹셔널, 318~1089만)
@@ -3095,7 +3098,7 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 
 【제품 카드 표시 규칙】
 - 특정 시리즈를 추천하거나 설명할 때, 답변 끝에 [PRODUCT:시리즈명] 마커를 넣으세요.
-- 시리즈명: 사티, 케렌시아, 보눔, 바드, 밀로, 엘머, 스탠, 테오, 비하르, 에브리데이, 홀리데이, 카포네, 카포네그랑, 레지나, 사티모션, 클렉트
+- 시리즈명: 사티, 케렌시아, 보눔, 바드, 밀로, 엘머, 스탠, 테오, 비하르, 에브리데이, 홀리데이, 카포네, 카포네그랑, 레지나, 사티모션, 클렉트, 로바, 라임, 사티큐브, 디딤
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
@@ -3124,8 +3127,8 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - "좌식/바닥 생활" → 디딤(좌식+입식 전환), 케렌시아(5cm 로우), 비하르 + 부클레/노르딕
 - "럭셔리/고급" → 카포네 그랑, 케렌시아, 스탠 + 베지탄/단테
 - "커플/신혼" → 사티 2인, 바드, 보눔 + 아크레(블러쉬/몬드)
-- "눕기/낮잠" → 바드 데이베드, 사티모션, 케렌시아 + 부클레/드리밍헤비 파우더
-- "TV/영화" → 사티모션, 홀리데이, 스탠 + 소프트프리모/솔라
+- "눕기/낮잠" → 바드 데이베드, 사티모션, 로바, 케렌시아 + 부클레/드리밍헤비 파우더
+- "TV/영화" → 사티모션, 로바, 라임, 홀리데이, 스탠 + 소프트프리모/솔라
 - "접대/손님" → 카포네(쿠션백, 세련된 인상), 보눔(오픈암, 공간감) + 드리밍헤비/릴레이트
 - 단종 시리즈(레지나, 클렉트, 테오) 문의 시: "현재 재고 한정으로 운영 중이에요. 매장에 재고 확인 후 안내드릴 수 있어요."라고 안내`;
 
@@ -3586,7 +3589,7 @@ function getDemoReply(text){
 
   // ── 눕기 / 낮잠 ──
   if(t.includes('눕')||t.includes('낮잠')||t.includes('누워'))
-    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n\n매장에서 직접 누워보시는 걸 강력 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n· **로바 / 라임** — 전동 리클라이너, 콤팩트 사이즈\n\n매장에서 직접 누워보시는 걸 강력 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
 
   // ── 예산 / 가성비 ──
   if(t.includes('가성비')||t.includes('저렴')||t.includes('싼')||t.includes('예산'))
@@ -3735,8 +3738,8 @@ function getDemoReply(text){
     return R('**케렌시아**는 로우 모듈형 소파로, 사선 디자인이 특징. 가죽 마감재도 선택 가능(오프라인 매장 전용). 소비자가 110만원대.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
   if(t.includes('딱딱')||t.includes('하드'))
     return R('탄성감이 있고 하부를 잡아주는 소파를 찾으시면 **케렌시아**와 **카포네** 시리즈를 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
-  if(t.includes('리클라이너')||t.includes('전동'))
-    return R('**사티모션**이 전동 리클라이너 소파예요. 등받이·레그레스트 자유 조절. 소비자가 **249만원대**.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
+  if(t.includes('리클라이너')||t.includes('전동')||t.includes('회전'))
+    return R('알로소 리클라이너·모션 소파를 소개해 드릴게요.\n\n**전동 리클라이너:**\n· **사티모션** — 전동 등받이+레그레스트, USB 충전, 1~3인 (249~838만)\n· **로바** — 전동 리클라이너, 콤팩트 디자인\n· **라임** — 전동 리클라이너, 슬림한 팔걸이\n\n**360° 회전:**\n· **사티 큐브 스위블** — 감싸안는 1인 소파, 360도 회전 (매장 전용)\n\n매장에서 직접 앉아보시고 체험하시는 걸 추천드려요!',['매장 어디 있어?','사티모션 가격 알려줘','3D 스튜디오에서 배치해볼래요']);
   if(t.includes('모듈'))
     return R('모듈형 소파는 **보눔FU, 케렌시아, 비하르, 클렉트** 등이 있어요. 공간에 맞게 섹션을 자유 조합 가능.',['3D 스튜디오에서 배치해볼래요','이사할 때 유리한 소파는?']);
   if(t.includes('로봇청소기')||t.includes('청소기'))
