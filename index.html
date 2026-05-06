@@ -3116,6 +3116,7 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
+- 고객이 "이미지 만들어줘", "합성해줘", "소파 넣어줘", "꾸며줘", "인테리어 보여줘" 등 이미지를 요청하면: "어떤 소파로 만들어 드릴까요? 시리즈 이름을 말씀해주시면 바로 인테리어 이미지를 생성해 드려요. 거실 사진이 있으시면 📷 버튼으로 올려주시면 더 좋아요!" 라고 안내하세요. 절대 "이미지를 제공할 수 없습니다"라고 하지 마세요.
 - 고객이 체계적 추천을 원하는 느낌이면("뭐가 좋을지 모르겠어요", "비교해주세요") 답변 마지막에 "체계적으로 찾아보고 싶으시면 **단계별 상담**도 준비되어 있어요." 정도로 자연스럽게 안내. 강제 유도하지 마세요.
 
 【컬러 스와치 표시 규칙】
@@ -3535,6 +3536,16 @@ async function sendMessage(text){
     const result = getDemoReply(text);
     reply = typeof result === 'string' ? result : result.text;
     followChips = typeof result === 'string' ? [] : (result.chips || []);
+
+    // 이미지 생성 시그널 감지
+    if(reply === '__IMAGINE__'){
+      hideTyping();
+      chatLoading = false;
+      document.getElementById('chatSend').disabled = false;
+      await sendImagine(text);
+      return;
+    }
+
     hideTyping();
     appendBotMsg(reply);
   }
@@ -3622,33 +3633,39 @@ function cancelPhoto(){
 }
 
 async function sendImagine(userText){
-  if(!pendingPhoto) return false;
-
+  const hasPhoto = !!pendingPhoto;
   const photo = pendingPhoto;
-  cancelPhoto(); // 미리보기 제거
+  if(hasPhoto) cancelPhoto();
 
-  // 사용자 메시지 표시 (사진 + 텍스트)
+  // 소파명 감지
+  const seriesNames = Object.keys(PRODUCT_CARDS);
+  let sofaName = null;
+  const allText = userText + ' ' + chatHistory.slice(-4).map(m=>m.content).join(' ');
+  for(const s of seriesNames){
+    if(allText.includes(s)){ sofaName = s; break; }
+  }
+  if(!sofaName) sofaName = '사티';
+
+  // 사용자 메시지 표시
   const msgs = document.getElementById('chatMsgs');
   const userRow = document.createElement('div');
   userRow.className = 'msg-row user';
+  const photoHtml = hasPhoto ? `<img src="${photo}" style="max-width:180px;border-radius:6px;display:block;margin-bottom:6px">` : '';
   userRow.innerHTML = `<div>
-    <div class="msg-bubble user"><img src="${photo}" style="max-width:180px;border-radius:6px;display:block;margin-bottom:6px">${escHtml(userText||'이 거실에 소파 놓아줘')}</div>
+    <div class="msg-bubble user">${photoHtml}${escHtml(userText)}</div>
     <div class="msg-time">${nowTime()}</div>
   </div>`;
   msgs.appendChild(userRow);
   scrollMsgs();
 
-  // 소파명 감지
-  const seriesNames = Object.keys(PRODUCT_CARDS);
-  let sofaName = '사티'; // 기본값
-  const allText = userText + ' ' + chatHistory.slice(-4).map(m=>m.content).join(' ');
-  for(const s of seriesNames){
-    if(allText.includes(s)){ sofaName = s; break; }
-  }
-
-  // 소파 제품 이미지 - CDN CORS 이슈로 생략, 프롬프트로 소파 디자인 전달
   const card = PRODUCT_CARDS[sofaName];
   const sofaDesc = card ? card.desc : '';
+
+  // 공간 스타일 감지
+  let roomStyle = '모던 미니멀 한국 아파트 거실';
+  if(allText.includes('내추럴')||allText.includes('우드')||allText.includes('북유럽')) roomStyle = '내추럴 북유럽 스타일 거실, 오크 바닥, 따뜻한 조명';
+  else if(allText.includes('럭셔리')||allText.includes('고급')||allText.includes('호텔')) roomStyle = '럭셔리 호텔 라운지 스타일 거실, 대리석 바닥';
+  else if(allText.includes('미니멀')||allText.includes('모던')) roomStyle = '모던 미니멀 아파트 거실, 화이트 벽, 밝은 공간';
 
   // 로딩 표시
   const loadRow = document.createElement('div');
@@ -3656,19 +3673,27 @@ async function sendImagine(userText){
   loadRow.id = 'imagineLoading';
   loadRow.innerHTML = `<div class="msg-av">A</div>
     <div class="msg-bubble bot">
-      <div class="imagine-loading">✨ <strong>${sofaName}</strong>를 거실에 배치하고 있어요<span class="dots">...</span><br><span style="font-size:10px;opacity:.6">AI가 이미지를 생성 중입니다 (10~20초)</span></div>
+      <div class="imagine-loading">✨ <strong>${sofaName}</strong>${hasPhoto ? '를 거실에 배치' : ' 인테리어 이미지를 생성'}하고 있어요<span class="dots">...</span><br><span style="font-size:10px;opacity:.6">AI가 이미지를 생성 중입니다 (10~20초)</span></div>
     </div>`;
   msgs.appendChild(loadRow);
   scrollMsgs();
+
+  // 프롬프트 구성
+  let prompt;
+  if(hasPhoto){
+    prompt = `이 거실 사진에 알로소(Alloso) ${sofaName} 소파를 자연스럽게 배치해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+'인 프리미엄 소파입니다.' : ''} 조명과 그림자도 맞춰주세요. 반드시 이미지를 생성해주세요.`;
+  } else {
+    prompt = `${roomStyle}에 알로소(Alloso) ${sofaName} 소파가 배치된 고급 인테리어 사진을 생성해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+'인 한국 프리미엄 소파 브랜드 제품입니다.' : ''} 사실적인 인테리어 매거진 스타일로, 자연광이 들어오는 아름다운 거실 공간에 소파가 자연스럽게 놓인 모습을 만들어주세요. 반드시 이미지를 생성해주세요.`;
+  }
 
   try{
     const res = await fetch('/api/imagine', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        roomImage: photo,
-        sofaName: sofaName,
-        prompt: `이 거실 사진에 알로소(Alloso) ${sofaName} 소파를 자연스럽게 배치해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+'인 프리미엄 소파입니다.' : ''} 소파를 거실 공간에 맞는 크기와 위치에 자연스럽게 합성해주세요. 조명과 그림자도 맞춰주세요. 반드시 이미지를 생성해주세요.`
+        roomImage: hasPhoto ? photo : null,
+        sofaName,
+        prompt
       })
     });
 
@@ -3683,25 +3708,25 @@ async function sendImagine(userText){
           <div>
             <div class="msg-bubble bot">
               <div class="ai-image-result">
-                <img src="${data.image}" alt="AI 합성 이미지">
-                <div class="ai-image-label">AI Generated · ${sofaName} in your room</div>
+                <img src="${data.image}" alt="AI 생성 이미지">
+                <div class="ai-image-label">AI Generated · ${sofaName}${hasPhoto ? ' in your room' : ' interior'}</div>
               </div>
               ${data.text ? '<div style="margin-top:8px;font-size:12px">'+escHtml(data.text)+'</div>' : ''}
-              <div style="margin-top:8px;font-size:10px;color:var(--muted)">실제 제품과 차이가 있을 수 있어요. 매장에서 직접 확인해보세요.</div>
+              <div style="margin-top:8px;font-size:10px;color:var(--muted)">AI가 생성한 이미지예요. 실제 제품은 매장에서 확인해보세요.</div>
             </div>
             <div class="msg-time">${nowTime()}</div>
           </div>`;
         msgs.appendChild(botRow);
         scrollMsgs();
 
-        chatHistory.push({role:'user', content:'[거실 사진 업로드] '+userText});
-        chatHistory.push({role:'assistant', content:`${sofaName} 소파를 거실에 배치한 이미지를 생성했습니다.`});
+        chatHistory.push({role:'user', content:(hasPhoto?'[거실 사진] ':'')+userText});
+        chatHistory.push({role:'assistant', content:`${sofaName} 소파 인테리어 이미지를 생성했습니다.`});
         saveSession();
       } else {
         appendBotMsg('이미지 생성에 실패했어요. 다시 시도해주세요.');
       }
     } else {
-      appendBotMsg('이미지 합성 서비스에 일시적인 문제가 있어요. 잠시 후 다시 시도해주세요.');
+      appendBotMsg('이미지 생성에 일시적인 문제가 있어요. 잠시 후 다시 시도해주세요.');
     }
   }catch(e){
     document.getElementById('imagineLoading')?.remove();
@@ -3711,7 +3736,7 @@ async function sendImagine(userText){
 
   // 후속 칩
   const chips = document.getElementById('chatChips');
-  chips.innerHTML = [`다른 소파로 바꿔보기`,`${sofaName} 상세 정보`,`매장에서 직접 보고 싶어`].map(c =>
+  chips.innerHTML = [`다른 소파로 바꿔보기`,`📷 내 거실 사진으로 해보기`,`${sofaName} 상세 정보`,`매장에서 직접 보고 싶어`].map(c =>
     `<div class="chat-chip" onclick="sendChip(this,'${c}')">${c}</div>`
   ).join('');
   chips.className = 'chat-chips';
@@ -3962,6 +3987,22 @@ function getDemoReply(text){
   // ── 브랜드 ──
   if(t.includes('퍼시스')||t.includes('alloso')||t.includes('알로소'))
     return R('Alloso는 **퍼시스그룹**의 하이엔드 소파 브랜드예요. 일룸·시디즈·퍼시스 등 국내 대표 가구 브랜드를 보유한 그룹이에요.',['추천 소파 알려줘','매장 어디 있어?']);
+
+  // ── 이미지 합성/생성 ──
+  if(t.includes('합성')||t.includes('이미지 생성')||t.includes('이미지 만들')||t.includes('사진 만들')||t.includes('인테리어 이미지')){
+    if(pendingPhoto){
+      return {text:'__IMAGINE__', chips:[]};
+    }
+    // 시리즈명이 포함되어 있으면 바로 이미지 생성
+    const mentioned = Object.keys(PRODUCT_CARDS).find(s => t.includes(s));
+    if(mentioned){
+      return {text:'__IMAGINE__', chips:[]};
+    }
+    return R('소파 인테리어 이미지를 만들어 드릴 수 있어요!\n\n**방법 1 — 바로 생성:**\n"사티 인테리어 이미지 만들어줘" 처럼 소파 이름을 말해주세요.\n\n**방법 2 — 내 거실에 배치:**\n📷 버튼으로 거실 사진을 올리고 소파를 선택하세요.\n\n어떤 소파로 해볼까요?',['사티 인테리어 보여줘','케렌시아 거실에 놓은 모습','바드 이미지 만들어줘']);
+  }
+  if((t.includes('보여줘')||t.includes('놓은 모습')||t.includes('놓아줘')||t.includes('넣어줘')||t.includes('꾸며줘')||t.includes('배치해줘'))&&Object.keys(PRODUCT_CARDS).some(s=>t.includes(s))){
+    return {text:'__IMAGINE__', chips:[]};
+  }
 
   // ── 3D 스튜디오 연결 (딥링크) ──
   if(t.includes('스튜디오')||t.includes('3d')||t.includes('배치'))
