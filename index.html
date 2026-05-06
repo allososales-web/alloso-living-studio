@@ -926,6 +926,18 @@ body{
 .compare-link{display:block;text-align:center;font-size:9px;color:var(--muted);margin-top:6px;text-decoration:none;letter-spacing:.06em}
 .compare-link:hover{color:var(--accent)}
 @media(max-width:360px){.compare-card{grid-template-columns:1fr;}.compare-col+.compare-col{border-left:none;border-top:1px solid var(--border)}}
+/* ── Photo Upload & AI Image ── */
+.chat-photo-btn{background:none;border:none;font-size:18px;cursor:pointer;padding:2px 6px;opacity:.5;transition:opacity .15s;flex-shrink:0}
+.chat-photo-btn:hover{opacity:1}
+.photo-preview{position:relative;margin:6px 0;max-width:200px}
+.photo-preview img{width:100%;border-radius:8px;border:1px solid var(--border)}
+.photo-preview-close{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ai-image-result{margin:8px 0;border-radius:10px;overflow:hidden;border:1px solid var(--accent2)}
+.ai-image-result img{width:100%;display:block}
+.ai-image-label{font-size:9px;color:var(--muted);text-align:center;padding:6px;background:var(--card);letter-spacing:.08em}
+.imagine-loading{text-align:center;padding:20px;color:var(--muted);font-size:11px}
+.imagine-loading .dots{display:inline-block;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -1262,9 +1274,11 @@ body{
     <!-- INPUT -->
     <div class="chat-input-wrap">
       <div class="chat-input-row">
+        <button class="chat-photo-btn" onclick="document.getElementById('photoInput').click()" title="거실 사진 업로드">📷</button>
         <textarea id="chatTa" class="chat-ta" placeholder="소파에 대해 자유롭게 물어보세요" rows="1" onkeydown="onChatKey(event)" oninput="autoResize(this)"></textarea>
         <button class="chat-send" id="chatSend" onclick="sendChat()">↑</button>
       </div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
     </div>
   </div>
 
@@ -3218,7 +3232,16 @@ function autoResize(ta){
 function sendChat(){
   const ta = document.getElementById('chatTa');
   const text = ta.value.trim();
-  if(!text || chatLoading) return;
+  if(chatLoading) return;
+  // 사진이 있으면 이미지 합성 모드
+  if(pendingPhoto){
+    ta.value=''; ta.style.height='auto';
+    hideChips();
+    chatLoading = true;
+    sendImagine(text || '이 거실에 소파 놓아줘').then(()=>{ chatLoading = false; });
+    return;
+  }
+  if(!text) return;
   ta.value=''; ta.style.height='auto';
   hideChips();
   sendMessage(text);
@@ -3545,6 +3568,146 @@ async function sendMessage(text){
 
   chatLoading = false;
   document.getElementById('chatSend').disabled = false;
+}
+
+/* ── 거실 사진 → AI 소파 합성 ── */
+let pendingPhoto = null;
+
+function handlePhotoUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 10*1024*1024){ alert('10MB 이하 이미지를 선택해주세요.'); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    pendingPhoto = e.target.result;
+    // 미리보기 표시
+    const preview = document.createElement('div');
+    preview.className = 'photo-preview';
+    preview.id = 'photoPreview';
+    preview.innerHTML = `<img src="${pendingPhoto}" alt="거실 사진"><button class="photo-preview-close" onclick="cancelPhoto()">✕</button>`;
+    const wrap = document.querySelector('.chat-input-wrap');
+    const existing = document.getElementById('photoPreview');
+    if(existing) existing.remove();
+    wrap.insertBefore(preview, wrap.firstChild);
+    document.getElementById('chatTa').placeholder = '이 거실에 어떤 소파를 놓아볼까요?';
+    document.getElementById('chatTa').focus();
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function cancelPhoto(){
+  pendingPhoto = null;
+  const p = document.getElementById('photoPreview');
+  if(p) p.remove();
+  document.getElementById('chatTa').placeholder = '소파에 대해 자유롭게 물어보세요';
+}
+
+async function sendImagine(userText){
+  if(!pendingPhoto) return false;
+
+  const photo = pendingPhoto;
+  cancelPhoto(); // 미리보기 제거
+
+  // 사용자 메시지 표시 (사진 + 텍스트)
+  const msgs = document.getElementById('chatMsgs');
+  const userRow = document.createElement('div');
+  userRow.className = 'msg-row user';
+  userRow.innerHTML = `<div>
+    <div class="msg-bubble user"><img src="${photo}" style="max-width:180px;border-radius:6px;display:block;margin-bottom:6px">${escHtml(userText||'이 거실에 소파 놓아줘')}</div>
+    <div class="msg-time">${nowTime()}</div>
+  </div>`;
+  msgs.appendChild(userRow);
+  scrollMsgs();
+
+  // 소파명 감지
+  const seriesNames = Object.keys(PRODUCT_CARDS);
+  let sofaName = '사티'; // 기본값
+  const allText = userText + ' ' + chatHistory.slice(-4).map(m=>m.content).join(' ');
+  for(const s of seriesNames){
+    if(allText.includes(s)){ sofaName = s; break; }
+  }
+
+  // 소파 제품 이미지 가져오기
+  let sofaImage = null;
+  const card = PRODUCT_CARDS[sofaName];
+  if(card && card.img){
+    try{
+      const imgRes = await fetch(card.img);
+      const blob = await imgRes.blob();
+      sofaImage = await new Promise(r=>{const rd=new FileReader();rd.onload=()=>r(rd.result);rd.readAsDataURL(blob);});
+    }catch(e){ console.warn('[Imagine] Failed to fetch sofa image:', e); }
+  }
+
+  // 로딩 표시
+  const loadRow = document.createElement('div');
+  loadRow.className = 'msg-row bot';
+  loadRow.id = 'imagineLoading';
+  loadRow.innerHTML = `<div class="msg-av">A</div>
+    <div class="msg-bubble bot">
+      <div class="imagine-loading">✨ <strong>${sofaName}</strong>를 거실에 배치하고 있어요<span class="dots">...</span><br><span style="font-size:10px;opacity:.6">AI가 이미지를 생성 중입니다 (10~20초)</span></div>
+    </div>`;
+  msgs.appendChild(loadRow);
+  scrollMsgs();
+
+  try{
+    const res = await fetch('/api/imagine', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        roomImage: photo,
+        sofaImage: sofaImage,
+        sofaName: sofaName,
+        prompt: userText ? `${userText}. 이 거실에 알로소 ${sofaName} 소파를 자연스럽게 배치해주세요.` : null
+      })
+    });
+
+    document.getElementById('imagineLoading')?.remove();
+
+    if(res.ok){
+      const data = await res.json();
+      if(data.image){
+        const botRow = document.createElement('div');
+        botRow.className = 'msg-row bot';
+        botRow.innerHTML = `<div class="msg-av">A</div>
+          <div>
+            <div class="msg-bubble bot">
+              <div class="ai-image-result">
+                <img src="${data.image}" alt="AI 합성 이미지">
+                <div class="ai-image-label">AI Generated · ${sofaName} in your room</div>
+              </div>
+              ${data.text ? '<div style="margin-top:8px;font-size:12px">'+escHtml(data.text)+'</div>' : ''}
+              <div style="margin-top:8px;font-size:10px;color:var(--muted)">실제 제품과 차이가 있을 수 있어요. 매장에서 직접 확인해보세요.</div>
+            </div>
+            <div class="msg-time">${nowTime()}</div>
+          </div>`;
+        msgs.appendChild(botRow);
+        scrollMsgs();
+
+        chatHistory.push({role:'user', content:'[거실 사진 업로드] '+userText});
+        chatHistory.push({role:'assistant', content:`${sofaName} 소파를 거실에 배치한 이미지를 생성했습니다.`});
+        saveSession();
+      } else {
+        appendBotMsg('이미지 생성에 실패했어요. 다시 시도해주세요.');
+      }
+    } else {
+      appendBotMsg('이미지 합성 서비스에 일시적인 문제가 있어요. 잠시 후 다시 시도해주세요.');
+    }
+  }catch(e){
+    document.getElementById('imagineLoading')?.remove();
+    appendBotMsg('네트워크 오류가 발생했어요. 인터넷 연결을 확인해주세요.');
+    console.error('[Imagine] Error:', e);
+  }
+
+  // 후속 칩
+  const chips = document.getElementById('chatChips');
+  chips.innerHTML = [`다른 소파로 바꿔보기`,`${sofaName} 상세 정보`,`매장에서 직접 보고 싶어`].map(c =>
+    `<div class="chat-chip" onclick="sendChip(this,'${c}')">${c}</div>`
+  ).join('');
+  chips.className = 'chat-chips';
+
+  return true;
 }
 
 function getDemoReply(text){
