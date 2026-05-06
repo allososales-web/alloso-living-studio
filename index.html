@@ -3116,7 +3116,7 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
-- 고객이 "이미지 만들어줘", "합성해줘", "소파 넣어줘", "꾸며줘", "인테리어 보여줘", "봐줘", "봐주면 돼" 등 이미지를 요청하면 간단히 조건을 정리하고 "지금 이미지를 생성할게요!" 라고 짧게 답하세요. 시스템이 자동으로 이미지를 생성합니다. 절대 "이미지를 제공할 수 없습니다"나 "이미지를 직접 생성하는 기능이 없습니다"라고 하지 마세요. 3D 스튜디오 링크로 대체하지 마세요.
+- 고객이 "이미지 만들어줘", "합성해줘", "소파 넣어줘", "꾸며줘", "인테리어 보여줘", "봐줘", "봐주면 돼", "우리집에 놓으면 어떨까", "모습 보고 싶어", "느낌 보여줘", "어울릴까" 등 소파를 시각적으로 보고 싶어하는 모든 표현에 대해: 간단히 조건을 정리하고 "지금 이미지를 생성할게요!" 라고 짧게 답하세요. 시스템이 자동으로 AI 이미지를 생성합니다. 절대 "이미지를 제공할 수 없습니다"나 "이미지를 직접 생성하는 기능이 없습니다"라고 하지 마세요. 3D 스튜디오 링크로 대체하지 마세요.
 - 고객이 체계적 추천을 원하는 느낌이면("뭐가 좋을지 모르겠어요", "비교해주세요") 답변 마지막에 "체계적으로 찾아보고 싶으시면 **단계별 상담**도 준비되어 있어요." 정도로 자연스럽게 안내. 강제 유도하지 마세요.
 
 【컬러 스와치 표시 규칙】
@@ -3560,7 +3560,7 @@ async function sendMessage(text){
   saveSession();
 
   // API 응답 후에도 이미지 생성 요청이었는지 체크
-  const imgKw = ['보여줘','봐줘','봐주','놓아줘','넣어줘','꾸며줘','배치해줘','만들어줘','인테리어','합성','이미지'];
+  const imgKw = ['보여줘','봐줘','봐주','놓아줘','넣어줘','꾸며줘','배치해줘','만들어줘','인테리어','합성','이미지','사진','모습','느낌','어떨까','어울릴까','볼래','보고 싶','시뮬레이션','가상 배치','놓으면','두면','넣으면','우리집','우리 집','내 집','내 거실'];
   const recentCtx = chatHistory.slice(-6).map(m=>m.content).join(' ');
   const hasImgKw = imgKw.some(k=>text.includes(k));
   const hasSeriesInCtx = Object.keys(PRODUCT_CARDS).some(s=>text.includes(s) || recentCtx.includes(s));
@@ -4021,10 +4021,14 @@ function getDemoReply(text){
   if(t.includes('퍼시스')||t.includes('alloso')||t.includes('알로소'))
     return R('Alloso는 **퍼시스그룹**의 하이엔드 소파 브랜드예요. 일룸·시디즈·퍼시스 등 국내 대표 가구 브랜드를 보유한 그룹이에요.',['추천 소파 알려줘','매장 어디 있어?']);
 
-  // ── 이미지 합성/생성 ──
-  const isImageReq = t.includes('합성')||t.includes('사진 만들')||t.includes('인테리어 이미지')
-    ||(t.includes('이미지')&&(t.includes('생성')||t.includes('만들')||t.includes('보여')||t.includes('줘')))
-    ||(t.includes('사진')&&(t.includes('생성')||t.includes('만들')));
+  // ── 이미지 합성/생성 (확장 트리거) ──
+  const isImageReq = t.includes('합성')||t.includes('인테리어 이미지')
+    ||(t.includes('이미지')&&(t.includes('생성')||t.includes('만들')||t.includes('보여')||t.includes('줘')||t.includes('보고')))
+    ||(t.includes('사진')&&(t.includes('생성')||t.includes('만들')||t.includes('보여')||t.includes('줘')))
+    ||((t.includes('모습')||t.includes('느낌'))&&(t.includes('보고 싶')||t.includes('볼래')||t.includes('볼 수')||t.includes('보여')||t.includes('봐')))
+    ||((t.includes('두었')||t.includes('놓았')||t.includes('놓으면')||t.includes('두면')||t.includes('넣으면'))&&(t.includes('어떨')||t.includes('어울')||t.includes('맞을')||t.includes('볼래')||t.includes('보고')||t.includes('보여')))
+    ||(t.includes('우리집')||t.includes('우리 집')||t.includes('내 집')||t.includes('내 방')||t.includes('내 거실'))&&(t.includes('보여')||t.includes('보고')||t.includes('놓')||t.includes('두')||t.includes('넣')||t.includes('배치'))
+    ||(t.includes('시뮬레이션')||t.includes('가상')&&(t.includes('배치')||t.includes('인테리어')));
   if(isImageReq){
     // 현재 메시지 또는 최근 대화에서 시리즈명 찾기
     const recentText = chatHistory.slice(-6).map(m=>m.content).join(' ');
@@ -4036,7 +4040,7 @@ function getDemoReply(text){
     return R('소파 인테리어 이미지를 만들어 드릴 수 있어요!\n\n**방법 1 — 바로 생성:**\n"사티 인테리어 이미지 만들어줘" 처럼 소파 이름을 말해주세요.\n\n**방법 2 — 내 거실에 배치:**\n📷 버튼으로 거실 사진을 올리고 소파를 선택하세요.\n\n어떤 소파로 해볼까요?',['사티 인테리어 보여줘','케렌시아 거실에 놓은 모습','바드 이미지 만들어줘']);
   }
   // 시리즈명 + 시각 요청 키워드 조합 → 이미지 생성
-  const imgKeywords = ['보여줘','보여 줘','봐줘','봐주','봐 줘','놓은 모습','놓아줘','넣어줘','꾸며줘','배치해줘','배치해 줘','그려줘','만들어줘','만들어 줘','크기로 봐','인테리어'];
+  const imgKeywords = ['보여줘','보여 줘','봐줘','봐주','봐 줘','놓은 모습','놓아줘','넣어줘','꾸며줘','배치해줘','배치해 줘','그려줘','만들어줘','만들어 줘','크기로 봐','인테리어','어떨까','어울릴까','모습','느낌','볼래','보고 싶','가상 배치','시뮬레이션'];
   if(imgKeywords.some(k=>t.includes(k)) && Object.keys(PRODUCT_CARDS).some(s=>t.includes(s))){
     return {text:'__IMAGINE__', chips:[]};
   }
