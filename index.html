@@ -3116,7 +3116,7 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
-- 고객이 "이미지 만들어줘", "합성해줘", "소파 넣어줘", "꾸며줘", "인테리어 보여줘" 등 이미지를 요청하면: "어떤 소파로 만들어 드릴까요? 시리즈 이름을 말씀해주시면 바로 인테리어 이미지를 생성해 드려요. 거실 사진이 있으시면 📷 버튼으로 올려주시면 더 좋아요!" 라고 안내하세요. 절대 "이미지를 제공할 수 없습니다"라고 하지 마세요.
+- 고객이 "이미지 만들어줘", "합성해줘", "소파 넣어줘", "꾸며줘", "인테리어 보여줘", "봐줘", "봐주면 돼" 등 이미지를 요청하면 간단히 조건을 정리하고 "지금 이미지를 생성할게요!" 라고 짧게 답하세요. 시스템이 자동으로 이미지를 생성합니다. 절대 "이미지를 제공할 수 없습니다"나 "이미지를 직접 생성하는 기능이 없습니다"라고 하지 마세요. 3D 스튜디오 링크로 대체하지 마세요.
 - 고객이 체계적 추천을 원하는 느낌이면("뭐가 좋을지 모르겠어요", "비교해주세요") 답변 마지막에 "체계적으로 찾아보고 싶으시면 **단계별 상담**도 준비되어 있어요." 정도로 자연스럽게 안내. 강제 유도하지 마세요.
 
 【컬러 스와치 표시 규칙】
@@ -3559,6 +3559,14 @@ async function sendMessage(text){
   chatHistory.push({role:'assistant', content:reply});
   saveSession();
 
+  // API 응답 후에도 이미지 생성 요청이었는지 체크
+  const imgKw = ['보여줘','봐줘','봐주','놓아줘','넣어줘','꾸며줘','배치해줘','만들어줘','인테리어','합성','이미지'];
+  const hasImgRequest = imgKw.some(k=>text.includes(k)) && Object.keys(PRODUCT_CARDS).some(s=>text.includes(s));
+  if(hasImgRequest && usedAPI && !reply.includes('__IMAGINE__')){
+    // API가 텍스트로만 응답했지만 이미지 요청이었음 → 이미지도 생성
+    await sendImagine(text);
+  }
+
   // 후속 질문 칩 표시
   if(followChips.length > 0){
     const chips = document.getElementById('chatChips');
@@ -3661,13 +3669,40 @@ async function sendImagine(userText){
   const card = PRODUCT_CARDS[sofaName];
   const sofaDesc = card ? card.desc : '';
 
+  // 사용자 텍스트에서 공간 조건 추출
+  let roomDetails = [];
+  if(allText.includes('오크')) roomDetails.push('오크 원목 바닥');
+  if(allText.includes('대리석')) roomDetails.push('대리석 바닥');
+  if(allText.includes('아이보리')) roomDetails.push('아이보리 벽');
+  if(allText.includes('화이트')||allText.includes('흰')) roomDetails.push('화이트 벽');
+  if(allText.includes('그레이')||allText.includes('회색')) roomDetails.push('그레이 톤');
+  if(allText.match(/\d+평/)) roomDetails.push(allText.match(/\d+평/)[0]+' 크기 공간');
+  if(allText.includes('안방')||allText.includes('침실')) roomDetails.push('안방/침실');
+  if(allText.includes('거실')) roomDetails.push('거실');
+  if(allText.includes('서재')) roomDetails.push('서재');
+
+  // 컬러 감지
+  let sofaColor = '';
+  const colorNames = Object.keys(COLOR_CHIPS);
+  for(const c of colorNames){ if(allText.includes(c)){ sofaColor = c; break; } }
+  if(allText.includes('블랙')||allText.includes('검정')) sofaColor = sofaColor || '블랙';
+  if(allText.includes('화이트')||allText.includes('크림')) sofaColor = sofaColor || '크림';
+
   // 공간 스타일 감지
   let roomStyle = '모던 미니멀 한국 아파트 거실';
   if(allText.includes('내추럴')||allText.includes('우드')||allText.includes('북유럽')) roomStyle = '내추럴 북유럽 스타일 거실, 오크 바닥, 따뜻한 조명';
   else if(allText.includes('럭셔리')||allText.includes('고급')||allText.includes('호텔')) roomStyle = '럭셔리 호텔 라운지 스타일 거실, 대리석 바닥';
   else if(allText.includes('미니멀')||allText.includes('모던')) roomStyle = '모던 미니멀 아파트 거실, 화이트 벽, 밝은 공간';
+  if(roomDetails.length > 0) roomStyle = roomDetails.join(', ') + '의 ' + roomStyle;
 
-  // 로딩 표시
+  // 프롬프트 구성
+  const colorText = sofaColor ? ` ${sofaColor} 컬러의` : '';
+  let prompt;
+  if(hasPhoto){
+    prompt = `이 사진의 공간에 알로소(Alloso)${colorText} ${sofaName} 소파를 자연스럽게 배치해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+' 디자인입니다.' : ''} 조명과 그림자를 맞춰서 실제처럼 합성해주세요. 반드시 이미지를 생성해주세요.`;
+  } else {
+    prompt = `${roomStyle}에 알로소(Alloso)${colorText} ${sofaName} 소파가 배치된 고급 인테리어 사진을 생성해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+' 디자인의 한국 프리미엄 소파입니다.' : ''} 사실적인 인테리어 매거진 스타일로, 자연광이 들어오는 아름다운 공간에 소파가 자연스럽게 놓인 모습을 만들어주세요. 반드시 이미지를 생성해주세요.`;
+  }
   const loadRow = document.createElement('div');
   loadRow.className = 'msg-row bot';
   loadRow.id = 'imagineLoading';
@@ -3677,14 +3712,6 @@ async function sendImagine(userText){
     </div>`;
   msgs.appendChild(loadRow);
   scrollMsgs();
-
-  // 프롬프트 구성
-  let prompt;
-  if(hasPhoto){
-    prompt = `이 거실 사진에 알로소(Alloso) ${sofaName} 소파를 자연스럽게 배치해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+'인 프리미엄 소파입니다.' : ''} 조명과 그림자도 맞춰주세요. 반드시 이미지를 생성해주세요.`;
-  } else {
-    prompt = `${roomStyle}에 알로소(Alloso) ${sofaName} 소파가 배치된 고급 인테리어 사진을 생성해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+'인 한국 프리미엄 소파 브랜드 제품입니다.' : ''} 사실적인 인테리어 매거진 스타일로, 자연광이 들어오는 아름다운 거실 공간에 소파가 자연스럽게 놓인 모습을 만들어주세요. 반드시 이미지를 생성해주세요.`;
-  }
 
   try{
     const res = await fetch('/api/imagine', {
@@ -3993,14 +4020,15 @@ function getDemoReply(text){
     if(pendingPhoto){
       return {text:'__IMAGINE__', chips:[]};
     }
-    // 시리즈명이 포함되어 있으면 바로 이미지 생성
     const mentioned = Object.keys(PRODUCT_CARDS).find(s => t.includes(s));
     if(mentioned){
       return {text:'__IMAGINE__', chips:[]};
     }
     return R('소파 인테리어 이미지를 만들어 드릴 수 있어요!\n\n**방법 1 — 바로 생성:**\n"사티 인테리어 이미지 만들어줘" 처럼 소파 이름을 말해주세요.\n\n**방법 2 — 내 거실에 배치:**\n📷 버튼으로 거실 사진을 올리고 소파를 선택하세요.\n\n어떤 소파로 해볼까요?',['사티 인테리어 보여줘','케렌시아 거실에 놓은 모습','바드 이미지 만들어줘']);
   }
-  if((t.includes('보여줘')||t.includes('놓은 모습')||t.includes('놓아줘')||t.includes('넣어줘')||t.includes('꾸며줘')||t.includes('배치해줘'))&&Object.keys(PRODUCT_CARDS).some(s=>t.includes(s))){
+  // 시리즈명 + 시각 요청 키워드 조합 → 이미지 생성
+  const imgKeywords = ['보여줘','보여 줘','봐줘','봐주','봐 줘','놓은 모습','놓아줘','넣어줘','꾸며줘','배치해줘','배치해 줘','그려줘','만들어줘','만들어 줘','크기로 봐','인테리어'];
+  if(imgKeywords.some(k=>t.includes(k)) && Object.keys(PRODUCT_CARDS).some(s=>t.includes(s))){
     return {text:'__IMAGINE__', chips:[]};
   }
 
