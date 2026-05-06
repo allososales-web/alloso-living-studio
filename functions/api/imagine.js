@@ -10,22 +10,19 @@ export async function onRequestPost(context) {
   try {
     const { roomImage, sofaImage, sofaName, prompt } = await context.request.json();
 
-    if (!roomImage) {
-      return new Response(JSON.stringify({ error: "Room image required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-      });
-    }
-
-    const userPrompt = prompt || `이 거실 사진에 ${sofaName || "소파"}를 자연스럽게 배치해주세요. 조명, 원근감, 그림자를 맞춰주세요.`;
+    const userPrompt = prompt || `모던한 한국 아파트 거실에 ${sofaName || "소파"}가 배치된 인테리어 사진을 생성해주세요.`;
 
     const parts = [{ text: userPrompt }];
 
-    const roomBase64 = roomImage.replace(/^data:image\/\w+;base64,/, "");
-    parts.push({ inline_data: { mime_type: "image/jpeg", data: roomBase64 } });
+    // Room image (optional - 있으면 합성, 없으면 생성)
+    if (roomImage) {
+      const roomBase64 = roomImage.replace(/^data:image\/\w+;base64,/, "");
+      parts.push({ inline_data: { mime_type: "image/jpeg", data: roomBase64 } });
+    }
 
+    // Sofa product image (optional)
     if (sofaImage) {
-      parts.push({ text: "위 거실에 아래 소파를 자연스럽게 배치해주세요." });
+      parts.push({ text: "위 공간에 아래 소파를 자연스럽게 배치해주세요." });
       const sofaBase64 = sofaImage.replace(/^data:image\/\w+;base64,/, "");
       parts.push({ inline_data: { mime_type: "image/jpeg", data: sofaBase64 } });
     }
@@ -42,7 +39,7 @@ export async function onRequestPost(context) {
     for (const model of models) {
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
-        console.log("[Imagine] Trying:", model);
+        console.log("[Imagine] Trying:", model, roomImage ? "(with room)" : "(generate)");
 
         const res = await fetch(url, {
           method: "POST",
