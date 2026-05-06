@@ -3576,22 +3576,39 @@ let pendingPhoto = null;
 function handlePhotoUpload(event){
   const file = event.target.files[0];
   if(!file) return;
-  if(file.size > 10*1024*1024){ alert('10MB 이하 이미지를 선택해주세요.'); return; }
+  if(file.size > 20*1024*1024){ alert('20MB 이하 이미지를 선택해주세요.'); return; }
 
+  // 이미지를 1024px로 리사이즈 후 base64 변환 (API 용량 제한 대응)
   const reader = new FileReader();
   reader.onload = function(e){
-    pendingPhoto = e.target.result;
-    // 미리보기 표시
-    const preview = document.createElement('div');
-    preview.className = 'photo-preview';
-    preview.id = 'photoPreview';
-    preview.innerHTML = `<img src="${pendingPhoto}" alt="거실 사진"><button class="photo-preview-close" onclick="cancelPhoto()">✕</button>`;
-    const wrap = document.querySelector('.chat-input-wrap');
-    const existing = document.getElementById('photoPreview');
-    if(existing) existing.remove();
-    wrap.insertBefore(preview, wrap.firstChild);
-    document.getElementById('chatTa').placeholder = '이 거실에 어떤 소파를 놓아볼까요?';
-    document.getElementById('chatTa').focus();
+    const img = new Image();
+    img.onload = function(){
+      const maxSize = 1024;
+      let w = img.width, h = img.height;
+      if(w > maxSize || h > maxSize){
+        if(w > h){ h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      pendingPhoto = canvas.toDataURL('image/jpeg', 0.8);
+      console.log('[Photo] Resized to', w+'x'+h, 'size:', Math.round(pendingPhoto.length/1024)+'KB');
+
+      // 미리보기 표시
+      const preview = document.createElement('div');
+      preview.className = 'photo-preview';
+      preview.id = 'photoPreview';
+      preview.innerHTML = `<img src="${pendingPhoto}" alt="거실 사진"><button class="photo-preview-close" onclick="cancelPhoto()">✕</button>`;
+      const wrap = document.querySelector('.chat-input-wrap');
+      const existing = document.getElementById('photoPreview');
+      if(existing) existing.remove();
+      wrap.insertBefore(preview, wrap.firstChild);
+      document.getElementById('chatTa').placeholder = '이 거실에 어떤 소파를 놓아볼까요?';
+      document.getElementById('chatTa').focus();
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
   event.target.value = '';
@@ -3629,16 +3646,9 @@ async function sendImagine(userText){
     if(allText.includes(s)){ sofaName = s; break; }
   }
 
-  // 소파 제품 이미지 가져오기
-  let sofaImage = null;
+  // 소파 제품 이미지 - CDN CORS 이슈로 생략, 프롬프트로 소파 디자인 전달
   const card = PRODUCT_CARDS[sofaName];
-  if(card && card.img){
-    try{
-      const imgRes = await fetch(card.img);
-      const blob = await imgRes.blob();
-      sofaImage = await new Promise(r=>{const rd=new FileReader();rd.onload=()=>r(rd.result);rd.readAsDataURL(blob);});
-    }catch(e){ console.warn('[Imagine] Failed to fetch sofa image:', e); }
-  }
+  const sofaDesc = card ? card.desc : '';
 
   // 로딩 표시
   const loadRow = document.createElement('div');
@@ -3657,9 +3667,8 @@ async function sendImagine(userText){
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         roomImage: photo,
-        sofaImage: sofaImage,
         sofaName: sofaName,
-        prompt: userText ? `${userText}. 이 거실에 알로소 ${sofaName} 소파를 자연스럽게 배치해주세요.` : null
+        prompt: `이 거실 사진에 알로소(Alloso) ${sofaName} 소파를 자연스럽게 배치해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+'인 프리미엄 소파입니다.' : ''} 소파를 거실 공간에 맞는 크기와 위치에 자연스럽게 합성해주세요. 조명과 그림자도 맞춰주세요. 반드시 이미지를 생성해주세요.`
       })
     });
 
