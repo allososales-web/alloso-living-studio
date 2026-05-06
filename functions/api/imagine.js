@@ -1,8 +1,5 @@
 export async function onRequestPost(context) {
   const API_KEY = context.env.GOOGLE_API_KEY;
-  if (!API_KEY) {
-    return jsonRes({ error: "API key not set" }, 500);
-  }
 
   try {
     const { roomImage, sofaName, prompt } = await context.request.json();
@@ -13,87 +10,78 @@ export async function onRequestPost(context) {
       parts.push({ inline_data: { mime_type: "image/jpeg", data: roomImage.replace(/^data:image\/\w+;base64,/, "") } });
     }
 
-    const errors = [];
+    // ── 1차: 나노바나나 (Gemini 이미지 생성) ──
+    if (API_KEY) {
+      const models = ["gemini-2.5-flash-image", "gemini-3.1-flash-image-preview"];
+      for (const model of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+          console.log("[Imagine] Try:", model);
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts, role: "user" }],
+              generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+            }),
+          });
+          if (res.status === 429) {
+            console.log("[Imagine]", model, "quota exceeded, trying next...");
+            continue;
+          }
+          if (!res.ok) {
+            console.log("[Imagine]", model, res.status);
+            continue;
+          }
+          const data = await res.json();
+          let image = null, text = "";
+          for (const p of (data.candidates?.[0]?.content?.parts || [])) {
+            if (p.inlineData) image = `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`;
+            if (p.text) text += p.text;
+          }
+          if (image) {
+            console.log("[Imagine] OK:", model);
+            return jsonRes({ ok: true, image, text, model });
+          }
+        } catch (e) {
+          console.log("[Imagine]", model, "error:", e.message);
+        }
+      }
+      console.log("[Imagine] All Gemini models failed, trying Cloudflare AI...");
+    }
 
-    // 1) gemini-2.5-flash-image (Nano Banana - confirmed REST API)
-    const r1 = await tryModel("gemini-2.5-flash-image", parts, API_KEY);
-    if (r1.image) return jsonRes({ ok:true, ...r1 });
-    errors.push("gemini-2.5-flash-image: " + r1.error);
+    // ── 2차: Cloudflare AI (FLUX Schnell) 폴백 ──
+    if (context.env.AI) {
+      try {
+        console.log("[Imagine] Try: Cloudflare FLUX");
+        const aiRes = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", {
+          prompt: userPrompt,
+        });
 
-    // 2) gemini-3.1-flash-image-preview (Nano Banana 2)
-    const r2 = await tryModel("gemini-3.1-flash-image-preview", parts, API_KEY);
-    if (r2.image) return jsonRes({ ok:true, ...r2 });
-    errors.push("gemini-3.1-flash-image-preview: " + r2.error);
+        // Response is raw image bytes → convert to base64
+        const arrayBuf = await new Response(aiRes).arrayBuffer();
+        const bytes = new Uint8Array(arrayBuf);
+        let binary = "";
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const base64 = btoa(binary);
 
-    // 3) gemini-2.5-flash with IMAGE modality
-    const r3 = await tryModel("gemini-2.5-flash", parts, API_KEY);
-    if (r3.image) return jsonRes({ ok:true, ...r3 });
-    errors.push("gemini-2.5-flash: " + r3.error);
+        if (base64.length > 1000) {
+          console.log("[Imagine] OK: Cloudflare FLUX");
+          return jsonRes({ ok: true, image: `data:image/png;base64,${base64}`, text: "", model: "flux-schnell" });
+        }
+      } catch (e) {
+        console.log("[Imagine] Cloudflare AI error:", e.message);
+      }
+    } else {
+      console.log("[Imagine] AI binding not available");
+    }
 
-    // 4) Imagen 4
-    const r4 = await tryImagen(userPrompt, API_KEY);
-    if (r4.image) return jsonRes({ ok:true, ...r4 });
-    errors.push("imagen-4: " + r4.error);
-
-    return jsonRes({ error: "All models failed", detail: errors.join(" | ") }, 500);
+    return jsonRes({ error: "Image generation failed", detail: "나노바나나 쿼터 소진 + Cloudflare AI 미연결. 잠시 후 다시 시도하거나 AI 바인딩을 설정해주세요." }, 500);
 
   } catch (err) {
     return jsonRes({ error: err.message }, 500);
-  }
-}
-
-async function tryModel(model, parts, key) {
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-    console.log("[Imagine] Try:", model);
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts, role: "user" }],
-        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text();
-      console.log("[Imagine]", model, res.status, t.slice(0, 150));
-      return { error: `${res.status}: ${t.slice(0, 80)}` };
-    }
-    const data = await res.json();
-    let image = null, text = "";
-    for (const p of (data.candidates?.[0]?.content?.parts || [])) {
-      if (p.inlineData) image = `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`;
-      if (p.text) text += p.text;
-    }
-    if (image) { console.log("[Imagine] OK:", model); return { image, text, model }; }
-    return { error: "no image returned" };
-  } catch (e) {
-    return { error: e.message };
-  }
-}
-
-async function tryImagen(prompt, key) {
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${key}`;
-    console.log("[Imagine] Try: imagen-4");
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ instances: [{ prompt }], parameters: { sampleCount: 1 } }),
-    });
-    if (!res.ok) {
-      const t = await res.text();
-      console.log("[Imagine] imagen-4", res.status, t.slice(0, 150));
-      return { error: `${res.status}: ${t.slice(0, 80)}` };
-    }
-    const data = await res.json();
-    if (data.predictions?.[0]?.bytesBase64Encoded) {
-      console.log("[Imagine] OK: imagen-4");
-      return { image: `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`, text: "", model: "imagen-4" };
-    }
-    return { error: "no image" };
-  } catch (e) {
-    return { error: e.message };
   }
 }
 
