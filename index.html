@@ -938,6 +938,18 @@ body{
 .imagine-loading{text-align:center;padding:20px;color:var(--muted);font-size:11px}
 .imagine-loading .dots{display:inline-block;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+/* ── Scene Visual Card ── */
+.scene-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:10px 0}
+.scene-card-img{position:relative;width:100%}
+.scene-card-img img{width:100%;display:block;border-radius:12px 12px 0 0}
+.scene-card-label{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;padding:3px 8px;border-radius:10px;letter-spacing:.06em}
+.scene-products{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scene-products::-webkit-scrollbar{display:none}
+.scene-ptag{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;text-decoration:none;color:inherit;transition:border-color .12s}
+.scene-ptag:hover{border-color:var(--gold-lt)}
+.scene-ptag-img{width:36px;height:36px;border-radius:4px;object-fit:cover;background:var(--card)}
+.scene-ptag-name{font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
+.scene-ptag-ko{font-size:9px;color:var(--muted)}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -1550,10 +1562,10 @@ function renderWelcome(){
       <div class="home-oq-q">어떤 공간을<br>만들고 싶으세요?</div>
       <input class="home-oq-input" id="homeInput" placeholder="예: 아이와 함께 쓸 따뜻한 거실" onkeydown="if(event.key==='Enter'){homeAsk(this.value)}">
       <div class="home-oq-scenes">
-        <button class="home-oq-scene" onclick="homeAsk('아이와 함께 쓸 따뜻한 거실을 꾸미고 싶어요')">우리 가족 거실</button>
-        <button class="home-oq-scene" onclick="homeAsk('혼자 쓰는 서재에 소파 하나 놓고 싶어요')">나만의 서재</button>
-        <button class="home-oq-scene" onclick="homeAsk('신혼 거실에 어울리는 소파 추천해주세요')">신혼 라운지</button>
-        <button class="home-oq-scene" onclick="homeAsk('반려동물이 있는데 어떤 소재가 좋을까요?')">반려동물과 함께</button>
+        <button class="home-oq-scene" onclick="sendSceneRecommendation('가족거실','아이와 함께 쓸 따뜻한 거실을 꾸미고 싶어요')">우리 가족 거실</button>
+        <button class="home-oq-scene" onclick="sendSceneRecommendation('서재','혼자 쓰는 서재에 소파 하나 놓고 싶어요')">나만의 서재</button>
+        <button class="home-oq-scene" onclick="sendSceneRecommendation('신혼','신혼 거실에 어울리는 소파 추천해주세요')">신혼 라운지</button>
+        <button class="home-oq-scene" onclick="sendSceneRecommendation('반려동물','반려동물이 있는데 어떤 소재가 좋을까요?')">반려동물과 함께</button>
       </div>
       <div class="home-oq-divider">또는</div>
       <div class="home-oq-links">
@@ -3772,6 +3784,156 @@ async function sendImagine(userText){
   chips.innerHTML = [`다른 소파로 바꿔보기`,`📷 내 거실 사진으로 해보기`,`${sofaName} 상세 정보`,`매장에서 직접 보고 싶어`].map(c =>
     `<div class="chat-chip" onclick="sendChip(this,'${c}')">${c}</div>`
   ).join('');
+  chips.className = 'chat-chips';
+
+  return true;
+}
+
+/* ── 장면별 비주얼 추천 (Scene Visual Cards) ── */
+const SCENE_CONFIGS = {
+  '가족거실': {
+    prompt: '밝고 따뜻한 30평대 한국 아파트 거실. 오크 원목 바닥, 아이보리 벽, 큰 창문으로 자연광이 들어옴. 넉넉한 크기의 모던 패밀리 소파가 중앙에 배치되고, 아이 장난감이 살짝 보이는 따뜻한 가족 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
+    products: ['홀리데이','에브리데이','디딤'],
+    colors: ['멜로우크림','웜브리즈'],
+    intro: '아이와 함께하는 따뜻한 거실, 이런 모습은 어떠세요?'
+  },
+  '서재': {
+    prompt: '세련된 한국 아파트 서재 공간. 원목 책장, 따뜻한 조명, 작은 사이드 테이블. 1인용 프리미엄 소파가 창가에 배치되어 독서와 휴식을 위한 아늑한 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
+    products: ['엘머','사티큐브','케렌시아1인'],
+    colors: ['버번','코스믹블루'],
+    intro: '나만의 서재, 이런 공간은 어떠세요?'
+  },
+  '신혼': {
+    prompt: '모던하고 세련된 25평 신혼 아파트 거실. 깔끔한 화이트 벽, 밝은 바닥, 미니멀한 가구. 2~3인 모던 소파가 중앙에 배치된 세련된 커플 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
+    products: ['사티','바드','보눔'],
+    colors: ['그레이아울','셀릭','몬드'],
+    intro: '신혼 거실, 이런 분위기는 어떠세요?'
+  },
+  '반려동물': {
+    prompt: '반려동물과 함께하는 한국 아파트 거실. 밝은 공간, 오크 바닥. 내구성 좋은 패브릭 소파가 배치되고, 고양이나 강아지가 소파 옆에 있는 따뜻한 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
+    products: ['카포네','에브리데이','사티'],
+    colors: ['아이린','셀릭'],
+    intro: '반려동물과 함께하는 공간, 이런 느낌은 어떠세요?'
+  }
+};
+
+async function sendSceneRecommendation(sceneKey, userText){
+  const scene = SCENE_CONFIGS[sceneKey];
+  if(!scene) return false;
+
+  openChat();
+  await new Promise(r=>setTimeout(r,300));
+
+  // 사용자 메시지 표시
+  appendUserMsg(userText);
+  chatHistory.push({role:'user', content:userText});
+  saveSession();
+
+  // 인트로 + 이미지 로딩
+  const msgs = document.getElementById('chatMsgs');
+  const introRow = document.createElement('div');
+  introRow.className = 'msg-row bot';
+  introRow.innerHTML = `<div class="msg-av">A</div>
+    <div>
+      <div class="msg-bubble bot">
+        <div>${scene.intro}</div>
+        <div class="imagine-loading" style="margin-top:10px">✨ 공간 이미지를 만들고 있어요<span class="dots">...</span></div>
+      </div>
+    </div>`;
+  msgs.appendChild(introRow);
+  scrollMsgs();
+
+  // Gemini 이미지 생성
+  try {
+    const res = await fetch('/api/imagine', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ sofaName: scene.products[0], prompt: scene.prompt })
+    });
+
+    // 인트로 메시지의 로딩 제거
+    const loadingEl = introRow.querySelector('.imagine-loading');
+    if(loadingEl) loadingEl.remove();
+
+    if(res.ok){
+      const data = await res.json();
+      if(data.image){
+        // 제품 태그 HTML 생성
+        const tagsHtml = scene.products.map(name => {
+          const p = PRODUCT_CARDS[name];
+          if(!p) return '';
+          const imgTag = p.img ? `<img class="scene-ptag-img" src="${p.img}" onerror="this.style.display='none'">` : '';
+          return `<a class="scene-ptag" href="${p.url}" target="_blank">
+            ${imgTag}
+            <div>
+              <div class="scene-ptag-name">${p.en}</div>
+              <div class="scene-ptag-ko">${name}</div>
+            </div>
+          </a>`;
+        }).join('');
+
+        // 컬러 스와치 HTML
+        const swatchHtml = scene.colors.map(name => {
+          const c = COLOR_CHIPS[name];
+          if(!c) return '';
+          const chipStyle = c.c
+            ? `background-image:url('${R2_CHIP_BASE}${encodeURI(c.c)}');background-color:${c.h}`
+            : `background:${c.h}`;
+          return `<a class="color-swatch" href="${MATERIAL_LIBRARY_URL}" target="_blank">
+            <div class="color-swatch-chip" style="${chipStyle}"></div>
+            <span class="color-swatch-name">${name}</span>
+          </a>`;
+        }).join(' ');
+
+        // 이미지 + 태그 카드
+        const cardRow = document.createElement('div');
+        cardRow.className = 'msg-row bot';
+        cardRow.innerHTML = `<div class="msg-av">A</div>
+          <div>
+            <div class="msg-bubble bot" style="padding:0;overflow:hidden;border-radius:12px">
+              <div class="scene-card">
+                <div class="scene-card-img">
+                  <img src="${data.image}" alt="AI 인테리어">
+                  <div class="scene-card-label">AI Generated · Alloso Interior</div>
+                </div>
+                <div class="scene-products">${tagsHtml}</div>
+              </div>
+            </div>
+            <div class="msg-bubble bot" style="margin-top:6px">
+              추천 컬러: ${swatchHtml}
+              <div style="margin-top:8px;font-size:10px;color:var(--muted)">관심 있는 제품을 탭하면 자세한 정보를 볼 수 있어요.</div>
+            </div>
+            <div class="msg-time">${nowTime()}</div>
+          </div>`;
+        msgs.appendChild(cardRow);
+        scrollMsgs();
+
+        chatHistory.push({role:'assistant', content:scene.intro + ' ' + scene.products.join(', ') + ' 추천'});
+        saveSession();
+      }
+    }
+  } catch(e){
+    console.error('[Scene] Image error:', e);
+    // 이미지 실패해도 텍스트 추천은 보여줌
+    const loadingEl = introRow.querySelector('.imagine-loading');
+    if(loadingEl) loadingEl.textContent = '';
+  }
+
+  // 제품 카드도 텍스트로 추가
+  const prodCards = scene.products.map(name => `[PRODUCT:${name}]`).join('\n');
+  appendBotMsg(`이 제품들을 추천드려요.\n\n${prodCards}`);
+  chatHistory.push({role:'assistant', content:'제품 추천: ' + scene.products.join(', ')});
+  saveSession();
+
+  // 후속 칩
+  const chips = document.getElementById('chatChips');
+  const s = scene.products;
+  chips.innerHTML = [
+    s.length>=2 ? `${s[0]} vs ${s[1]} 비교해줘` : `${s[0]} 가격 알려줘`,
+    '소재 샘플 받고 싶어',
+    `${s[0]} 인테리어 다시 만들어줘`,
+    '매장에서 직접 보고 싶어'
+  ].map(c=>`<div class="chat-chip" onclick="sendChip(this,'${c.replace(/'/g,"\\\\'")}')">${c}</div>`).join('');
   chips.className = 'chat-chips';
 
   return true;
