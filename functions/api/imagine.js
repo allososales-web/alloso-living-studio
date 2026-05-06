@@ -17,90 +17,77 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Build prompt
-    const userPrompt = prompt || `이 거실 사진에 ${sofaName || "소파"}를 자연스럽게 배치해주세요. 조명, 원근감, 그림자를 거실 환경에 맞게 조정하고, 기존 가구와 어울리도록 배치해주세요. 소파의 크기와 비율은 공간에 적절하게 조정해주세요.`;
+    const userPrompt = prompt || `이 거실 사진에 ${sofaName || "소파"}를 자연스럽게 배치해주세요. 조명, 원근감, 그림자를 맞춰주세요.`;
 
-    // Build parts array
-    const parts = [
-      { text: userPrompt },
-      {
-        inline_data: {
-          mime_type: "image/jpeg",
-          data: roomImage.replace(/^data:image\/\w+;base64,/, ""),
-        },
-      },
+    const parts = [{ text: userPrompt }];
+
+    const roomBase64 = roomImage.replace(/^data:image\/\w+;base64,/, "");
+    parts.push({ inline_data: { mime_type: "image/jpeg", data: roomBase64 } });
+
+    if (sofaImage) {
+      parts.push({ text: "위 거실에 아래 소파를 자연스럽게 배치해주세요." });
+      const sofaBase64 = sofaImage.replace(/^data:image\/\w+;base64,/, "");
+      parts.push({ inline_data: { mime_type: "image/jpeg", data: sofaBase64 } });
+    }
+
+    // Try models in order
+    const models = [
+      "gemini-2.0-flash-exp-image-generation",
+      "gemini-2.5-flash-preview-04-17",
+      "gemini-2.0-flash-exp",
     ];
 
-    // If sofa product image is provided, add it
-    if (sofaImage) {
-      parts.push({
-        text: "위 거실에 아래 소파 제품을 배치해주세요. 소파의 디자인과 색상을 최대한 유지하면서 자연스럽게 합성해주세요.",
-      });
-      parts.push({
-        inline_data: {
-          mime_type: "image/jpeg",
-          data: sofaImage.replace(/^data:image\/\w+;base64,/, ""),
-        },
-      });
+    let lastError = null;
+
+    for (const model of models) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+        console.log("[Imagine] Trying:", model);
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          console.error("[Imagine]", model, "error:", res.status, err.slice(0, 200));
+          lastError = `${model}: ${res.status}`;
+          continue;
+        }
+
+        const result = await res.json();
+        let image = null, text = "";
+
+        if (result.candidates?.[0]?.content?.parts) {
+          for (const p of result.candidates[0].content.parts) {
+            if (p.inlineData) image = `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`;
+            if (p.text) text += p.text;
+          }
+        }
+
+        if (image) {
+          console.log("[Imagine] OK:", model);
+          return new Response(JSON.stringify({ ok: true, image, text, model }), {
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+          });
+        }
+
+        lastError = `${model}: no image`;
+      } catch (e) {
+        lastError = `${model}: ${e.message}`;
+      }
     }
 
-    // Call Gemini API with image generation
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${API_KEY}`;
-
-    const geminiRes = await fetch(geminiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        generationConfig: {
-          responseModalities: ["IMAGE", "TEXT"],
-          temperature: 0.4,
-        },
-      }),
+    return new Response(JSON.stringify({ error: "Image generation failed", detail: lastError }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
     });
-
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error("[Imagine] Gemini API error:", geminiRes.status, errText);
-      return new Response(JSON.stringify({ error: "Image generation failed", detail: errText }), {
-        status: geminiRes.status,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-      });
-    }
-
-    const result = await geminiRes.json();
-
-    // Extract generated image and text from response
-    let generatedImage = null;
-    let generatedText = "";
-
-    if (result.candidates && result.candidates[0]) {
-      const parts = result.candidates[0].content?.parts || [];
-      for (const part of parts) {
-        if (part.inlineData) {
-          generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-        }
-        if (part.text) {
-          generatedText += part.text;
-        }
-      }
-    }
-
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        image: generatedImage,
-        text: generatedText,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
   } catch (err) {
-    console.error("[Imagine] Error:", err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
