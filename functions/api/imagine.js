@@ -4,25 +4,23 @@ export async function onRequestPost(context) {
   try {
     const { roomImage, sofaName, prompt, productImage, colorDesc } = await context.request.json();
 
-    // Gemini 요청 구성
+    const colorNote = colorDesc ? ` The sofa upholstery must be ${colorDesc}.` : '';
     const parts = [];
-    const colorNote = colorDesc ? ` 소파의 색상과 소재는 ${colorDesc}입니다.` : '';
 
     if (productImage) {
-      // GLB 렌더링 이미지가 있음 → 제품 형태+컬러 참조
+      // 3D 렌더링 이미지가 있음 → 제품 형태 참조
       if (roomImage) {
-        parts.push({ text: `첫 번째 이미지는 소파 3D 렌더링입니다. 이 소파의 형태와 색상을 정확하게 유지하면서 두 번째 이미지의 거실에 자연스럽게 배치해주세요.${colorNote} 조명과 그림자를 맞춰주세요. 반드시 이미지를 생성해주세요.` });
+        parts.push({ text: `First image is a 3D rendering of the sofa. Place this exact sofa design into the room shown in the second image.${colorNote} Keep the sofa shape accurate. Match lighting and shadows. Generate a photorealistic image.` });
         parts.push({ inline_data: { mime_type: "image/jpeg", data: productImage.replace(/^data:image\/\w+;base64,/, "") } });
         parts.push({ inline_data: { mime_type: "image/jpeg", data: roomImage.replace(/^data:image\/\w+;base64,/, "") } });
       } else {
-        parts.push({ text: `이 소파 3D 렌더링을 참고해서, 이 소파가 모던한 한국 아파트 거실에 자연스럽게 배치된 인테리어 사진을 생성해주세요. 소파의 형태와 색상을 정확하게 유지해주세요.${colorNote} 인테리어 매거진 스타일, 자연광, 따뜻한 분위기. 반드시 이미지를 생성해주세요.` });
+        parts.push({ text: `This is a 3D rendering of a sofa. Generate a photorealistic interior photo of a modern Korean apartment living room with this exact sofa placed naturally.${colorNote} Keep the sofa design and shape accurate. Magazine-style photography, natural lighting, warm atmosphere. Generate an image.` });
         parts.push({ inline_data: { mime_type: "image/jpeg", data: productImage.replace(/^data:image\/\w+;base64,/, "") } });
       }
     } else {
-      parts.push({ text: prompt || `Modern Korean apartment with ${sofaName} sofa. Generate image.` });
-      if (roomImage) {
-        parts.push({ inline_data: { mime_type: "image/jpeg", data: roomImage.replace(/^data:image\/\w+;base64,/, "") } });
-      }
+      // 텍스트만
+      parts.push({ text: (prompt || `Modern Korean apartment with ${sofaName} sofa. Generate image.`) + colorNote });
+      if (roomImage) parts.push({ inline_data: { mime_type: "image/jpeg", data: roomImage.replace(/^data:image\/\w+;base64,/, "") } });
     }
 
     // 1차: 나노바나나
@@ -47,7 +45,7 @@ export async function onRequestPost(context) {
     // 2차: FLUX 폴백
     if (context.env.AI) {
       try {
-        const result = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt: prompt || `${sofaName} sofa interior` });
+        const result = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt: (prompt || `${sofaName} sofa interior`) + (colorNote || '') });
         if (result?.image) return jsonRes({ ok: true, image: `data:image/jpeg;base64,${result.image}`, model: "flux" });
       } catch (e) { /* */ }
     }
