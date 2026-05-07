@@ -1,40 +1,42 @@
-// GET: 진단 테스트 — 브라우저에서 /api/imagine 접속하면 모델별 상태 확인
+// GET: 진단
 export async function onRequestGet(context) {
-  const API_KEY = context.env.GOOGLE_API_KEY;
-  const results = { timestamp: new Date().toISOString(), models: {}, flux: null };
+  const results = { timestamp: new Date().toISOString(), flux: null };
 
-  // Test each Gemini model
-  for (const model of ["gemini-2.5-flash-image", "gemini-3.1-flash-image-preview"]) {
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`,
-        { method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: "Generate a simple photo of a modern white sofa in a minimalist room. Generate image." }], role: "user" }],
-            generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
-          })
-        }
-      );
-      const text = await res.text();
-      const hasImage = text.includes("inlineData");
-      results.models[model] = { status: res.status, hasImage, preview: text.slice(0, 200) };
-    } catch (e) {
-      results.models[model] = { status: "error", message: e.message };
-    }
-  }
-
-  // Test FLUX
   if (context.env.AI) {
     try {
-      const r = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt: "a white sofa" });
+      const r = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt: "a modern white sofa in minimalist room" });
+      // Inspect the result deeply
       const type = r?.constructor?.name || typeof r;
-      const size = r?.byteLength || r?.length || 'unknown';
-      results.flux = { status: "ok", type, size };
+      const keys = r ? Object.keys(r) : [];
+      const proto = Object.getPrototypeOf(r)?.constructor?.name;
+      let imageSize = 0;
+
+      // Check if it has an image property
+      if (r?.image) {
+        imageSize = r.image.byteLength || r.image.length || 0;
+      }
+
+      // Try to read as response
+      let respSize = 0;
+      try {
+        const resp = new Response(r);
+        const buf = await resp.arrayBuffer();
+        respSize = buf.byteLength;
+      } catch(e) {}
+
+      results.flux = { 
+        status: "ok", type, proto, keys: keys.join(','), 
+        imageSize, respSize,
+        isUint8: r instanceof Uint8Array,
+        isAB: r instanceof ArrayBuffer,
+        isRS: r instanceof ReadableStream,
+        sample: typeof r === 'object' ? JSON.stringify(r).slice(0, 100) : String(r).slice(0, 100)
+      };
     } catch (e) {
       results.flux = { status: "error", message: e.message };
     }
   } else {
-    results.flux = { status: "no binding" };
+    results.flux = { status: "no AI binding" };
   }
 
   return new Response(JSON.stringify(results, null, 2), {
@@ -42,7 +44,7 @@ export async function onRequestGet(context) {
   });
 }
 
-// POST: 실제 이미지 생성
+// POST: 이미지 생성
 export async function onRequestPost(context) {
   const API_KEY = context.env.GOOGLE_API_KEY;
 
@@ -64,27 +66,39 @@ export async function onRequestPost(context) {
             { method: "POST", headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ contents: [{ parts, role: "user" }], generationConfig: { responseModalities: ["TEXT", "IMAGE"] } }) }
           );
-          if (res.status === 429) { console.log("[Imagine]", model, "429"); continue; }
-          if (!res.ok) { console.log("[Imagine]", model, res.status); continue; }
+          if (res.status === 429) continue;
+          if (!res.ok) continue;
           const data = await res.json();
           for (const p of (data.candidates?.[0]?.content?.parts || [])) {
-            if (p.inlineData) {
-              console.log("[Imagine] OK:", model);
-              return jsonRes({ ok: true, image: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`, model });
-            }
+            if (p.inlineData) return jsonRes({ ok: true, image: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`, model });
           }
-        } catch (e) { console.log("[Imagine]", model, e.message); }
+        } catch (e) { /* next */ }
       }
     }
 
-    // 2차: Cloudflare FLUX
+    // 2차: FLUX — 응답 형식 자동 감지
     if (context.env.AI) {
       try {
         const result = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt: userPrompt });
+        
         let bytes;
-        if (result instanceof Uint8Array) bytes = result;
-        else if (result instanceof ArrayBuffer) bytes = new Uint8Array(result);
-        else bytes = new Uint8Array(await new Response(result).arrayBuffer());
+        
+        // Case 1: result.image (some CF AI versions return {image: Uint8Array})
+        if (result?.image) {
+          if (result.image instanceof Uint8Array) bytes = result.image;
+          else if (result.image instanceof ArrayBuffer) bytes = new Uint8Array(result.image);
+          else bytes = new Uint8Array(await new Response(result.image).arrayBuffer());
+        }
+        // Case 2: result is Uint8Array directly
+        else if (result instanceof Uint8Array) { bytes = result; }
+        // Case 3: result is ArrayBuffer
+        else if (result instanceof ArrayBuffer) { bytes = new Uint8Array(result); }
+        // Case 4: result is ReadableStream
+        else if (result instanceof ReadableStream) { bytes = new Uint8Array(await new Response(result).arrayBuffer()); }
+        // Case 5: result is Response-like
+        else if (typeof result?.arrayBuffer === 'function') { bytes = new Uint8Array(await result.arrayBuffer()); }
+        // Case 6: try wrapping in Response
+        else { try { bytes = new Uint8Array(await new Response(result).arrayBuffer()); } catch(e){} }
 
         if (bytes && bytes.length > 100) {
           let bin = '';
@@ -93,7 +107,9 @@ export async function onRequestPost(context) {
           }
           return jsonRes({ ok: true, image: `data:image/png;base64,${btoa(bin)}`, model: "flux" });
         }
-      } catch (e) { console.log("[Imagine] FLUX:", e.message); }
+      } catch (e) {
+        console.log("[Imagine] FLUX error:", e.message);
+      }
     }
 
     return jsonRes({ error: "unavailable" }, 500);
