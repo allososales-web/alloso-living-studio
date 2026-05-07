@@ -3597,37 +3597,23 @@ const GLB_MAP = {
   '카포네그랑':R2_GLB_BASE+'카포네그랑%201인(좌).glb',
 };
 
-// Three.js 동적 로드 + GLB → 2D 이미지 렌더링
+// Three.js 동적 로드 (일반 스크립트)
 let threeLoaded = false;
+function loadScript(src){ return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);}); }
+
 async function loadThree(){
-  if(threeLoaded) return;
-  await new Promise((resolve) => {
-    const s = document.createElement('script');
-    s.type = 'importmap';
-    s.textContent = JSON.stringify({imports:{"three":"https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js"}});
-    document.head.appendChild(s);
-    // Load Three + GLTFLoader via module script
-    const m = document.createElement('script');
-    m.type = 'module';
-    m.textContent = `
-      import * as THREE from 'three';
-      import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
-      window._THREE = THREE;
-      window._GLTFLoader = GLTFLoader;
-      window.dispatchEvent(new Event('threeReady'));
-    `;
-    document.head.appendChild(m);
-    window.addEventListener('threeReady', ()=>{ threeLoaded=true; resolve(); }, {once:true});
-    setTimeout(resolve, 5000); // timeout fallback
-  });
+  if(threeLoaded && window.THREE) return;
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js');
+    threeLoaded = true;
+    console.log('[Three] Loaded OK');
+  } catch(e){ console.log('[Three] Load failed:', e); }
 }
 
 async function renderGLBToImage(glbUrl, hexColor){
   await loadThree();
-  if(!window._THREE) return null;
-
-  const THREE = window._THREE;
-  const GLTFLoader = window._GLTFLoader;
+  if(!window.THREE || !THREE.GLTFLoader) { console.log('[GLB] Three not available'); return null; }
 
   return new Promise((resolve) => {
     const w=512, h=384;
@@ -3639,17 +3625,14 @@ async function renderGLBToImage(glbUrl, hexColor){
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(35, w/h, 0.1, 100);
 
-    // 조명
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const dir = new THREE.DirectionalLight(0xffffff, 0.8);
     dir.position.set(3, 5, 4);
     scene.add(dir);
 
-    const loader = new GLTFLoader();
+    const loader = new THREE.GLTFLoader();
     loader.load(glbUrl, (gltf) => {
       const model = gltf.scene;
-
-      // 컬러 적용
       if(hexColor){
         const color = new THREE.Color(hexColor);
         model.traverse((child) => {
@@ -3658,8 +3641,6 @@ async function renderGLBToImage(glbUrl, hexColor){
           }
         });
       }
-
-      // 모델 중심 + 카메라 위치
       const box = new THREE.Box3().setFromObject(model);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
@@ -3667,14 +3648,13 @@ async function renderGLBToImage(glbUrl, hexColor){
       const maxDim = Math.max(size.x, size.y, size.z);
       camera.position.set(maxDim*1.2, maxDim*0.8, maxDim*1.5);
       camera.lookAt(0, 0, 0);
-
       scene.add(model);
       renderer.render(scene, camera);
-
       const dataUrl = renderer.domElement.toDataURL('image/jpeg', 0.85);
       renderer.dispose();
+      console.log('[GLB] Rendered:', glbUrl.split('/').pop());
       resolve(dataUrl);
-    }, undefined, () => { resolve(null); });
+    }, undefined, (err) => { console.log('[GLB] Load error:', err); resolve(null); });
 
     setTimeout(() => resolve(null), 10000);
   });
