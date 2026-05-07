@@ -926,30 +926,8 @@ body{
 .compare-link{display:block;text-align:center;font-size:9px;color:var(--muted);margin-top:6px;text-decoration:none;letter-spacing:.06em}
 .compare-link:hover{color:var(--accent)}
 @media(max-width:360px){.compare-card{grid-template-columns:1fr;}.compare-col+.compare-col{border-left:none;border-top:1px solid var(--border)}}
-/* ── Photo Upload & AI Image ── */
-.chat-photo-btn{background:none;border:none;font-size:18px;cursor:pointer;padding:2px 6px;opacity:.5;transition:opacity .15s;flex-shrink:0}
-.chat-photo-btn:hover{opacity:1}
-.photo-preview{position:relative;margin:6px 0;max-width:200px}
-.photo-preview img{width:100%;border-radius:8px;border:1px solid var(--border)}
-.photo-preview-close{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ai-image-result{margin:8px 0;border-radius:10px;overflow:hidden;border:1px solid var(--accent2)}
-.ai-image-result img{width:100%;display:block}
-.ai-image-label{font-size:9px;color:var(--muted);text-align:center;padding:6px;background:var(--card);letter-spacing:.08em}
-.imagine-loading{text-align:center;padding:20px;color:var(--muted);font-size:11px}
 .imagine-loading .dots{display:inline-block;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
-/* ── Scene Visual Card ── */
-.scene-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:10px 0}
-.scene-card-img{position:relative;width:100%}
-.scene-card-img img{width:100%;display:block;border-radius:12px 12px 0 0}
-.scene-card-label{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;padding:3px 8px;border-radius:10px;letter-spacing:.06em}
-.scene-products{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.scene-products::-webkit-scrollbar{display:none}
-.scene-ptag{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;text-decoration:none;color:inherit;transition:border-color .12s}
-.scene-ptag:hover{border-color:var(--gold-lt)}
-.scene-ptag-img{width:36px;height:36px;border-radius:4px;object-fit:cover;background:var(--card)}
-.scene-ptag-name{font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
-.scene-ptag-ko{font-size:9px;color:var(--muted)}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -1286,11 +1264,9 @@ body{
     <!-- INPUT -->
     <div class="chat-input-wrap">
       <div class="chat-input-row">
-        <button class="chat-photo-btn" onclick="document.getElementById('photoInput').click()" title="거실 사진 업로드">📷</button>
         <textarea id="chatTa" class="chat-ta" placeholder="소파에 대해 자유롭게 물어보세요" rows="1" onkeydown="onChatKey(event)" oninput="autoResize(this)"></textarea>
         <button class="chat-send" id="chatSend" onclick="sendChat()">↑</button>
       </div>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
     </div>
   </div>
 
@@ -1562,10 +1538,10 @@ function renderWelcome(){
       <div class="home-oq-q">어떤 공간을<br>만들고 싶으세요?</div>
       <input class="home-oq-input" id="homeInput" placeholder="예: 아이와 함께 쓸 따뜻한 거실" onkeydown="if(event.key==='Enter'){homeAsk(this.value)}">
       <div class="home-oq-scenes">
-        <button class="home-oq-scene" onclick="sendSceneRecommendation('가족거실','아이와 함께 쓸 따뜻한 거실을 꾸미고 싶어요')">우리 가족 거실</button>
-        <button class="home-oq-scene" onclick="sendSceneRecommendation('서재','혼자 쓰는 서재에 소파 하나 놓고 싶어요')">나만의 서재</button>
-        <button class="home-oq-scene" onclick="sendSceneRecommendation('신혼','신혼 거실에 어울리는 소파 추천해주세요')">신혼 라운지</button>
-        <button class="home-oq-scene" onclick="sendSceneRecommendation('반려동물','반려동물이 있는데 어떤 소재가 좋을까요?')">반려동물과 함께</button>
+        <button class="home-oq-scene" onclick="homeAsk('아이와 함께 쓸 따뜻한 거실을 꾸미고 싶어요')">우리 가족 거실</button>
+        <button class="home-oq-scene" onclick="homeAsk('혼자 쓰는 서재에 소파 하나 놓고 싶어요')">나만의 서재</button>
+        <button class="home-oq-scene" onclick="homeAsk('신혼 거실에 어울리는 소파 추천해주세요')">신혼 라운지</button>
+        <button class="home-oq-scene" onclick="homeAsk('반려동물이 있는데 어떤 소재가 좋을까요?')">반려동물과 함께</button>
       </div>
       <div class="home-oq-divider">또는</div>
       <div class="home-oq-links">
@@ -3128,7 +3104,6 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
-- 고객이 "이미지 만들어줘", "합성해줘", "소파 넣어줘", "꾸며줘", "인테리어 보여줘", "봐줘", "봐주면 돼", "우리집에 놓으면 어떨까", "모습 보고 싶어", "느낌 보여줘", "어울릴까" 등 소파를 시각적으로 보고 싶어하는 모든 표현에 대해: 간단히 조건을 정리하고 "지금 이미지를 생성할게요!" 라고 짧게 답하세요. 시스템이 자동으로 AI 이미지를 생성합니다. 절대 "이미지를 제공할 수 없습니다"나 "이미지를 직접 생성하는 기능이 없습니다"라고 하지 마세요. 3D 스튜디오 링크로 대체하지 마세요.
 - 고객이 체계적 추천을 원하는 느낌이면("뭐가 좋을지 모르겠어요", "비교해주세요") 답변 마지막에 "체계적으로 찾아보고 싶으시면 **단계별 상담**도 준비되어 있어요." 정도로 자연스럽게 안내. 강제 유도하지 마세요.
 
 【컬러 스와치 표시 규칙】
@@ -3245,16 +3220,7 @@ function autoResize(ta){
 function sendChat(){
   const ta = document.getElementById('chatTa');
   const text = ta.value.trim();
-  if(chatLoading) return;
-  // 사진이 있으면 이미지 합성 모드
-  if(pendingPhoto){
-    ta.value=''; ta.style.height='auto';
-    hideChips();
-    chatLoading = true;
-    sendImagine(text || '이 거실에 소파 놓아줘').then(()=>{ chatLoading = false; });
-    return;
-  }
-  if(!text) return;
+  if(!text || chatLoading) return;
   ta.value=''; ta.style.height='auto';
   hideChips();
   sendMessage(text);
@@ -3549,15 +3515,6 @@ async function sendMessage(text){
     reply = typeof result === 'string' ? result : result.text;
     followChips = typeof result === 'string' ? [] : (result.chips || []);
 
-    // 이미지 생성 시그널 감지
-    if(reply === '__IMAGINE__'){
-      hideTyping();
-      chatLoading = false;
-      document.getElementById('chatSend').disabled = false;
-      await sendImagine(text);
-      return;
-    }
-
     hideTyping();
     appendBotMsg(reply);
   }
@@ -3570,16 +3527,6 @@ async function sendMessage(text){
 
   chatHistory.push({role:'assistant', content:reply});
   saveSession();
-
-  // API 응답 후에도 이미지 생성 요청이었는지 체크
-  const imgKw = ['보여줘','봐줘','봐주','놓아줘','넣어줘','꾸며줘','배치해줘','만들어줘','인테리어','합성','이미지','사진','모습','느낌','어떨까','어울릴까','볼래','보고 싶','시뮬레이션','가상 배치','놓으면','두면','넣으면','우리집','우리 집','내 집','내 거실'];
-  const recentCtx = chatHistory.slice(-6).map(m=>m.content).join(' ');
-  const hasImgKw = imgKw.some(k=>text.includes(k));
-  const hasSeriesInCtx = Object.keys(PRODUCT_CARDS).some(s=>text.includes(s) || recentCtx.includes(s));
-  const hasImgRequest = (hasImgKw && hasSeriesInCtx) || (text.includes('이미지') && (text.includes('생성')||text.includes('만들')) && hasSeriesInCtx);
-  if(hasImgRequest && usedAPI){
-    await sendImagine(text);
-  }
 
   // 후속 질문 칩 표시
   if(followChips.length > 0){
@@ -3602,343 +3549,6 @@ async function sendMessage(text){
   chatLoading = false;
   document.getElementById('chatSend').disabled = false;
 }
-
-/* ── 거실 사진 → AI 소파 합성 ── */
-let pendingPhoto = null;
-
-function handlePhotoUpload(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  if(file.size > 20*1024*1024){ alert('20MB 이하 이미지를 선택해주세요.'); return; }
-
-  // 이미지를 1024px로 리사이즈 후 base64 변환 (API 용량 제한 대응)
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const img = new Image();
-    img.onload = function(){
-      const maxSize = 1024;
-      let w = img.width, h = img.height;
-      if(w > maxSize || h > maxSize){
-        if(w > h){ h = Math.round(h * maxSize / w); w = maxSize; }
-        else { w = Math.round(w * maxSize / h); h = maxSize; }
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      pendingPhoto = canvas.toDataURL('image/jpeg', 0.8);
-      console.log('[Photo] Resized to', w+'x'+h, 'size:', Math.round(pendingPhoto.length/1024)+'KB');
-
-      // 미리보기 표시
-      const preview = document.createElement('div');
-      preview.className = 'photo-preview';
-      preview.id = 'photoPreview';
-      preview.innerHTML = `<img src="${pendingPhoto}" alt="거실 사진"><button class="photo-preview-close" onclick="cancelPhoto()">✕</button>`;
-      const wrap = document.querySelector('.chat-input-wrap');
-      const existing = document.getElementById('photoPreview');
-      if(existing) existing.remove();
-      wrap.insertBefore(preview, wrap.firstChild);
-      document.getElementById('chatTa').placeholder = '이 거실에 어떤 소파를 놓아볼까요?';
-      document.getElementById('chatTa').focus();
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-  event.target.value = '';
-}
-
-function cancelPhoto(){
-  pendingPhoto = null;
-  const p = document.getElementById('photoPreview');
-  if(p) p.remove();
-  document.getElementById('chatTa').placeholder = '소파에 대해 자유롭게 물어보세요';
-}
-
-async function sendImagine(userText){
-  const hasPhoto = !!pendingPhoto;
-  const photo = pendingPhoto;
-  if(hasPhoto) cancelPhoto();
-
-  // 소파명 감지 (긴 이름 우선 매칭)
-  const allText = userText + ' ' + chatHistory.slice(-4).map(m=>m.content).join(' ');
-  const seriesNames = Object.keys(PRODUCT_CARDS).sort((a,b)=>b.length-a.length);
-  let sofaName = null;
-  // 복합 이름 정규화 (사티 큐브 → 사티큐브, 카포네 그랑 → 카포네그랑)
-  const normalized = allText.replace(/사티\s*큐브/g,'사티큐브').replace(/카포네\s*그랑/g,'카포네그랑').replace(/케렌시아\s*1인/g,'케렌시아1인').replace(/사티\s*모션/g,'사티모션');
-  for(const s of seriesNames){
-    if(normalized.includes(s)){ sofaName = s; break; }
-  }
-  if(!sofaName) sofaName = '사티';
-
-  // 사용자 메시지 표시
-  const msgs = document.getElementById('chatMsgs');
-  const userRow = document.createElement('div');
-  userRow.className = 'msg-row user';
-  const photoHtml = hasPhoto ? `<img src="${photo}" style="max-width:180px;border-radius:6px;display:block;margin-bottom:6px">` : '';
-  userRow.innerHTML = `<div>
-    <div class="msg-bubble user">${photoHtml}${escHtml(userText)}</div>
-    <div class="msg-time">${nowTime()}</div>
-  </div>`;
-  msgs.appendChild(userRow);
-  scrollMsgs();
-
-  const card = PRODUCT_CARDS[sofaName];
-  const sofaDesc = card ? card.desc : '';
-
-  // 사용자 텍스트에서 공간 조건 추출
-  let roomDetails = [];
-  if(allText.includes('오크')) roomDetails.push('오크 원목 바닥');
-  if(allText.includes('대리석')) roomDetails.push('대리석 바닥');
-  if(allText.includes('아이보리')) roomDetails.push('아이보리 벽');
-  if(allText.includes('화이트')||allText.includes('흰')) roomDetails.push('화이트 벽');
-  if(allText.includes('그레이')||allText.includes('회색')) roomDetails.push('그레이 톤');
-  if(allText.match(/\d+평/)) roomDetails.push(allText.match(/\d+평/)[0]+' 크기 공간');
-  if(allText.includes('안방')||allText.includes('침실')) roomDetails.push('안방/침실');
-  if(allText.includes('거실')) roomDetails.push('거실');
-  if(allText.includes('서재')) roomDetails.push('서재');
-
-  // 컬러 감지
-  let sofaColor = '';
-  const colorNames = Object.keys(COLOR_CHIPS);
-  for(const c of colorNames){ if(allText.includes(c)){ sofaColor = c; break; } }
-  if(allText.includes('블랙')||allText.includes('검정')) sofaColor = sofaColor || '블랙';
-  if(allText.includes('화이트')||allText.includes('크림')) sofaColor = sofaColor || '크림';
-
-  // 공간 스타일 감지
-  let roomStyle = '모던 미니멀 한국 아파트 거실';
-  if(allText.includes('내추럴')||allText.includes('우드')||allText.includes('북유럽')) roomStyle = '내추럴 북유럽 스타일 거실, 오크 바닥, 따뜻한 조명';
-  else if(allText.includes('럭셔리')||allText.includes('고급')||allText.includes('호텔')) roomStyle = '럭셔리 호텔 라운지 스타일 거실, 대리석 바닥';
-  else if(allText.includes('미니멀')||allText.includes('모던')) roomStyle = '모던 미니멀 아파트 거실, 화이트 벽, 밝은 공간';
-  if(roomDetails.length > 0) roomStyle = roomDetails.join(', ') + '의 ' + roomStyle;
-
-  // 프롬프트 구성
-  const colorText = sofaColor ? ` ${sofaColor} 컬러의` : '';
-  let prompt;
-  if(hasPhoto){
-    prompt = `이 사진의 공간에 알로소(Alloso)${colorText} ${sofaName} 소파를 자연스럽게 배치해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+' 디자인입니다.' : ''} 조명과 그림자를 맞춰서 실제처럼 합성해주세요. 반드시 이미지를 생성해주세요.`;
-  } else {
-    prompt = `${roomStyle}에 알로소(Alloso)${colorText} ${sofaName} 소파가 배치된 고급 인테리어 사진을 생성해주세요. ${sofaDesc ? sofaName+'은(는) '+sofaDesc+' 디자인의 한국 프리미엄 소파입니다.' : ''} 사실적인 인테리어 매거진 스타일로, 자연광이 들어오는 아름다운 공간에 소파가 자연스럽게 놓인 모습을 만들어주세요. 반드시 이미지를 생성해주세요.`;
-  }
-  const loadRow = document.createElement('div');
-  loadRow.className = 'msg-row bot';
-  loadRow.id = 'imagineLoading';
-  loadRow.innerHTML = `<div class="msg-av">A</div>
-    <div class="msg-bubble bot">
-      <div class="imagine-loading">✨ <strong>${sofaName}</strong>${hasPhoto ? '를 거실에 배치' : ' 인테리어 이미지를 생성'}하고 있어요<span class="dots">...</span><br><span style="font-size:10px;opacity:.6">AI가 이미지를 생성 중입니다 (10~20초)</span></div>
-    </div>`;
-  msgs.appendChild(loadRow);
-  scrollMsgs();
-
-  try{
-    const res = await fetch('/api/imagine', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        roomImage: hasPhoto ? photo : null,
-        sofaName,
-        prompt
-      })
-    });
-
-    document.getElementById('imagineLoading')?.remove();
-
-    if(res.ok){
-      const data = await res.json();
-      if(data.image){
-        const botRow = document.createElement('div');
-        botRow.className = 'msg-row bot';
-        botRow.innerHTML = `<div class="msg-av">A</div>
-          <div>
-            <div class="msg-bubble bot">
-              <div class="ai-image-result">
-                <img src="${data.image}" alt="AI 생성 이미지">
-                <div class="ai-image-label">AI Generated · ${sofaName}${hasPhoto ? ' in your room' : ' interior'}</div>
-              </div>
-              ${data.text ? '<div style="margin-top:8px;font-size:12px">'+escHtml(data.text)+'</div>' : ''}
-              <div style="margin-top:8px;font-size:10px;color:var(--muted)">AI가 생성한 이미지예요. 실제 제품은 매장에서 확인해보세요.</div>
-            </div>
-            <div class="msg-time">${nowTime()}</div>
-          </div>`;
-        msgs.appendChild(botRow);
-        scrollMsgs();
-
-        chatHistory.push({role:'user', content:(hasPhoto?'[거실 사진] ':'')+userText});
-        chatHistory.push({role:'assistant', content:`${sofaName} 소파 인테리어 이미지를 생성했습니다.`});
-        saveSession();
-      } else {
-        appendBotMsg('이미지 생성에 실패했어요. 다시 시도해주세요.');
-      }
-    } else {
-      const errData = await res.json().catch(()=>({}));
-      console.error('[Imagine] API response error:', JSON.stringify(errData));
-      appendBotMsg('이미지 생성에 문제가 있어요.\n\n' + (errData.detail || errData.error || '알 수 없는 오류') + '\n\n다시 시도해주세요.');
-    }
-  }catch(e){
-    document.getElementById('imagineLoading')?.remove();
-    appendBotMsg('네트워크 오류가 발생했어요. 인터넷 연결을 확인해주세요.');
-    console.error('[Imagine] Error:', e);
-  }
-
-  // 후속 칩
-  const chips = document.getElementById('chatChips');
-  chips.innerHTML = [`다른 소파로 바꿔보기`,`📷 내 거실 사진으로 해보기`,`${sofaName} 상세 정보`,`매장에서 직접 보고 싶어`].map(c =>
-    `<div class="chat-chip" onclick="sendChip(this,'${c}')">${c}</div>`
-  ).join('');
-  chips.className = 'chat-chips';
-
-  return true;
-}
-
-/* ── 장면별 비주얼 추천 (Scene Visual Cards) ── */
-const SCENE_CONFIGS = {
-  '가족거실': {
-    prompt: '밝고 따뜻한 30평대 한국 아파트 거실. 오크 원목 바닥, 아이보리 벽, 큰 창문으로 자연광이 들어옴. 넉넉한 크기의 모던 패밀리 소파가 중앙에 배치되고, 아이 장난감이 살짝 보이는 따뜻한 가족 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
-    products: ['홀리데이','에브리데이','디딤'],
-    colors: ['멜로우크림','웜브리즈'],
-    intro: '아이와 함께하는 따뜻한 거실, 이런 모습은 어떠세요?'
-  },
-  '서재': {
-    prompt: '세련된 한국 아파트 서재 공간. 원목 책장, 따뜻한 조명, 작은 사이드 테이블. 1인용 프리미엄 소파가 창가에 배치되어 독서와 휴식을 위한 아늑한 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
-    products: ['엘머','사티큐브','케렌시아1인'],
-    colors: ['버번','코스믹블루'],
-    intro: '나만의 서재, 이런 공간은 어떠세요?'
-  },
-  '신혼': {
-    prompt: '모던하고 세련된 25평 신혼 아파트 거실. 깔끔한 화이트 벽, 밝은 바닥, 미니멀한 가구. 2~3인 모던 소파가 중앙에 배치된 세련된 커플 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
-    products: ['사티','바드','보눔'],
-    colors: ['그레이아울','셀릭','몬드'],
-    intro: '신혼 거실, 이런 분위기는 어떠세요?'
-  },
-  '반려동물': {
-    prompt: '반려동물과 함께하는 한국 아파트 거실. 밝은 공간, 오크 바닥. 내구성 좋은 패브릭 소파가 배치되고, 고양이나 강아지가 소파 옆에 있는 따뜻한 공간. 인테리어 매거진 스타일 사진. 반드시 이미지를 생성해주세요.',
-    products: ['카포네','에브리데이','사티'],
-    colors: ['아이린','셀릭'],
-    intro: '반려동물과 함께하는 공간, 이런 느낌은 어떠세요?'
-  }
-};
-
-async function sendSceneRecommendation(sceneKey, userText){
-  const scene = SCENE_CONFIGS[sceneKey];
-  if(!scene) return false;
-
-  openChat();
-  await new Promise(r=>setTimeout(r,300));
-
-  // 사용자 메시지 표시
-  appendUserMsg(userText);
-  chatHistory.push({role:'user', content:userText});
-  saveSession();
-
-  // 인트로 + 이미지 로딩
-  const msgs = document.getElementById('chatMsgs');
-  const introRow = document.createElement('div');
-  introRow.className = 'msg-row bot';
-  introRow.innerHTML = `<div class="msg-av">A</div>
-    <div>
-      <div class="msg-bubble bot">
-        <div>${scene.intro}</div>
-        <div class="imagine-loading" style="margin-top:10px">✨ 공간 이미지를 만들고 있어요<span class="dots">...</span></div>
-      </div>
-    </div>`;
-  msgs.appendChild(introRow);
-  scrollMsgs();
-
-  // Gemini 이미지 생성
-  try {
-    const res = await fetch('/api/imagine', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ sofaName: scene.products[0], prompt: scene.prompt })
-    });
-
-    // 인트로 메시지의 로딩 제거
-    const loadingEl = introRow.querySelector('.imagine-loading');
-    if(loadingEl) loadingEl.remove();
-
-    if(res.ok){
-      const data = await res.json();
-      if(data.image){
-        // 제품 태그 HTML 생성
-        const tagsHtml = scene.products.map(name => {
-          const p = PRODUCT_CARDS[name];
-          if(!p) return '';
-          const imgTag = p.img ? `<img class="scene-ptag-img" src="${p.img}" onerror="this.style.display='none'">` : '';
-          return `<a class="scene-ptag" href="${p.url}" target="_blank">
-            ${imgTag}
-            <div>
-              <div class="scene-ptag-name">${p.en}</div>
-              <div class="scene-ptag-ko">${name}</div>
-            </div>
-          </a>`;
-        }).join('');
-
-        // 컬러 스와치 HTML
-        const swatchHtml = scene.colors.map(name => {
-          const c = COLOR_CHIPS[name];
-          if(!c) return '';
-          const chipStyle = c.c
-            ? `background-image:url('${R2_CHIP_BASE}${encodeURI(c.c)}');background-color:${c.h}`
-            : `background:${c.h}`;
-          return `<a class="color-swatch" href="${MATERIAL_LIBRARY_URL}" target="_blank">
-            <div class="color-swatch-chip" style="${chipStyle}"></div>
-            <span class="color-swatch-name">${name}</span>
-          </a>`;
-        }).join(' ');
-
-        // 이미지 + 태그 카드
-        const cardRow = document.createElement('div');
-        cardRow.className = 'msg-row bot';
-        cardRow.innerHTML = `<div class="msg-av">A</div>
-          <div>
-            <div class="msg-bubble bot" style="padding:0;overflow:hidden;border-radius:12px">
-              <div class="scene-card">
-                <div class="scene-card-img">
-                  <img src="${data.image}" alt="AI 인테리어">
-                  <div class="scene-card-label">AI Generated · Alloso Interior</div>
-                </div>
-                <div class="scene-products">${tagsHtml}</div>
-              </div>
-            </div>
-            <div class="msg-bubble bot" style="margin-top:6px">
-              추천 컬러: ${swatchHtml}
-              <div style="margin-top:8px;font-size:10px;color:var(--muted)">관심 있는 제품을 탭하면 자세한 정보를 볼 수 있어요.</div>
-            </div>
-            <div class="msg-time">${nowTime()}</div>
-          </div>`;
-        msgs.appendChild(cardRow);
-        scrollMsgs();
-
-        chatHistory.push({role:'assistant', content:scene.intro + ' ' + scene.products.join(', ') + ' 추천'});
-        saveSession();
-      }
-    }
-  } catch(e){
-    console.error('[Scene] Image error:', e);
-    // 이미지 실패해도 텍스트 추천은 보여줌
-    const loadingEl = introRow.querySelector('.imagine-loading');
-    if(loadingEl) loadingEl.textContent = '';
-  }
-
-  // 제품 카드도 텍스트로 추가
-  const prodCards = scene.products.map(name => `[PRODUCT:${name}]`).join('\n');
-  appendBotMsg(`이 제품들을 추천드려요.\n\n${prodCards}`);
-  chatHistory.push({role:'assistant', content:'제품 추천: ' + scene.products.join(', ')});
-  saveSession();
-
-  // 후속 칩
-  const chips = document.getElementById('chatChips');
-  const s = scene.products;
-  chips.innerHTML = [
-    s.length>=2 ? `${s[0]} vs ${s[1]} 비교해줘` : `${s[0]} 가격 알려줘`,
-    '소재 샘플 받고 싶어',
-    `${s[0]} 인테리어 다시 만들어줘`,
-    '매장에서 직접 보고 싶어'
-  ].map(c=>`<div class="chat-chip" onclick="sendChip(this,'${c.replace(/'/g,"\\\\'")}')">${c}</div>`).join('');
-  chips.className = 'chat-chips';
-
-  return true;
-}
-
 function getDemoReply(text){
   // ── 유사어 정규화 (퍼지 매칭) ──
   let t = text.toLowerCase()
@@ -4182,30 +3792,6 @@ function getDemoReply(text){
   // ── 브랜드 ──
   if(t.includes('퍼시스')||t.includes('alloso')||t.includes('알로소'))
     return R('Alloso는 **퍼시스그룹**의 하이엔드 소파 브랜드예요. 일룸·시디즈·퍼시스 등 국내 대표 가구 브랜드를 보유한 그룹이에요.',['추천 소파 알려줘','매장 어디 있어?']);
-
-  // ── 이미지 합성/생성 (확장 트리거) ──
-  const isImageReq = t.includes('합성')||t.includes('인테리어 이미지')
-    ||(t.includes('이미지')&&(t.includes('생성')||t.includes('만들')||t.includes('보여')||t.includes('줘')||t.includes('보고')))
-    ||(t.includes('사진')&&(t.includes('생성')||t.includes('만들')||t.includes('보여')||t.includes('줘')))
-    ||((t.includes('모습')||t.includes('느낌'))&&(t.includes('보고 싶')||t.includes('볼래')||t.includes('볼 수')||t.includes('보여')||t.includes('봐')))
-    ||((t.includes('두었')||t.includes('놓았')||t.includes('놓으면')||t.includes('두면')||t.includes('넣으면'))&&(t.includes('어떨')||t.includes('어울')||t.includes('맞을')||t.includes('볼래')||t.includes('보고')||t.includes('보여')))
-    ||(t.includes('우리집')||t.includes('우리 집')||t.includes('내 집')||t.includes('내 방')||t.includes('내 거실'))&&(t.includes('보여')||t.includes('보고')||t.includes('놓')||t.includes('두')||t.includes('넣')||t.includes('배치'))
-    ||(t.includes('시뮬레이션')||t.includes('가상')&&(t.includes('배치')||t.includes('인테리어')));
-  if(isImageReq){
-    // 현재 메시지 또는 최근 대화에서 시리즈명 찾기
-    const recentText = chatHistory.slice(-6).map(m=>m.content).join(' ');
-    const allSearch = (t + ' ' + recentText).replace(/사티\s*큐브/g,'사티큐브').replace(/카포네\s*그랑/g,'카포네그랑').replace(/사티\s*모션/g,'사티모션');
-    const mentioned = Object.keys(PRODUCT_CARDS).sort((a,b)=>b.length-a.length).find(s=>allSearch.includes(s));
-    if(mentioned || pendingPhoto){
-      return {text:'__IMAGINE__', chips:[]};
-    }
-    return R('소파 인테리어 이미지를 만들어 드릴 수 있어요!\n\n**방법 1 — 바로 생성:**\n"사티 인테리어 이미지 만들어줘" 처럼 소파 이름을 말해주세요.\n\n**방법 2 — 내 거실에 배치:**\n📷 버튼으로 거실 사진을 올리고 소파를 선택하세요.\n\n어떤 소파로 해볼까요?',['사티 인테리어 보여줘','케렌시아 거실에 놓은 모습','바드 이미지 만들어줘']);
-  }
-  // 시리즈명 + 시각 요청 키워드 조합 → 이미지 생성
-  const imgKeywords = ['보여줘','보여 줘','봐줘','봐주','봐 줘','놓은 모습','놓아줘','넣어줘','꾸며줘','배치해줘','배치해 줘','그려줘','만들어줘','만들어 줘','크기로 봐','인테리어','어떨까','어울릴까','모습','느낌','볼래','보고 싶','가상 배치','시뮬레이션'];
-  if(imgKeywords.some(k=>t.includes(k)) && Object.keys(PRODUCT_CARDS).some(s=>t.includes(s))){
-    return {text:'__IMAGINE__', chips:[]};
-  }
 
   // ── 3D 스튜디오 연결 (딥링크) ──
   if(t.includes('스튜디오')||t.includes('3d')||t.includes('배치'))
