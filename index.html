@@ -1192,6 +1192,8 @@ body{
 .rec-cta:hover{background:rgba(139,115,85,.08);}
 
 </style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
 <div class="shell" id="shell">
@@ -3583,83 +3585,56 @@ async function sendMessage(text){
 }
 /* ── 나노바나나 이미지 생성 ── */
 let pendingPhoto = null;
-const R2_GLB_BASE = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/Alloso%20series%20(glb)/';
+const R2_GLB = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/Alloso%20series%20(glb)/';
 const GLB_MAP = {
-  '사티':R2_GLB_BASE+'사티%20와이드%201인%20(우).glb',
-  '케렌시아':R2_GLB_BASE+'케렌시아%20싱글.glb',
-  '보눔':R2_GLB_BASE+'보눔%201인%20(우).glb',
-  '바드':R2_GLB_BASE+'바드%20데이베드.glb',
-  '밀로':R2_GLB_BASE+'밀로%201인%20(우).glb',
-  '엘머':R2_GLB_BASE+'엘머.glb',
-  '스탠':R2_GLB_BASE+'스탠%202인%20(우).glb',
-  '비하르':R2_GLB_BASE+'비하르%201인%20라운지(좌).glb',
-  '홀리데이':R2_GLB_BASE+'홀리데이%202인%20와이드%20(좌).glb',
-  '카포네그랑':R2_GLB_BASE+'카포네그랑%201인(좌).glb',
+  '사티':R2_GLB+'%EC%82%AC%ED%8B%B0%20%EC%99%80%EC%9D%B4%EB%93%9C%201%EC%9D%B8%20(%EC%9A%B0).glb',
+  '케렌시아':R2_GLB+'%EC%BC%80%EB%A0%8C%EC%8B%9C%EC%95%84%20%EC%8B%B1%EA%B8%80.glb',
+  '보눔':R2_GLB+'%EB%B3%B4%EB%88%94%201%EC%9D%B8%20(%EC%9A%B0).glb',
+  '바드':R2_GLB+'%EB%B0%94%EB%93%9C%20%EB%8D%B0%EC%9D%B4%EB%B2%A0%EB%93%9C.glb',
+  '밀로':R2_GLB+'%EB%B0%80%EB%A1%9C%201%EC%9D%B8%20(%EC%9A%B0).glb',
+  '엘머':R2_GLB+'%EC%97%98%EB%A8%B8.glb',
+  '스탠':R2_GLB+'%EC%8A%A4%ED%83%A0%202%EC%9D%B8%20(%EC%9A%B0).glb',
+  '홀리데이':R2_GLB+'%ED%99%80%EB%A6%AC%EB%8D%B0%EC%9D%B4%202%EC%9D%B8%20%EC%99%80%EC%9D%B4%EB%93%9C%20(%EC%A2%8C).glb',
+  '카포네그랑':R2_GLB+'%EC%B9%B4%ED%8F%AC%EB%84%A4%EA%B7%B8%EB%9E%91%201%EC%9D%B8(%EC%A2%8C).glb',
 };
 
-// Three.js 동적 로드 (일반 스크립트)
-let threeLoaded = false;
-function loadScript(src){ return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);}); }
-
-async function loadThree(){
-  if(threeLoaded && window.THREE) return;
-  try {
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
-    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js');
-    threeLoaded = true;
-    console.log('[Three] Loaded OK');
-  } catch(e){ console.log('[Three] Load failed:', e); }
-}
-
-async function renderGLBToImage(glbUrl, hexColor){
-  await loadThree();
-  if(!window.THREE || !THREE.GLTFLoader) { console.log('[GLB] Three not available'); return null; }
-
+function renderGLB(glbUrl, hexColor){
+  if(!window.THREE || !THREE.GLTFLoader){ console.warn('[GLB] Three.js not loaded'); return Promise.resolve(null); }
   return new Promise((resolve) => {
     const w=512, h=384;
-    const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true, preserveDrawingBuffer:true});
+    const renderer = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
     renderer.setSize(w, h);
-    renderer.setClearColor(0xf5f4f0, 1);
+    renderer.setClearColor(0xf5f4f0);
     renderer.outputEncoding = THREE.sRGBEncoding;
-
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(35, w/h, 0.1, 100);
-
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-    dir.position.set(3, 5, 4);
-    scene.add(dir);
+    const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(3,5,4); scene.add(dl);
 
-    const loader = new THREE.GLTFLoader();
-    loader.load(glbUrl, (gltf) => {
-      const model = gltf.scene;
+    new THREE.GLTFLoader().load(glbUrl, (gltf) => {
+      const m = gltf.scene;
       if(hexColor){
-        const color = new THREE.Color(hexColor);
-        model.traverse((child) => {
-          if(child.isMesh && child.material){
-            child.material = new THREE.MeshStandardMaterial({color, roughness:0.4, metalness:0.1});
-          }
-        });
+        const c = new THREE.Color(hexColor);
+        m.traverse(ch => { if(ch.isMesh) ch.material = new THREE.MeshStandardMaterial({color:c, roughness:0.4, metalness:0.1}); });
       }
-      const box = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
-      model.position.sub(center);
-      const maxDim = Math.max(size.x, size.y, size.z);
-      camera.position.set(maxDim*1.2, maxDim*0.8, maxDim*1.5);
-      camera.lookAt(0, 0, 0);
-      scene.add(model);
+      const box = new THREE.Box3().setFromObject(m);
+      const ct = box.getCenter(new THREE.Vector3());
+      const sz = box.getSize(new THREE.Vector3());
+      m.position.sub(ct);
+      const d = Math.max(sz.x, sz.y, sz.z);
+      camera.position.set(d*1.2, d*0.8, d*1.5);
+      camera.lookAt(0,0,0);
+      scene.add(m);
       renderer.render(scene, camera);
-      const dataUrl = renderer.domElement.toDataURL('image/jpeg', 0.85);
+      const img = renderer.domElement.toDataURL('image/jpeg', 0.85);
       renderer.dispose();
-      console.log('[GLB] Rendered:', glbUrl.split('/').pop());
-      resolve(dataUrl);
-    }, undefined, (err) => { console.log('[GLB] Load error:', err); resolve(null); });
+      console.log('[GLB] Rendered OK');
+      resolve(img);
+    }, undefined, (err) => { console.warn('[GLB] Load error:', err.message||err); resolve(null); });
 
-    setTimeout(() => resolve(null), 10000);
+    setTimeout(()=> resolve(null), 15000);
   });
 }
-
 function handlePhotoUpload(event){
   const file = event.target.files[0];
   if(!file) return;
@@ -3738,7 +3713,28 @@ async function sendImagine(userText){
     const chip = COLOR_CHIPS[sofaColor];
     if(chip){
       const isLeather = ['소프트프리모','드리밍헤비','르아테','베지탄','단테'].includes(chip.a);
-      colorDesc = `${sofaColor} color (hex:${chip.h}), ${isLeather?'premium leather with sheen':'fabric'}, from ${chip.a} article`;
+      // 자연어 컬러 묘사 (AI가 이해하기 쉬운 형태)
+      const COLOR_DESC_MAP = {
+        '클라우드':'cream white soft leather','카멜':'warm camel tan leather','피오니':'soft pink leather',
+        '파우더':'light beige powder leather','노체':'rich dark walnut brown leather','세이지':'muted sage green leather',
+        '템즈그레이':'warm medium gray leather','뮤트블랙':'deep matte black leather','테라코타':'warm terracotta orange-brown leather',
+        '카도마리노':'deep forest green leather','조이풀옐로우':'bright mustard yellow leather','올드로즈':'dusty rose pink leather',
+        '블루피코크':'deep teal blue leather','셔우드탠':'warm honey tan leather','모빅':'glossy black leather with subtle sheen',
+        '버번':'rich warm bourbon brown leather','온드':'soft pearl gray leather','오비드':'dark espresso brown leather',
+        '모튼':'warm mocha brown leather','프렌치모이어':'soft French blue leather','쿠오이오':'natural tan cognac leather',
+        '오키드':'muted orchid purple leather','아이리쉬':'deep Irish green leather',
+        '마쉬':'olive marsh green leather','머스키블랙':'deep black leather','녹스':'very dark charcoal black leather','토프':'warm taupe leather',
+        '멜로우크림':'soft mellow cream fabric','핑크블리스':'light blush pink fabric','딥올리브':'deep olive green fabric',
+        '그레이아울':'warm owl gray fabric','웜브리즈':'warm beige breeze fabric','이브닝허쉬':'dark charcoal evening fabric',
+        '샤모아':'chamois sand fabric','블루베이':'ocean blue fabric','블러쉬':'soft blush fabric','몬드':'warm sand mond fabric',
+        '쉘':'soft shell white fabric','머스탱':'dark mustang brown fabric','마리골드':'bright marigold yellow fabric','클레이':'warm clay fabric',
+        '아이린':'light silver gray fabric','뮤티드핑크':'muted dusty pink fabric','셀릭':'medium charcoal gray fabric',
+        '시나몬':'warm cinnamon brown fabric','우드랜드':'forest woodland green fabric','코스믹블루':'deep cosmic navy blue fabric',
+        '마누카':'warm manuka honey fabric','미모사':'bright mimosa yellow fabric','모스':'natural moss green fabric',
+        '민트밤':'fresh mint green fabric','번트엄버':'dark burnt umber brown fabric',
+        '카놀리크림':'cannoli cream boucle fabric','허니콤':'golden honeycomb boucle fabric','아이스블루':'light ice blue boucle fabric',
+      };
+      colorDesc = COLOR_DESC_MAP[sofaColor] || `${sofaColor} (${isLeather?'leather':'fabric'})`;
     }
   }
 
@@ -3750,19 +3746,14 @@ async function sendImagine(userText){
 
   // 로딩
   const loadRow = document.createElement('div'); loadRow.className='msg-row bot'; loadRow.id='imagineLoading';
-  loadRow.innerHTML = `<div class="msg-av">A</div><div class="msg-bubble bot"><div class="imagine-loading">✨ <strong>${sofaName}</strong>${sofaColor?' '+sofaColor:''} 인테리어 이미지를 생성하고 있어요<span class="dots">...</span><br><span style="font-size:10px;opacity:.6">3D 모델 렌더링 + AI 합성 중 (15~30초)</span></div></div>`;
+  loadRow.innerHTML = `<div class="msg-av">A</div><div class="msg-bubble bot"><div class="imagine-loading">✨ <strong>${sofaName}</strong>${sofaColor?' '+sofaColor:''} 인테리어 이미지를 생성하고 있어요<span class="dots">...</span><br><span style="font-size:10px;opacity:.6">AI가 인테리어 이미지를 생성 중입니다 (10~20초)</span></div></div>`;
   msgs.appendChild(loadRow); scrollMsgs();
 
-  // GLB → 2D 렌더링 (제품 형태 + 컬러 적용)
+  // GLB 3D 렌더링 → 제품 형태 참조 (기본 색상, 형태만)
   let productImage = null;
   const glbUrl = GLB_MAP[sofaName];
   if(glbUrl){
-    const chip = sofaColor ? COLOR_CHIPS[sofaColor] : null;
-    const hex = chip?.h || null;
-    try {
-      productImage = await renderGLBToImage(glbUrl, hex);
-      if(productImage) console.log('[Imagine] GLB rendered:', sofaName, sofaColor||'default');
-    } catch(e){ console.log('[Imagine] GLB render failed:', e.message); }
+    productImage = await renderGLB(glbUrl, null); // 색상 적용 안 함 — 형태만 참조
   }
 
   // 공간 조건 추출
@@ -3790,7 +3781,7 @@ async function sendImagine(userText){
     const data = await res.json();
     if(res.ok && data.image){
       const botRow = document.createElement('div'); botRow.className='msg-row bot';
-      botRow.innerHTML = `<div class="msg-av">A</div><div><div class="msg-bubble bot" style="padding:4px"><div class="ai-image-result"><img src="${data.image}"><div class="ai-image-label">AI Generated · ${sofaName} interior</div></div></div><div class="msg-time">${nowTime()}</div></div>`;
+      botRow.innerHTML = `<div class="msg-av">A</div><div><div class="msg-bubble bot" style="padding:4px"><div class="ai-image-result"><img src="${data.image}"><div class="ai-image-label">AI 참고 이미지 · 실제 제품과 차이가 있을 수 있습니다</div></div></div><div class="msg-time">${nowTime()}</div></div>`;
       msgs.appendChild(botRow); scrollMsgs();
       chatHistory.push({role:'user',content:userText},{role:'assistant',content:`${sofaName} 인테리어 이미지 생성 완료`});
       saveSession();
