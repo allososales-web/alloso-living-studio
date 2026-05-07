@@ -3675,7 +3675,7 @@ async function sendImagine(userText){
   try {
     const res = await fetch('/api/imagine', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ roomImage: hasPhoto ? photo : null, sofaName, prompt })
+      body: JSON.stringify({ roomImage: hasPhoto ? photo : null, sofaName, prompt, sofaImageUrl: card?.img || '' })
     });
     document.getElementById('imagineLoading')?.remove();
 
