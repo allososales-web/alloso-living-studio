@@ -2,42 +2,47 @@ export async function onRequestPost(context) {
   const API_KEY = context.env.GOOGLE_API_KEY;
 
   try {
-    const { roomImage, sofaName, prompt, sofaImageUrl, colorDesc } = await context.request.json();
+    const { roomImage, sofaName, prompt, sofaImageUrl, colorDesc, chipImageUrl } = await context.request.json();
 
-    // 제품 사진 가져오기
-    let sofaImageBase64 = null;
+    // 제품 사진 fetch (소파 형태 참조)
+    let sofaBase64 = null;
     if (sofaImageUrl) {
       try {
-        const imgRes = await fetch(sofaImageUrl);
-        if (imgRes.ok) {
-          const buf = await imgRes.arrayBuffer();
-          const bytes = new Uint8Array(buf);
-          let bin = '';
-          for (let i = 0; i < bytes.length; i += 8192) {
-            bin += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + 8192, bytes.length)));
-          }
-          sofaImageBase64 = btoa(bin);
-        }
-      } catch (e) { console.log("[Imagine] CDN fetch error:", e.message); }
+        const r = await fetch(sofaImageUrl);
+        if (r.ok) sofaBase64 = await toBase64(await r.arrayBuffer());
+      } catch (e) { console.log("[Imagine] sofa fetch:", e.message); }
     }
 
-    // 컬러 지시
-    const colorInstruction = colorDesc ? ` 소파 색상/소재를 반드시 ${colorDesc}로 변경해주세요.` : '';
+    // 칩 이미지 fetch (컬러/텍스처 참조)
+    let chipBase64 = null;
+    if (chipImageUrl) {
+      try {
+        const r = await fetch(chipImageUrl);
+        if (r.ok) chipBase64 = await toBase64(await r.arrayBuffer());
+        console.log("[Imagine] Chip image fetched:", chipImageUrl.split('/').pop());
+      } catch (e) { console.log("[Imagine] chip fetch:", e.message); }
+    }
 
     // Gemini 요청 구성
     const parts = [];
-    if (roomImage) {
-      parts.push({ text: `이 거실 사진에 두 번째 이미지의 소파를 자연스럽게 배치해주세요. 소파의 디자인 형태를 유지하면서${colorInstruction} 조명과 그림자를 거실 환경에 맞춰주세요. 반드시 이미지를 생성해주세요.` });
-      parts.push({ inline_data: { mime_type: "image/jpeg", data: roomImage.replace(/^data:image\/\w+;base64,/, "") } });
-    } else if (sofaImageBase64) {
-      parts.push({ text: `이 소파 제품을 모던한 한국 아파트 거실에 자연스럽게 배치한 인테리어 사진을 생성해주세요. 소파의 디자인 형태를 정확하게 유지해주세요.${colorInstruction} 인테리어 매거진 스타일, 자연광. 반드시 이미지를 생성해주세요.` });
-    } else {
-      parts.push({ text: prompt || `Modern Korean apartment with ${sofaName} sofa. Generate image.` });
-    }
+    const colorNote = colorDesc ? ` 소파의 색상과 소재를 반드시 ${colorDesc}으로 적용해주세요.` : '';
 
-    if (sofaImageBase64) {
-      const mime = sofaImageUrl.endsWith('.png') ? 'image/png' : 'image/jpeg';
-      parts.push({ inline_data: { mime_type: mime, data: sofaImageBase64 } });
+    if (sofaBase64 && chipBase64) {
+      // 최적: 제품 사진 (형태) + 칩 이미지 (컬러) + 공간 합성
+      parts.push({ text: `첫 번째 이미지는 소파 제품입니다. 이 소파의 디자인과 형태를 정확하게 유지해주세요. 두 번째 이미지는 소재 샘플입니다. 소파의 색상과 텍스처를 이 소재 샘플과 동일하게 적용해주세요.${roomImage ? ' 세 번째 이미지의 거실에 배치해주세요.' : ' 모던한 한국 아파트 거실에 배치한 인테리어 매거진 스타일 사진을 생성해주세요.'} 자연광, 따뜻한 분위기. 반드시 이미지를 생성해주세요.` });
+      parts.push({ inline_data: { mime_type: imgMime(sofaImageUrl), data: sofaBase64 } });
+      parts.push({ inline_data: { mime_type: "image/jpeg", data: chipBase64 } });
+      if (roomImage) parts.push({ inline_data: { mime_type: "image/jpeg", data: stripDataUrl(roomImage) } });
+
+    } else if (sofaBase64) {
+      // 제품 사진만 (컬러 텍스트 지시)
+      parts.push({ text: `이 소파 제품을 모던한 한국 아파트 거실에 배치한 인테리어 사진을 생성해주세요. 소파의 디자인 형태를 정확하게 유지해주세요.${colorNote} 인테리어 매거진 스타일, 자연광. 반드시 이미지를 생성해주세요.` });
+      parts.push({ inline_data: { mime_type: imgMime(sofaImageUrl), data: sofaBase64 } });
+      if (roomImage) parts.push({ inline_data: { mime_type: "image/jpeg", data: stripDataUrl(roomImage) } });
+
+    } else {
+      // 텍스트만
+      parts.push({ text: prompt || `Modern Korean apartment with ${sofaName} sofa. Generate image.` });
     }
 
     // 1차: 나노바나나
@@ -62,16 +67,32 @@ export async function onRequestPost(context) {
     // 2차: FLUX 폴백
     if (context.env.AI) {
       try {
-        const fluxPrompt = prompt || `Modern Korean apartment with ${sofaName} sofa. Interior photography.`;
-        const result = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt: fluxPrompt });
+        const result = await context.env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt: prompt || `${sofaName} sofa interior` });
         if (result?.image) return jsonRes({ ok: true, image: `data:image/jpeg;base64,${result.image}`, model: "flux" });
-      } catch (e) { /* fallthrough */ }
+      } catch (e) { /* */ }
     }
 
     return jsonRes({ error: "unavailable" }, 500);
   } catch (err) {
     return jsonRes({ error: err.message }, 500);
   }
+}
+
+function toBase64(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 8192) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + 8192, bytes.length)));
+  }
+  return btoa(bin);
+}
+
+function stripDataUrl(dataUrl) {
+  return dataUrl.replace(/^data:image\/\w+;base64,/, "");
+}
+
+function imgMime(url) {
+  return (url || '').endsWith('.png') ? 'image/png' : 'image/jpeg';
 }
 
 function jsonRes(data, status = 200) {
