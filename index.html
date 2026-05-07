@@ -3626,6 +3626,27 @@ async function sendImagine(userText){
   let sofaName = seriesNames.find(s=>allText.includes(s)) || '사티';
   const card = PRODUCT_CARDS[sofaName];
 
+  // 시리즈별 디자인 묘사 (이미지 생성용)
+  const SOFA_LOOKS = {
+    '사티': 'a sleek modern low-profile sofa with thin metal legs, clean straight lines, deep seat cushions, minimalist frame, light fabric upholstery',
+    '케렌시아': 'a very low floor-level modular sofa with curved armrests flowing into the backrest, deep wide seat for lounging, wooden short legs, organic arch silhouette',
+    '바드': 'a Scandinavian style sofa with slim steel legs, minimal thin arms, clean rectangular shape, light colored fabric, daybed convertible design',
+    '보눔': 'a modern open-arm sofa with no armrests, wide generous seating, clean boxy shape, premium fabric or leather',
+    '카포네': 'a cushion-back sofa with plush rounded cushions, comfortable deep seating, modern relaxed design',
+    '카포네그랑': 'a large L-shaped sectional sofa with plush cushion back, generous corner configuration, premium leather',
+    '홀리데이': 'a family-friendly large sofa with rounded soft edges, deep comfortable cushions, warm fabric upholstery, cozy design',
+    '에브리데이': 'a casual comfortable sofa with soft rounded shape, plush cushions, family-friendly durable fabric',
+    '스탠': 'a very large premium modular sofa system, wide deep seating, luxurious proportions, statement piece',
+    '비하르': 'a low-profile natural style sofa, wide flat seat, organic relaxed design, natural toned fabric',
+    '엘머': 'a single-person lounge chair with wide seat, high backrest, curved comfortable design, premium leather',
+    '사티큐브': 'a single-person cube-shaped swivel chair, enveloping high sides that wrap around the sitter, compact square form, 360 rotation base',
+    '디딤': 'a floor-level modular sofa with very low height, Japanese-Korean floor sitting inspired, cushion modules that can be rearranged',
+    '사티모션': 'a modern electric recliner sofa with power headrest and legrest, sleek design with hidden mechanism',
+    '로바': 'a compact electric recliner with modern design',
+    '라임': 'a slim electric recliner with thin armrests',
+  };
+  const sofaLook = SOFA_LOOKS[sofaName] || 'a premium Korean designer sofa';
+
   // 사용자 메시지
   const msgs = document.getElementById('chatMsgs');
   const userRow = document.createElement('div'); userRow.className='msg-row user';
@@ -3648,8 +3669,8 @@ async function sendImagine(userText){
   const roomDesc = details.length ? details.join(', ') + '. ' : '';
 
   const prompt = hasPhoto
-    ? `Place an Alloso ${sofaName} sofa naturally in this room photo. ${card?.desc||''} Match lighting and perspective. Generate an image.`
-    : `A photorealistic modern Korean apartment living room. ${roomDesc}An Alloso ${sofaName} premium sofa is placed naturally. ${card?.desc||''} Magazine-style interior photography, natural lighting. Generate an image.`;
+    ? `Place ${sofaLook} naturally in this room photo. Match lighting and perspective. Generate an image.`
+    : `A photorealistic modern Korean apartment living room. ${roomDesc}The main furniture is ${sofaLook}. Magazine-style interior photography, natural window lighting, warm atmosphere. Generate an image.`;
 
   try {
     const res = await fetch('/api/imagine', {
@@ -3666,11 +3687,11 @@ async function sendImagine(userText){
       chatHistory.push({role:'user',content:userText},{role:'assistant',content:`${sofaName} 인테리어 이미지 생성 완료`});
       saveSession();
     } else {
-      appendBotMsg('이미지 생성에 문제가 있어요.\n\n'+(data.detail||data.error||'알 수 없는 오류')+'\n\n잠시 후 다시 시도해주세요.');
+      appendBotMsg(`지금은 이미지 생성이 어려워요. 대신 **${sofaName}** 제품을 자세히 확인해보세요.\n\n[PRODUCT:${sofaName}]\n\n3D 스튜디오에서 직접 배치해보실 수도 있어요.\n\n[STUDIO_LINK]`);
     }
   } catch(e){
     document.getElementById('imagineLoading')?.remove();
-    appendBotMsg('네트워크 오류. 다시 시도해주세요.');
+    appendBotMsg(`이미지 생성이 지연되고 있어요. **${sofaName}** 정보를 먼저 확인해보세요.\n\n[PRODUCT:${sofaName}]`);
   }
 
   const chips = document.getElementById('chatChips');
