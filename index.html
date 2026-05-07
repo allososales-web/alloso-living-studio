@@ -3695,7 +3695,7 @@ async function sendImagine(userText){
   try {
     const res = await fetch('/api/imagine', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ roomImage: hasPhoto ? photo : null, sofaName, prompt, sofaImageUrl: card?.img || '', colorDesc: colorDesc || '' })
+      body: JSON.stringify({ roomImage: hasPhoto ? photo : null, sofaName, prompt, sofaImageUrl: card?.img || '', colorDesc: colorDesc || '', chipImageUrl: (sofaColor && COLOR_CHIPS[sofaColor]?.c) ? R2_CHIP_BASE + encodeURI(COLOR_CHIPS[sofaColor].c) : '' })
     });
     document.getElementById('imagineLoading')?.remove();
 
