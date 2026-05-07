@@ -3647,6 +3647,25 @@ async function sendImagine(userText){
   };
   const sofaLook = SOFA_LOOKS[sofaName] || 'a premium Korean designer sofa';
 
+  // 컬러 감지
+  let sofaColor = '';
+  let colorDesc = '';
+  const colorNames = Object.keys(COLOR_CHIPS).sort((a,b)=>b.length-a.length);
+  for(const c of colorNames){ if(allText.includes(c)){ sofaColor = c; break; } }
+  if(!sofaColor){
+    if(allText.includes('블랙')||allText.includes('검정')) { sofaColor='뮤트블랙'; colorDesc='matte black'; }
+    else if(allText.includes('화이트')||allText.includes('크림')) { sofaColor='클라우드'; colorDesc='cream white'; }
+    else if(allText.includes('그레이')||allText.includes('회색')) { sofaColor='그레이아울'; colorDesc='warm gray'; }
+    else if(allText.includes('브라운')||allText.includes('갈색')) { sofaColor='버번'; colorDesc='warm brown leather'; }
+  }
+  if(sofaColor && !colorDesc){
+    const chip = COLOR_CHIPS[sofaColor];
+    if(chip){
+      const isLeather = ['소프트프리모','드리밍헤비','르아테','베지탄','단테'].includes(chip.a);
+      colorDesc = `${sofaColor} color (hex:${chip.h}), ${isLeather?'premium leather with sheen':'fabric'}, from ${chip.a} article`;
+    }
+  }
+
   // 사용자 메시지
   const msgs = document.getElementById('chatMsgs');
   const userRow = document.createElement('div'); userRow.className='msg-row user';
@@ -3668,14 +3687,15 @@ async function sendImagine(userText){
   if(allText.includes('서재')) details.push('study room');
   const roomDesc = details.length ? details.join(', ') + '. ' : '';
 
+  const colorPrompt = colorDesc ? ` The sofa color/material is ${colorDesc}.` : '';
   const prompt = hasPhoto
-    ? `Place ${sofaLook} naturally in this room photo. Match lighting and perspective. Generate an image.`
-    : `A photorealistic modern Korean apartment living room. ${roomDesc}The main furniture is ${sofaLook}. Magazine-style interior photography, natural window lighting, warm atmosphere. Generate an image.`;
+    ? `Place ${sofaLook} naturally in this room photo.${colorPrompt} Match lighting and perspective. Generate an image.`
+    : `A photorealistic modern Korean apartment living room. ${roomDesc}The main furniture is ${sofaLook}.${colorPrompt} Magazine-style interior photography, natural window lighting, warm atmosphere. Generate an image.`;
 
   try {
     const res = await fetch('/api/imagine', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ roomImage: hasPhoto ? photo : null, sofaName, prompt, sofaImageUrl: card?.img || '' })
+      body: JSON.stringify({ roomImage: hasPhoto ? photo : null, sofaName, prompt, sofaImageUrl: card?.img || '', colorDesc: colorDesc || '' })
     });
     document.getElementById('imagineLoading')?.remove();
 
