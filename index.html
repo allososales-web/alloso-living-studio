@@ -849,12 +849,12 @@ body{
   .product-card-price{font-size:12px}
 }
 /* ── Studio Deeplink Button ── */
-.studio-deeplink{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:#8B7355;color:#fff;border-radius:6px;font-size:11px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-decoration:none;transition:opacity .15s;border:none;font-family:'Noto Sans KR',sans-serif}
+.studio-deeplink{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:var(--accent);color:#0C0B0A;border-radius:6px;font-size:11px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-decoration:none;transition:opacity .15s;border:none;font-family:'Noto Sans KR',sans-serif}
 .studio-deeplink:hover{opacity:.85}
 /* ── Home One-Question Hero ── */
 .home-oq{text-align:center;padding:48px 24px 20px;position:relative}
 .home-oq-brand{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.45em;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
-.home-oq-q{font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:#8B7355;line-height:1.6;margin-bottom:20px;letter-spacing:.03em}
+.home-oq-q{font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);line-height:1.6;margin-bottom:20px;letter-spacing:.03em}
 .home-oq-input{width:100%;background:var(--card);border:1.5px solid var(--border2);border-radius:24px;padding:13px 18px;font-size:13px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;transition:border-color .2s}
 .home-oq-input:focus{border-color:var(--accent)}
 .home-oq-input::placeholder{color:var(--muted)}
@@ -866,77 +866,6 @@ body{
 .home-oq-links{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .home-oq-link{font-size:10px;padding:6px 12px;color:var(--muted);cursor:pointer;transition:color .12s;background:none;border:none;font-family:'Noto Sans KR',sans-serif}
 .home-oq-link:hover{color:var(--accent)}
-/* ── Session Resume Banner ── */
-.session-banner{margin:0 24px 12px;background:var(--card);border:1px solid var(--accent2);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
-.session-banner:hover{background:rgba(200,176,122,.06)}
-.session-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8B7355,#C4A882);display:flex;align-items:center;justify-content:center;font-family:'Josefin Sans',sans-serif;font-size:14px;color:rgba(255,255,255,.9);flex-shrink:0}
-.session-body{flex:1;min-width:0}
-.session-title{font-size:12px;font-weight:400;color:var(--accent)}
-.session-desc{font-size:10px;color:var(--muted);margin-top:2px}
-.session-actions{display:flex;gap:6px;margin-top:8px}
-.session-btn{font-size:10px;padding:5px 12px;border-radius:14px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s}
-.session-btn.pri{background:#8B7355;color:#fff}
-.session-btn.sec{background:transparent;border:1px solid var(--border);color:var(--muted)}
-.session-btn.sec:hover{color:var(--text)}
-/* ── Lead Collection CTA ── */
-.lead-cta{background:var(--card);border:1px solid var(--accent2);border-radius:10px;padding:14px 16px;margin:10px 0;animation:leadFadeIn .4s ease}
-@keyframes leadFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.lead-cta-title{font-size:12px;font-weight:400;color:var(--accent);margin-bottom:4px}
-.lead-cta-desc{font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:10px}
-.lead-form{display:flex;flex-direction:column;gap:8px}
-.lead-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;transition:border-color .2s}
-.lead-input:focus{border-color:var(--accent)}
-.lead-input::placeholder{color:var(--muted)}
-.lead-row{display:flex;gap:6px}
-.lead-submit{background:#8B7355;border:none;border-radius:6px;padding:9px 16px;font-size:11px;font-weight:500;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;flex-shrink:0}
-.lead-submit:hover{opacity:.85}
-.lead-submit:disabled{opacity:.4;cursor:default}
-.lead-dismiss{background:none;border:none;font-size:10px;color:var(--muted);cursor:pointer;padding:4px 0;font-family:'Noto Sans KR',sans-serif}
-.lead-dismiss:hover{color:var(--text)}
-.lead-done{font-size:11px;color:var(--green);text-align:center;padding:8px 0}
-/* ── Wizard ↔ Chat Transition ── */
-.guide-suggest{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:10px 0;animation:leadFadeIn .4s ease}
-.guide-suggest-title{font-size:11px;font-weight:400;color:var(--accent);margin-bottom:4px}
-.guide-suggest-desc{font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:8px}
-.guide-suggest-btns{display:flex;gap:6px}
-.guide-suggest-btn{font-size:10px;padding:6px 14px;border-radius:14px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s}
-.guide-suggest-btn.pri{background:#8B7355;color:#fff}
-.guide-suggest-btn.sec{background:transparent;border:1px solid var(--border);color:var(--muted)}
-.guide-suggest-btn.sec:hover{color:var(--text)}
-.wizard-chat-btn{display:flex;align-items:center;gap:6px;margin:10px 0;padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .14s;font-size:10px;color:var(--muted);width:100%;text-align:left;font-family:'Noto Sans KR',sans-serif}
-.wizard-chat-btn:hover{border-color:var(--gold-lt);color:var(--accent)}
-/* ── Inline Color Swatch ── */
-.color-swatch{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2px 10px 2px 2px;margin:2px 1px;vertical-align:middle;text-decoration:none;color:inherit;transition:border-color .12s}
-.color-swatch:hover{border-color:var(--gold-lt)}
-.color-swatch-chip{width:22px;height:22px;border-radius:50%;flex-shrink:0;background-size:cover;background-position:center;border:1px solid rgba(0,0,0,.08)}
-.color-swatch-name{font-size:10px;color:var(--text2);white-space:nowrap}
-.color-swatch-art{font-size:8px;color:var(--muted);margin-left:1px}
-/* ── Compare Card ── */
-.compare-card{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:10px 0;background:var(--card)}
-.compare-col{padding:12px}
-.compare-col+.compare-col{border-left:1px solid var(--border)}
-.compare-img{width:100%;aspect-ratio:4/3;border-radius:6px;background:var(--bg2);object-fit:cover;margin-bottom:8px}
-.compare-name{font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
-.compare-ko{font-size:9px;color:var(--muted);margin-top:1px;margin-bottom:8px}
-.compare-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px}
-.compare-row:last-child{border-bottom:none}
-.compare-label{color:var(--muted)}
-.compare-val{color:var(--text2);text-align:right;max-width:60%}
-.compare-price{font-size:11px;color:var(--gold);margin-top:8px;font-weight:400}
-.compare-link{display:block;text-align:center;font-size:9px;color:var(--muted);margin-top:6px;text-decoration:none;letter-spacing:.06em}
-.compare-link:hover{color:var(--accent)}
-@media(max-width:360px){.compare-card{grid-template-columns:1fr;}.compare-col+.compare-col{border-left:none;border-top:1px solid var(--border)}}
-.imagine-loading .dots{display:inline-block;animation:pulse 1.2s infinite}
-/* ── Image Generation ── */
-.chat-photo-btn{background:none;border:none;font-size:18px;cursor:pointer;padding:2px 6px;opacity:.5;transition:opacity .15s;flex-shrink:0}
-.chat-photo-btn:hover{opacity:1}
-.photo-preview{position:relative;margin:6px 0;max-width:200px}
-.photo-preview img{width:100%;border-radius:8px;border:1px solid var(--border)}
-.photo-preview-close{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ai-image-result{margin:8px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
-.ai-image-result img{width:100%;display:block}
-.ai-image-label{font-size:9px;color:var(--muted);text-align:center;padding:6px;background:var(--card);letter-spacing:.08em}
-@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
 .sb-eyebrow{
   font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;
   color:rgba(200,184,128,.6);margin-bottom:6px;
@@ -1191,9 +1120,68 @@ body{
 }
 .rec-cta:hover{background:rgba(139,115,85,.08);}
 
+/* ══════════════════════════════════════
+   DESKTOP RESPONSIVE  ≥769px
+   ══════════════════════════════════════ */
+@media (min-width: 769px) {
+  body {
+    padding: 24px 16px;
+    align-items: center;
+  }
+  .shell {
+    width: min(820px, calc(100vw - 48px));
+    height: min(900px, calc(100vh - 48px));
+    border-radius: 16px;
+  }
+  /* Header — slightly more spacious */
+  .hdr {
+    padding: 14px 26px 12px;
+  }
+  /* Chat messages — content max 720px, centered with breathing space */
+  .chat-msgs {
+    padding-left: max(20px, calc((100% - 720px) / 2));
+    padding-right: max(20px, calc((100% - 720px) / 2));
+    padding-top: 22px;
+  }
+  /* Chat input — same content alignment as messages */
+  .chat-input-wrap {
+    padding-left: max(20px, calc((100% - 720px) / 2));
+    padding-right: max(20px, calc((100% - 720px) / 2));
+  }
+  /* Welcome screen — more breathing on desktop */
+  .home-oq {
+    padding-top: 56px;
+    padding-bottom: 40px;
+  }
+  .home-oq-q {
+    font-size: 30px;
+  }
+  /* Overlay panel headers (Care/FAQ/Chat) — more horizontal padding */
+  .op-hdr {
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+  /* Overlay panel body — center content, allow wider */
+  .op-body .op-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  /* Bubbles can be a bit larger on desktop */
+  .msg-bubble {
+    max-width: 78%;
+    font-size: 13.5px;
+  }
+}
+
+/* Tablet adjustments — keep mobile shell but allow it to be slightly larger */
+@media (min-width: 481px) and (max-width: 768px) {
+  .shell {
+    width: min(440px, calc(100vw - 24px));
+    height: min(880px, calc(100vh - 24px));
+  }
+}
+
 </style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
 <div class="shell" id="shell">
@@ -1204,25 +1192,14 @@ body{
 
       <div>
         <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyODAgNTIiIHdpZHRoPSIxNjgiIGhlaWdodD0iMzIiPgogIDx0ZXh0IHg9IjE0MCIgeT0iMzciIGZvbnQtZmFtaWx5PSInSm9zZWZpbiBTYW5zJywnQ2VudHVyeSBHb3RoaWMnLEFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iY3VycmVudENvbG9yIj5BTExPU088L3RleHQ+Cjwvc3ZnPg==" class="hdr-logo" alt="ALLOSO" style="height:16px;opacity:.92;">
-        <div class="hdr-consultant" id="hdrSub">소파 상담</div>
+        <div class="hdr-consultant" id="hdrSub">Alloso Advisor</div>
       </div>
     </div>
     <div class="hdr-r">
       <div class="hbtn" onclick="restart()">↺</div>
     </div>
   </div>
-  <div class="ribbon" id="ribbon" style="display:none">
-    <div class="prog-track" id="progTrack"></div>
-    <div class="prog-lbls" id="progLbls"></div>
-  </div>
   <div class="main" id="main"></div>
-  <div class="navbar" id="navbar" style="display:none">
-    <div class="nav-back" onclick="goBack()">←</div>
-    <button class="nav-next" id="navNext" onclick="goNext()">
-      <span id="navLbl">다음</span>
-      <span class="nav-arr" id="navArr">→</span>
-    </button>
-  </div>
 
   <!-- ══ CARE PANEL ══ -->
   <div class="overlay-panel" id="carePanel">
@@ -1275,11 +1252,9 @@ body{
     <!-- INPUT -->
     <div class="chat-input-wrap">
       <div class="chat-input-row">
-        <button class="chat-photo-btn" onclick="document.getElementById('photoInput').click()" title="거실 사진 업로드">📷</button>
         <textarea id="chatTa" class="chat-ta" placeholder="소파에 대해 자유롭게 물어보세요" rows="1" onkeydown="onChatKey(event)" oninput="autoResize(this)"></textarea>
         <button class="chat-send" id="chatSend" onclick="sendChat()">↑</button>
       </div>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
     </div>
   </div>
 
@@ -1401,7 +1376,7 @@ body{
 // DATA
 // ════════════════════════════════════
 const SERIES = {
-  '레지나':    {type:'다리형', mood:['classic','refined'],           minSqm:14, w:[2200,3070], desc:'클래식 다리형. 단종 예정, 재고 한정 운영.',
+  '레지나':    {type:'다리형', mood:['classic','refined'],           minSqm:14, w:[2200,3070], desc:'아치형 다리와 클래식한 실루엣.',
     price:{ess_f:[2190000,3090000],prem_f:[2390000,3990000],design_f:[2390000,3390000],ess_l:[2490000,3790000],prem_l:[2990000,4990000],hi_l:[4990000,7390000]}},
   '보눔OP':   {type:'오픈암', mood:['modern','minimal'],            minSqm:16, w:[2320,3200], desc:'팔걸이 없이 공간감을 극대화.',
     price:{ess_f:[2790000,3890000],prem_f:[2890000,4870000],design_f:[2890000,4140000],ess_l:[3390000,4900000],prem_l:[3880000,6190000],hi_l:[5980000,8190000]}},
@@ -1415,9 +1390,9 @@ const SERIES = {
     price:{ess_f:[570000,4390000],prem_f:[590000,5090000],design_f:[570000,5090000],ess_l:[670000,5390000],prem_l:[730000,6750000],hi_l:[990000,8490000]}},
   '사티모션': {type:'리클라이너', mood:['relaxation','luxury'],    minSqm:18, w:[2080], desc:'전동 리클라이너. 완전한 휴식 자세.',
     price:{ess_f:[2490000,4980000],prem_f:[2540000,5380000],design_f:[2540000,5380000],ess_l:[2790000,5580000],prem_l:[3090000,6580000],hi_l:[4190000,8380000]}},
-  '케렌시아': {type:'로우 모듈', mood:['natural','warm'],          minSqm:20, w:[2050,3000,3150], desc:'애쉬 원목 다리(5cm/15cm 선택), 감싸안는 로우 디자인.',
+  '케렌시아': {type:'로우 모듈', mood:['natural','warm'],          minSqm:20, w:[2050,3000,3150], desc:'자유 모듈, 트렌디한 낮은 높이.',
     price:{ess_f:[1100000,5080000],prem_f:[1200000,6180000],design_f:[1200000,6180000],ess_l:[1200000,5580000],prem_l:[1500000,7580000],hi_l:[2200000,9480000]}},
-  '바드':     {type:'스칸디', mood:['scandinavian','minimal'],     minSqm:14, w:[1900,2600], desc:'스틸다리(블랙/크롬), 간결한 직선형 스칸디 감성. 데이베드 전환 가능.',
+  '바드':     {type:'스칸디', mood:['scandinavian','minimal'],     minSqm:14, w:[1800,1900,2600], desc:'가느다란 원목 다리, 스칸디 감성.',
     price:{ess_f:[160000,3580000],prem_f:[180000,4260000],design_f:[180000,4260000],ess_l:[190000,3980000],prem_l:[230000,5280000],hi_l:[390000,7980000]}},
   '스탠':     {type:'대형',   mood:['luxury','contemporary'],     minSqm:24, w:[2580,3580,4780], desc:'넓고 깊은 프리미엄 대형 소파.',
     price:{prem_f:[1500000,12130000],design_f:[1500000,12130000],prem_l:[1900000,14980000],hi_l:[2700000,20490000]}},
@@ -1454,85 +1429,21 @@ const ARTICLES = {
 };
 
 // ════════════════════════════════════
-// CONSULTANT CONFIG
+// STATE (chat-first, no structured flow)
 // ════════════════════════════════════
-const CONSULTANTS = {
-  T: {
-    mark:'L', type:'T', name:'LINEN', nameKo:'린넨',
-    sub:'LINEN — 수치로 찾는 소파',
-    tagline:'데이터 기반 최적 매칭',
-    tags:['스펙과 수치로 분석해요','가성비·내구성 우선 고려','명확한 근거로 추천드려요'],
-    hdrClass:'t', hdrAvClass:'t',
-    steps:['공간 측정','사용 패턴','소재 우선순위','소파 선택','마감 선택','예약'],
-    eyebrowPrefix:'분석',
-    accentVar:'var(--t-accent)',
-  },
-  F: {
-    mark:'S', type:'F', name:'SUEDE', nameKo:'스웨이드',
-    sub:'SUEDE — 감각으로 찾는 소파',
-    tagline:'감성 공간 스토리텔링',
-    tags:['공간의 느낌을 먼저 물어봐요','생활 장면으로 소파를 찾아요','감촉과 무드 중심으로 안내해요'],
-    hdrClass:'f', hdrAvClass:'f',
-    steps:['공간 장면','거실 감성','원하는 촉감','소파 선택','마감 선택','예약'],
-    eyebrowPrefix:'감성',
-    accentVar:'var(--f-accent)',
-  },
-};
-
-// ════════════════════════════════════
-// STATE
-// ════════════════════════════════════
-let consultant = null; // 'T' or 'F'
-let curStep = 0;
 const ans = {
-  // T형
-  sqm:null, usage:null, priority:null,
-  // F형
-  scene:null, vibe:null, texture:null,
-  // shared
   series:null, grade:null, article:null, color:null,
-  showroom:null, date:null, time:null,
 };
-
-// ════════════════════════════════════
-// T형 STEP DEFINITIONS
-// ════════════════════════════════════
-const T_STEPS = [
-  {id:'t_size'},
-  {id:'t_usage'},
-  {id:'t_priority'},
-  {id:'shared_series'},
-  {id:'shared_material'},
-  {id:'shared_booking'},
-];
-const F_STEPS = [
-  {id:'f_scene'},
-  {id:'f_vibe'},
-  {id:'f_texture'},
-  {id:'shared_series'},
-  {id:'shared_material'},
-  {id:'shared_booking'},
-];
-
-function steps(){ return consultant === 'T' ? T_STEPS : F_STEPS; }
-function C(){ return CONSULTANTS[consultant] || CONSULTANTS.T; }
-function tf(t,f){ return consultant==='T'?t:f; }
 
 // ════════════════════════════════════
 // BOOT
 // ════════════════════════════════════
 window.addEventListener('DOMContentLoaded', boot);
 function boot(){
-  setRibbon(false);
-  setNavbar(false);
   renderWelcome();
 }
 function restart(){
   Object.keys(ans).forEach(k=>ans[k]=null);
-  consultant=null; curStep=0;
-  updateHdr(null);
-  setRibbon(false); setNavbar(false);
-  // chatFab always visible
   renderWelcome();
 }
 
@@ -1559,31 +1470,11 @@ function renderWelcome(){
       <div class="home-oq-divider">또는</div>
       <div class="home-oq-links">
         <button class="home-oq-link" onclick="location.href='/alloso-studio.html'">3D 스튜디오 →</button>
-        <button class="home-oq-link" onclick="renderTypeSelect()">단계별 상담 →</button>
         <button class="home-oq-link" onclick="openFAQ()">자주 묻는 질문</button>
         <button class="home-oq-link" onclick="openCare()">소재 관리 가이드</button>
       </div>
     </div>`;
   main.appendChild(div);
-
-  // 세션 복원 배너
-  const session = getSessionSummary();
-  if(session){
-    const banner = document.createElement('div');
-    banner.className = 'session-banner';
-    banner.innerHTML = `
-      <div class="session-av">A</div>
-      <div class="session-body">
-        <div class="session-title">${session.topSeries ? session.topSeries+'에 관심 보이셨어요' : '이전 상담 내역이 있어요'}</div>
-        <div class="session-desc">${session.elapsedText} · ${session.userMsgCount}개 질문</div>
-        <div class="session-actions">
-          <button class="session-btn pri" onclick="event.stopPropagation();resumeSession()">이어서 상담하기</button>
-          <button class="session-btn sec" onclick="event.stopPropagation();clearSession();this.closest('.session-banner').remove()">새로 시작</button>
-        </div>
-      </div>`;
-    const oqDiv = div.querySelector('.home-oq');
-    if(oqDiv) oqDiv.after(banner);
-  }
 }
 
 function homeAsk(text){
@@ -1592,674 +1483,6 @@ function homeAsk(text){
   setTimeout(()=>sendMessage(text.trim()),300);
 }
 
-function renderTypeSelect(){
-  const main=document.getElementById('main');
-  main.innerHTML='';
-  const div=document.createElement('div');
-  div.className='type-sel';
-  div.innerHTML=`
-    <button class="ts-back" onclick="renderWelcome()">← 홈으로</button>
-    <div class="ts-q">어떤 기준으로 소파를<br>찾아볼까요?</div>
-    <div class="ts-sub">선택에 따라 질문 방식이 달라져요.</div>
-    <div class="type-cards">
-      <div class="tc space" id="tc-T" onclick="pickType('T')">
-        <div class="tc-badge">✓</div>
-        <div class="tc-bar"></div>
-        <div class="tc-label">S P A C E</div>
-        <div class="tc-name">공간 기반</div>
-        <div class="tc-tags">
-          <div class="tc-tag">우리 집 거실 크기와 구조 중심</div>
-          <div class="tc-tag">공간에 맞는 소파 사이즈 추천</div>
-          <div class="tc-tag">배치와 동선 기준 상담</div>
-        </div>
-      </div>
-      <div class="tc life" id="tc-F" onclick="pickType('F')">
-        <div class="tc-badge">✓</div>
-        <div class="tc-bar"></div>
-        <div class="tc-label">L I F E S T Y L E</div>
-        <div class="tc-name">라이프스타일</div>
-        <div class="tc-tags">
-          <div class="tc-tag">생활 방식과 취향 중심</div>
-          <div class="tc-tag">휴식·대화·가족 생활 기준</div>
-          <div class="tc-tag">소재와 분위기 추천</div>
-        </div>
-      </div>
-    </div>
-    <button class="w-btn-pri" id="tsStartBtn" onclick="startFlow()" disabled style="max-width:100%;border-radius:2px;letter-spacing:.2em;font-size:11px;">상담 시작하기 →</button>`;
-  main.appendChild(div);
-}
-
-
-
-function selectConsultant(type){
-  consultant = type;
-  document.querySelectorAll('.cc').forEach(c=>c.classList.remove('sel'));
-  const el = document.getElementById('cc-'+type);
-  if(el) el.classList.add('sel');
-  const btn = document.getElementById('startBtn');
-  if(btn){ btn.disabled=false; btn.className='w-btn-pri '+type.toLowerCase(); }
-}
-
-function pickType(type){
-  consultant = type;
-  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('sel'));
-  document.getElementById('tc-'+type).classList.add('sel');
-  const btn = document.getElementById('tsStartBtn');
-  btn.disabled = false;
-  btn.className = 'w-btn-pri ' + (type==='T' ? 't' : 'f');
-  btn.style.maxWidth='100%'; btn.style.borderRadius='2px';
-}
-
-
-
-function startFlow(){
-  if(!consultant) return;
-  curStep = 0;
-  updateHdr(consultant);
-  buildRibbon();
-  setRibbon(true);
-  setNavbar(true);
-  // chatFab always visible
-  renderStep(curStep);
-}
-
-
-// ════════════════════════════════════
-// HEADER / RIBBON / NAVBAR
-// ════════════════════════════════════
-function updateHdr(type){
-  const hdr=document.getElementById('hdr');
-  const av=document.getElementById('hdrAv');
-  const sub=document.getElementById('hdrSub');
-  if(!type){ hdr.className='hdr'; av.className='hdr-av'; av.innerHTML=`<span style="font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:400;color:#C8B880;letter-spacing:.12em;">A</span>`; sub.textContent='소파 상담'; return; }
-  const c=CONSULTANTS[type];
-  hdr.className='hdr '+c.hdrClass;
-  av.className='hdr-av '+c.hdrAvClass;
-  av.innerHTML=`<span style="font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:400;letter-spacing:.12em;">${c.mark}</span>`;
-  sub.textContent=c.name;
-  const nn=document.getElementById('navNext');
-  if(nn){ nn.className='nav-next '+c.hdrClass; }
-}
-function setRibbon(show){ document.getElementById('ribbon').style.display=show?'block':'none'; }
-function setNavbar(show){ document.getElementById('navbar').style.display=show?'flex':'none'; }
-
-function buildRibbon(){
-  const c=C();
-  const track=document.getElementById('progTrack');
-  const lbls=document.getElementById('progLbls');
-  track.innerHTML=''; lbls.innerHTML='';
-  const type=consultant.toLowerCase();
-  c.steps.forEach((lbl,i)=>{
-    if(i>0){
-      const conn=document.createElement('div');
-      conn.id='conn'+i;
-      conn.className='prog-seg '+type;
-      conn.innerHTML='<div class="ps-fill"></div>';
-      track.appendChild(conn);
-    }
-    const dot=document.createElement('div');
-    dot.id='pdot'+i;
-    dot.className='prog-seg '+type+(i===0?' active':'');
-    dot.innerHTML='<div class="ps-fill"></div>';
-    track.appendChild(dot);
-    const l=document.createElement('div');
-    l.id='plbl'+i;
-    l.className='prog-lbl'+(i===0?' active '+type:'');
-    l.textContent=lbl;
-    lbls.appendChild(l);
-  });
-  updateRibbon();
-}
-function updateRibbon(){
-  const type=consultant.toLowerCase();
-  C().steps.forEach((_,i)=>{
-    const dot=document.getElementById('pdot'+i);
-    const lbl=document.getElementById('plbl'+i);
-    if(!dot) return;
-    dot.className='prog-seg '+type+(i<curStep?' done':i===curStep?' active':'');
-    if(lbl) lbl.className='prog-lbl'+(i===curStep?' active '+type:'');
-    if(i>0){
-      const conn=document.getElementById('conn'+i);
-      if(conn) conn.className='prog-seg '+type+(i<=curStep?' active done':'');
-    }
-  });
-}
-function updateNavBtn(){
-  const s=steps();
-  const lbl=document.getElementById('navLbl');
-  const arr=document.getElementById('navArr');
-  const nn=document.getElementById('navNext');
-  nn.className='nav-next '+consultant.toLowerCase();
-  if(curStep===s.length-1){ lbl.textContent='예약 확정'; arr.textContent='✓'; }
-  else{ lbl.textContent='다음'; arr.textContent='→'; }
-}
-
-// ════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════
-function goNext(){
-  const s=steps();
-  if(!validate(s[curStep].id)){ shake(); return; }
-  if(curStep>=s.length-1){ confirmBooking(); return; }
-  const old=curStep; curStep++;
-  updateRibbon(); updateNavBtn();
-  transition(old,curStep,'fwd');
-}
-function goBack(){
-  if(curStep===0){ restart(); return; }
-  const old=curStep; curStep--;
-  updateRibbon(); updateNavBtn();
-  transition(old,curStep,'bk');
-}
-function validate(id){
-  if(id==='t_size') return ans.sqm && ans.sqm>0;
-  if(id==='t_usage') return !!ans.usage;
-  if(id==='t_priority') return !!ans.priority;
-  if(id==='f_scene') return !!ans.scene;
-  if(id==='f_vibe') return !!ans.vibe;
-  if(id==='f_texture') return !!ans.texture;
-  if(id==='shared_series') return !!ans.series;
-  if(id==='shared_material') return !!(ans.article && ans.color);
-  return true;
-}
-function shake(){ const b=document.getElementById('navNext'); b.style.animation='none'; b.offsetHeight; b.style.animation='shake .32s ease'; }
-
-function transition(from,to,dir){
-  const main=document.getElementById('main');
-  const old=main.querySelector('.slide.active');
-  const ns=document.createElement('div');
-  ns.className='slide';
-  ns.style.position='absolute';ns.style.inset='0';
-  ns.style.transform=dir==='fwd'?'translateX(100%)':'translateX(-100%)';
-  main.appendChild(ns);
-  buildStepContent(to,ns);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    ns.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
-    ns.style.transform='translateX(0)';
-    if(old){
-      old.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
-      old.style.transform=dir==='fwd'?'translateX(-100%)':'translateX(100%)';
-    }
-    setTimeout(()=>{ if(old) old.remove(); ns.style.cssText=''; ns.classList.add('active'); },380);
-  }));
-}
-function renderStep(idx){
-  const main=document.getElementById('main');
-  main.innerHTML='';
-  const slide=document.createElement('div');
-  slide.className='slide active';
-  main.appendChild(slide);
-  buildStepContent(idx,slide);
-  // P7: 위저드 내 자유 문의 버튼
-  const chatBtn = document.createElement('button');
-  chatBtn.className = 'wizard-chat-btn';
-  chatBtn.innerHTML = '💬 AI에게 자유롭게 물어보기';
-  chatBtn.onclick = openChatFromWizard;
-  slide.appendChild(chatBtn);
-  updateNavBtn();
-}
-
-// ════════════════════════════════════
-// BUILD STEP CONTENT
-// ════════════════════════════════════
-function buildStepContent(idx,container){
-  const id=steps()[idx].id;
-  const type=consultant.toLowerCase();
-  const inner=document.createElement('div');
-  inner.className='sinner';
-  container.appendChild(inner);
-  switch(id){
-    case 't_size':      build_T_Size(inner,type); break;
-    case 't_usage':     build_T_Usage(inner,type); break;
-    case 't_priority':  build_T_Priority(inner,type); break;
-    case 'f_scene':     build_F_Scene(inner,type); break;
-    case 'f_vibe':      build_F_Vibe(inner,type); break;
-    case 'f_texture':   build_F_Texture(inner,type); break;
-    case 'shared_series':  build_Series(inner,type); break;
-    case 'shared_material':build_Material(inner,type); break;
-    case 'shared_booking': build_Booking(inner,type); break;
-  }
-}
-
-// ════════════════════════════════════
-// T형 STEPS
-// ════════════════════════════════════
-function build_T_Size(el,tp){
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">T형 · Step 1 · 공간 측정</div>
-      <div class="eq ${tp}">거실 <em>면적</em>을<br>입력해주세요.</div>
-      <div class="edesc">소파 폭 추천 기준: 거실 폭의 약 60–70%가 이상적이에요.<br>모르는 경우 대략 평수로 환산해드릴게요.</div>
-    </div>
-    <div class="sz-block">
-      <div class="sz-row">
-        <input class="sz-inp t" id="szInp" type="number" placeholder="예: 28" min="5" max="300" value="${ans.sqm||''}" oninput="onSz(this.value)">
-        <span class="sz-unit">㎡</span>
-      </div>
-      <div class="presets">
-        ${[10,15,20,28,38].map(v=>`<div class="pre t${ans.sqm==v?' on':''}" onclick="setSz(${v},this)">${v}㎡</div>`).join('')}
-      </div>
-      <div class="sz-fb t${ans.sqm?' show':''}" id="szFb">${ans.sqm?tSzFb(ans.sqm):''}</div>
-    </div>
-    <div class="info-note t">📐 &nbsp;벽에서 소파까지 최소 <strong>45cm</strong> 이상 여유를 남겨야 편하게 이동할 수 있어요.</div>
-    ${receiptHtml([])}`;
-}
-function onSz(v){ const n=parseFloat(v); const fb=document.getElementById('szFb'); if(!fb) return; if(n>0){ans.sqm=n;fb.className='sz-fb t show';fb.innerHTML=tSzFb(n);} else{ans.sqm=null;fb.className='sz-fb t';} document.querySelectorAll('.pre.t').forEach(p=>p.classList.remove('on')); }
-function setSz(v,el){ document.getElementById('szInp').value=v; document.querySelectorAll('.pre.t').forEach(p=>p.classList.remove('on')); el.classList.add('on'); onSz(v); }
-function tSzFb(sqm){
-  const maxW=Math.round(sqm*100*0.65);
-  const recs=Object.entries(SERIES).filter(([,s])=>s.minSqm<=sqm).map(([n])=>n).slice(0,4).join(', ');
-  return `<strong>${sqm}㎡</strong> → 권장 소파 최대 폭 <strong>${maxW}mm</strong> 이하<br>적합 시리즈: ${recs}`;
-}
-
-function build_T_Usage(el,tp){
-  const opts=[
-    {val:'daily_long',  icon:'📺', main:'매일 장시간', sub:'TV·넷플릭스 등 주 사용 가구', spec:'시트 깊이 +  복원력 중요'},
-    {val:'daily_short', icon:'☕', main:'하루 1–2시간', sub:'독서·커피 등 소소한 시간',   spec:'쿠션 밀도 & 등받이 각도 우선'},
-    {val:'guest',       icon:'🫂', main:'손님 접대 중심', sub:'자주 손님이 방문',          spec:'시각적 인상 & 좌석 수 중요'},
-    {val:'kids',        icon:'🧒', main:'아이 놀이터',    sub:'자녀가 함께 사용',          spec:'내구성 & 세척 가능 소재 필수'},
-  ];
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">T형 · Step 2 · 사용 패턴</div>
-      <div class="eq ${tp}">소파의 주 <em>사용 방식</em>은<br>어떻게 되시나요?</div>
-      <div class="edesc">사용 빈도와 방식에 따라 최적 쿠션 구조와 소재가 달라져요.</div>
-    </div>
-    <div class="opts">
-      ${opts.map(o=>`
-        <div class="opt${ans.usage===o.val?' sel t':''}" onclick="pickOpt('usage','${o.val}',this,'t')">
-          <span class="opt-icon">${o.icon}</span>
-          <div class="opt-body">
-            <div class="opt-main">${o.main}</div>
-            <div class="opt-sub">${o.sub}<br><span style="font-size:10px;opacity:.7">${o.spec}</span></div>
-          </div>
-          <div class="opt-check">✓</div>
-        </div>`).join('')}
-    </div>
-    ${receiptHtml(['sqm'])}`;
-}
-
-function build_T_Priority(el,tp){
-  const items=[
-    {val:'durability', num:'01', lbl:'내구성 최우선', sub:'10년 이상 사용 고려'},
-    {val:'value',      num:'02', lbl:'가성비 균형',   sub:'합리적 투자'},
-    {val:'aesthetics', num:'03', lbl:'심미성 최우선', sub:'공간 완성도'},
-    {val:'premium',    num:'04', lbl:'프리미엄 추구', sub:'최고급 소재·마감'},
-  ];
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">T형 · Step 3 · 소재 우선순위</div>
-      <div class="eq ${tp}">가장 중요하게 생각하는<br><em>기준</em>은 무엇인가요?</div>
-      <div class="edesc">선택에 따라 추천 소재 등급과 시리즈가 달라져요.</div>
-    </div>
-    <div class="spec-grid">
-      ${items.map(o=>`
-        <div class="spec-item${ans.priority===o.val?' sel':''}" onclick="pickSpec('priority','${o.val}',this)">
-          <div class="spec-num">${o.num}</div>
-          <div class="spec-lbl">${o.lbl}</div>
-          <div class="spec-sub">${o.sub}</div>
-        </div>`).join('')}
-    </div>
-    ${ans.priority?`<div class="info-note t" style="animation:up .2s ease both">${tPriorityNote(ans.priority)}</div>`:''}
-    ${receiptHtml(['sqm','usage'])}`;
-}
-function pickSpec(key,val,el){ ans[key]=val; document.querySelectorAll('.spec-item').forEach(s=>s.classList.remove('sel')); el.classList.add('sel'); const note=document.querySelector('.info-note.t'); if(note) note.innerHTML=tPriorityNote(val); }
-function tPriorityNote(v){
-  const m={durability:'에센셜·프리미엄 패브릭(워터프루프) 또는 풀그레인 레더 추천. 시리즈는 단순한 구조의 <strong>사티·보눔</strong> 계열.',value:'에센셜 패브릭 기준 소비자가 50–200만 원대. 가성비 최고 시리즈는 <strong>카포네·에브리데이</strong>.',aesthetics:'디자인 패브릭(부클레·릴레이트) 또는 하이엔드 레더. <strong>사티·바드·스탠</strong> 라인 추천.',premium:'하이엔드 레더(베지탄·단테) 최우선. <strong>스탠·테오·카포네 그랑</strong> 프리미엄 시리즈.'};
-  return m[v]||'';
-}
-
-// ════════════════════════════════════
-// F형 STEPS
-// ════════════════════════════════════
-function build_F_Scene(el,tp){
-  const scenes=[
-    {val:'morning', icon:'☕', bg:'#FFF8F0', main:'아침 햇살 속 커피 한 잔',  sub:'여유로운 아침, 창가 빛이 드는 소파'},
-    {val:'movie',   icon:'🎬', bg:'#F0F0F8', main:'가족과 영화 보는 저녁',    sub:'온 가족이 함께, 넉넉한 공간'},
-    {val:'nap',     icon:'🌙', bg:'#F5F0F8', main:'혼자만의 낮잠',            sub:'완전히 기댈 수 있는 깊은 시트'},
-    {val:'gather',  icon:'🥂', bg:'#F0F8F0', main:'친구들과 수다 모임',        sub:'자유롭게 앉고 눕고, 분위기 좋은'},
-  ];
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">F형 · Step 1 · 공간 장면</div>
-      <div class="eq ${tp}">소파에서 <em>어떤 순간</em>을<br>가장 많이 보내나요?</div>
-      <div class="edesc">가장 자주 떠오르는 장면을 골라주세요. 딱 하나만요.</div>
-    </div>
-    <div class="scene-cards">
-      ${scenes.map(s=>`
-        <div class="scard${ans.scene===s.val?' sel':''}" onclick="pickScene('scene','${s.val}',this)">
-          <div class="scard-visual" style="background:${s.bg}">
-            ${s.icon}
-            <div class="scard-check">✓</div>
-          </div>
-          <div class="scard-body">
-            <div class="scard-main">${s.main}</div>
-            <div class="scard-sub">${s.sub}</div>
-          </div>
-        </div>`).join('')}
-    </div>
-    ${receiptHtml([])}`;
-}
-
-function build_F_Vibe(el,tp){
-  const vibes=[
-    {val:'nordic',  icon:'🌲', bg:'#EEF4EC', main:'북유럽 통나무 오두막',   sub:'원목·그린·크림, 자연소재'},
-    {val:'modern',  icon:'🏙️', bg:'#EEF0F8', main:'뉴욕 모던 아파트',       sub:'블랙·화이트, 절제된 라인'},
-    {val:'jeju',    icon:'🌊', bg:'#EEF6F8', main:'제주 감성 게스트하우스', sub:'밝고 바람 부는, 내추럴'},
-    {val:'hotel',   icon:'🛎️', bg:'#F6F4EE', main:'파리 부티크 호텔',       sub:'골드·크림, 고급스러운 클래식'},
-  ];
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">F형 · Step 2 · 거실 감성</div>
-      <div class="eq ${tp}">꿈꾸는 거실은<br><em>어떤 공간</em>인가요?</div>
-      <div class="edesc">영화나 잡지에서 봤던 공간도 좋아요. 느낌으로 골라주세요.</div>
-    </div>
-    <div class="scene-cards">
-      ${vibes.map(v=>`
-        <div class="scard${ans.vibe===v.val?' sel':''}" onclick="pickScene('vibe','${v.val}',this)">
-          <div class="scard-visual" style="background:${v.bg}">
-            ${v.icon}
-            <div class="scard-check">✓</div>
-          </div>
-          <div class="scard-body">
-            <div class="scard-main">${v.main}</div>
-            <div class="scard-sub">${v.sub}</div>
-          </div>
-        </div>`).join('')}
-    </div>
-    ${receiptHtml(['scene'])}`;
-}
-
-function build_F_Texture(el,tp){
-  const textures=[
-    {val:'soft',   icon:'🐑', main:'보들보들',    sub:'캐시미어처럼 따뜻하고 포근한'},
-    {val:'linen',  icon:'🌾', main:'까슬까슬',    sub:'린넨처럼 시원하고 자연스러운'},
-    {val:'leather',icon:'✨', main:'매끈매끈',    sub:'레더처럼 깔끔하고 고급스러운'},
-    {val:'boucle', icon:'🧶', main:'폭신폭신',    sub:'부클레처럼 풍성하고 루즈한'},
-  ];
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">F형 · Step 3 · 원하는 촉감</div>
-      <div class="eq ${tp}">소파에 앉으면<br><em>어떤 느낌</em>이 좋으세요?</div>
-      <div class="edesc">눈 감고 손을 얹었을 때 기분 좋은 감촉을 골라주세요.</div>
-    </div>
-    <div class="opts2">
-      ${textures.map(o=>`
-        <div class="opt${ans.texture===o.val?' sel f':''}" onclick="pickOpt('texture','${o.val}',this,'f')">
-          <span class="opt-icon">${o.icon}</span>
-          <div class="opt-body">
-            <div class="opt-main">${o.main}</div>
-            <div class="opt-sub">${o.sub}</div>
-          </div>
-          <div class="opt-check">✓</div>
-        </div>`).join('')}
-    </div>
-    ${ans.texture?`<div class="info-note f" style="animation:up .2s ease both">${fTextureNote(ans.texture)}</div>`:''}
-    ${receiptHtml(['scene','vibe'])}`;
-}
-function fTextureNote(v){
-  const m={soft:'✦ 에센셜 패브릭(노르딕·솔라)이나 부클레 계열이 잘 맞아요. 따뜻하고 포근한 공간을 완성해드릴게요.',linen:'✦ 린넨 계열 패브릭이 딱이에요. 시원하고 자연스러운 질감이 공간에 여유를 더해줘요.',leather:'✦ 레더 계열 소재를 추천드려요. 관리가 쉽고, 세월이 쌓일수록 깊어지는 패티나가 매력이에요.',boucle:'✦ 부클레 위브나 디자인 패브릭 계열이 어울려요. 볼륨감 있는 텍스처가 공간을 살려줘요.'};
-  return m[v]||'';
-}
-
-// ════════════════════════════════════
-// SHARED: SERIES
-// ════════════════════════════════════
-function build_Series(el,tp){
-  // compute recommendations based on consultant type
-  let moodKeys=[];
-  if(consultant==='T'){
-    const map={daily_long:['natural','warm','family'],daily_short:['minimal','modern'],guest:['classic','refined'],kids:['family','warm']};
-    moodKeys=map[ans.usage]||['modern'];
-    if(ans.priority==='premium') moodKeys=[...moodKeys,'luxury','contemporary'];
-  } else {
-    const sceneMap={morning:['minimal','natural'],movie:['family','warm'],nap:['relaxation','luxury'],gather:['contemporary','modern']};
-    const vibeMap={nordic:['scandinavian','natural'],modern:['modern','minimal'],jeju:['natural','warm'],hotel:['classic','refined','luxury']};
-    const sm=sceneMap[ans.scene]||[];
-    const vm=vibeMap[ans.vibe]||[];
-    moodKeys=[...new Set([...sm,...vm])];
-  }
-  const sqm=ans.sqm||20;
-  let recs=Object.entries(SERIES)
-    .filter(([,s])=>s.minSqm<=sqm&&moodKeys.some(m=>s.mood.includes(m)))
-    .map(([n,s])=>({name:n,...s}));
-  if(recs.length<3) recs=[...recs,...Object.entries(SERIES).filter(([,s])=>s.minSqm<=sqm&&!recs.find(r=>r.name===s.type)).map(([n,s])=>({name:n,...s}))].slice(0,5);
-  recs=recs.slice(0,6);
-
-  const stepNum=tf('T형 · Step 4','F형 · Step 4');
-  const qText=tf(
-    '스펙 분석 결과<br><em>최적 매칭</em> 소파예요.',
-    '당신의 감성에<br><em>딱 맞는 소파</em>예요.'
-  );
-  const descText=tf(
-    `${sqm}㎡ 기준 · ${moodKeys.slice(0,2).join('·')} 무드 · 스크롤하여 비교`,
-    `당신의 공간 스토리에 어울리는 소파들이에요`
-  );
-
-  const cards=recs.map((p,i)=>{
-    const prices=Object.values(p.price||{});
-    const minP=prices.length?Math.min(...prices.map(x=>x[0])):0;
-    const pct=i===0?97:i===1?93:i===2?87:i===3?82:77;
-    return `
-      <div class="pcard${ans.series===p.name?' sel '+tp:''}" id="pc_${p.name.replace(/\s/g,'_')}" onclick="pickSeries('${p.name}','${tp}')">
-        <div class="pcard-img">
-          <div class="pcard-img-lbl">${p.name}</div>
-          ${i===0?`<div class="pcard-badge ${tp}">${tf('매칭 1위','분위기 최적')}</div>`:''}
-          <div class="pcard-sel">✓</div>
-        </div>
-        <div class="pcard-body">
-          <div class="pcard-series ${tp}">${p.type}</div>
-          <div class="pcard-name">${p.name}</div>
-          <div class="pcard-spec">W${p.w[0].toLocaleString()}mm~</div>
-          <div class="match-row">
-            <div class="match-track"><div class="match-fill-${tp}" style="width:${pct}%"></div></div>
-            <span class="match-txt ${tp}">${pct}%</span>
-          </div>
-          <div class="pcard-price">소비자가 <strong class="${tp}">${Math.round(minP/10000)}만~</strong></div>
-          <div class="pcard-desc">${p.desc}</div>
-        </div>
-      </div>`;
-  }).join('');
-
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">${stepNum} · 소파 선택</div>
-      <div class="eq ${tp}">${qText}</div>
-      <div class="edesc">${descText}</div>
-    </div>
-    <div><div class="slbl">추천 소파 · 스크롤하여 더 보기</div><div class="pcards">${cards}</div></div>
-    ${receiptHtml(tf(['sqm','usage','priority'],['scene','vibe','texture']))}`;
-}
-function pickSeries(name,tp){
-  ans.series=name;
-  document.querySelectorAll('.pcard').forEach(c=>c.className=c.className.replace(' sel t',' ').replace(' sel f',' ').replace(' sel',''));
-  const el=document.getElementById('pc_'+name.replace(/\s/g,'_'));
-  if(el) el.classList.add('sel',tp);
-}
-
-// ════════════════════════════════════
-// SHARED: MATERIAL
-// ════════════════════════════════════
-function build_Material(el,tp){
-  const s=SERIES[ans.series];
-  const gradeKeys=s?Object.keys(s.price):Object.keys(GRADES);
-  const stepNum=tf('T형 · Step 5','F형 · Step 5');
-  const qText=tf('소재 등급과<br><em>컬러</em>를 선택하세요.','소재의<br><em>감촉과 컬러</em>를 골라주세요.');
-
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">${stepNum} · 소재 선택</div>
-      <div class="eq ${tp}">${qText}</div>
-    </div>
-    <div>
-      <div class="slbl">소재 등급</div>
-      <div class="gtabs" id="gtabs">
-        ${gradeKeys.map(gk=>`<div class="gtab ${tp}${ans.grade===gk?' on':''}" onclick="pickGrade('${gk}','${tp}',this)">${GRADES[gk]?.label||gk}</div>`).join('')}
-      </div>
-    </div>
-    <div id="swatchArea"></div>
-    <div class="art-detail" id="artDet"></div>
-    ${receiptHtml(tf(['sqm','usage','priority','series'],['scene','vibe','texture','series']))}`;
-
-  if(ans.grade) renderSwatches(ans.grade,s,tp);
-}
-function pickGrade(gk,tp,el){
-  ans.grade=gk; ans.article=null; ans.color=null;
-  document.querySelectorAll('.gtab').forEach(t=>t.classList.remove('on')); el.classList.add('on');
-  const s=ans.series?SERIES[ans.series]:null;
-  renderSwatches(gk,s,tp);
-  const d=document.getElementById('artDet'); if(d){d.className='art-detail';d.innerHTML='';}
-}
-function renderSwatches(gk,series,tp){
-  const g=GRADES[gk]; if(!g) return;
-  const area=document.getElementById('swatchArea'); if(!area) return;
-  const priceRange=series?.price?.[gk];
-  let html=`<div class="slbl" style="margin-top:4px;">컬러 선택</div><div class="swatch-row">`;
-  g.articles.forEach(artName=>{
-    const art=ARTICLES[artName]; if(!art) return;
-    art.colors.forEach((colorName,ci)=>{
-      const hex=art.hex[ci]||'#CCC';
-      const isOn=ans.article===artName&&ans.color===colorName;
-      html+=`<div class="sw${isOn?' on '+tp:''}" id="sw_${artName}_${ci}" onclick="pickColor('${artName}','${colorName}','${gk}','${tp}',${ci})">
-        <div class="sw-c" style="background:${hex}"></div>
-        <div class="sw-n">${colorName}</div>
-      </div>`;
-    });
-  });
-  html+='</div>';
-  area.innerHTML=html;
-  if(ans.article&&ans.color){ const art=ARTICLES[ans.article]; if(art) showArtDet(ans.article,ans.color,art,priceRange); }
-}
-function pickColor(artName,colorName,gk,tp,ci){
-  ans.article=artName; ans.color=colorName;
-  document.querySelectorAll('.sw').forEach(s=>s.className=s.className.replace(' on t','').replace(' on f','').replace(' on',''));
-  const el=document.getElementById(`sw_${artName}_${ci}`); if(el) el.classList.add('on',tp);
-  const art=ARTICLES[artName];
-  const priceRange=ans.series?SERIES[ans.series]?.price?.[ans.grade||gk]:null;
-  if(art) showArtDet(artName,colorName,art,priceRange);
-}
-function showArtDet(artName,colorName,art,pr){
-  const d=document.getElementById('artDet'); if(!d) return;
-  d.className='art-detail show';
-  d.innerHTML=`
-    <div style="font-family:'Josefin Sans',sans-serif;font-size:16px;font-weight:400;color:var(--accent);margin-bottom:2px;">${artName} · ${colorName}</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:7px;">${art.co}</div>
-    <div style="font-size:11.5px;color:var(--text2);line-height:1.6;">${art.care}</div>
-    ${pr?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--text);">가격 범위 <strong style="color:var(--gold)">${pr[0].toLocaleString()}–${pr[1].toLocaleString()}원</strong></div>`:''}`;
-}
-
-// ════════════════════════════════════
-// SHARED: BOOKING
-// ════════════════════════════════════
-function build_Booking(el,tp){
-  const s=SERIES[ans.series];
-  const g=GRADES[ans.grade];
-  const pr=s&&g?s.price[ans.grade]:null;
-  const tom=new Date(); tom.setDate(tom.getDate()+1);
-  const dateStr=tom.toISOString().split('T')[0];
-  const stepNum=tf('T형 · Step 6','F형 · Step 6');
-  const qText=tf('쇼룸에서 <em>직접 확인</em>하고<br>결정하세요.','쇼룸에서 <em>직접 경험</em>하고<br>결정해요.');
-
-  el.innerHTML=`
-    <div class="ehead">
-      <div class="eyebrow ${tp}">${stepNum} · 쇼룸 예약</div>
-      <div class="eq ${tp}">${qText}</div>
-      <div class="edesc">상담 내용을 어드바이저에게 미리 전달해드릴게요.</div>
-    </div>
-    ${(ans.series&&ans.article)?`
-    <div class="sumcard">
-      <div class="sumtop ${tp}"><span class="sumtop-title">상담 요약</span></div>
-      ${ans.series?`<div class="sum-row"><span class="sk">소파</span><span class="sv">${ans.series}</span></div>`:''}
-      ${s?`<div class="sum-row"><span class="sk">사이즈</span><span class="sv">W${s.w.map(v=>v.toLocaleString()).join('/')}</span></div>`:''}
-      ${g?`<div class="sum-row"><span class="sk">소재 등급</span><span class="sv">${g.label}</span></div>`:''}
-      ${ans.article?`<div class="sum-row"><span class="sk">아티클·컬러</span><span class="sv">${ans.article} · ${ans.color}</span></div>`:''}
-      ${pr?`<div class="sum-row"><span class="sk">가격</span><span class="sv">${pr[0].toLocaleString()}–${pr[1].toLocaleString()}원</span></div>`:''}
-    </div>`:''}
-    <div>
-      <div class="slbl">쇼룸 선택</div>
-      <div style="display:flex;flex-direction:column;gap:7px;">
-        ${[{id:'cheongdam',name:'청담 플래그십',addr:'강남구 청담동',hours:'10:00–19:00'},
-           {id:'seongsu',  name:'성수 쇼룸',   addr:'성동구 성수동',hours:'11:00–20:00'}]
-          .map(r=>`<div class="room-opt${ans.showroom===r.id?' sel '+tp:''}" onclick="pickRoom('${r.id}','${tp}',this)">
-            <div><div style="font-size:13px;font-weight:400;color:var(--text2);">${r.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">${r.addr} · ${r.hours}</div></div>
-            <span style="font-size:11px;color:var(--muted)">선택 →</span></div>`).join('')}
-      </div>
-    </div>
-    <div id="timeSection" style="${ans.showroom?'':'display:none'}">
-      <div class="slbl">방문 날짜</div>
-      <input type="date" class="sz-inp ${tp}" id="bdate" value="${ans.date||dateStr}" onchange="ans.date=this.value" style="margin-bottom:12px;font-size:13px">
-      <div class="slbl">방문 시간</div>
-      <div class="time-grid">
-        ${['10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t=>`
-          <div class="tslot${ans.time===t?' on '+tp:''}" onclick="pickTime('${t}','${tp}',this)">${t}</div>`).join('')}
-      </div>
-    </div>`;
-}
-function pickRoom(id,tp,el){
-  ans.showroom=id;
-  document.querySelectorAll('.room-opt').forEach(r=>r.className=r.className.replace(' sel t','').replace(' sel f','').replace(' sel',''));
-  el.classList.add('sel',tp);
-  const ts=document.getElementById('timeSection'); if(ts) ts.style.display='block';
-}
-function pickTime(t,tp,el){
-  ans.time=t;
-  document.querySelectorAll('.tslot').forEach(s=>s.className=s.className.replace(' on t','').replace(' on f','').replace(' on',''));
-  el.classList.add('on',tp);
-}
-
-function confirmBooking(){
-  if(!ans.showroom||!ans.time){ shake(); return; }
-  const names={'cheongdam':'청담 플래그십','seongsu':'성수 쇼룸'};
-  showComplete(names[ans.showroom],ans.date||'미정',ans.time);
-}
-function showComplete(room,date,time){
-  const tp=consultant.toLowerCase();
-  setRibbon(false); setNavbar(false);
-  const main=document.getElementById('main');
-  main.innerHTML='';
-  const slide=document.createElement('div');
-  slide.className='slide active';
-  slide.style.background='var(--surface)';
-  slide.innerHTML=`
-    <div class="sinner" style="align-items:center;justify-content:center;text-align:center;">
-      <div class="complete-icon ${tp}">${tp==='t'?'📊':'✨'}</div>
-      <div class="complete-title">예약이 완료됐어요</div>
-      <div class="complete-sub">${room}<br>${date} · ${time}<br><br>카카오톡으로 예약 확인을 보내드릴게요.<br>${tf('상담 분석 리포트를 함께 전달드려요.','공간 무드 큐레이션을 함께 전달드려요.')}</div>
-      <div class="sumcard" style="width:100%;text-align:left;">
-        <div class="sumtop ${tp}"><span class="sumtop-title">최종 상담 요약</span></div>
-        ${ans.series?`<div class="sum-row"><span class="sk">소파</span><span class="sv">${ans.series}</span></div>`:''}
-        ${ans.article?`<div class="sum-row"><span class="sk">소재·컬러</span><span class="sv">${ans.article} · ${ans.color}</span></div>`:''}
-        <div class="sum-row"><span class="sk">상담사</span><span class="sv">${C().name} (${C().type})</span></div>
-        <div class="sum-row"><span class="sk">쇼룸</span><span class="sv">${room}</span></div>
-        <div class="sum-row"><span class="sk">일시</span><span class="sv">${date} ${time}</span></div>
-      </div>
-      <button class="w-btn-pri ${tp}" style="margin-top:16px;" onclick="restart()">처음으로 돌아가기</button>
-    </div>`;
-  main.appendChild(slide);
-}
-
-// ════════════════════════════════════
-// PICK HELPERS
-// ════════════════════════════════════
-function pickOpt(key,val,el,tp){
-  ans[key]=val;
-  el.closest('.opts,.opts2').querySelectorAll('.opt').forEach(o=>o.className=o.className.replace(' sel t','').replace(' sel f','').replace(' sel',''));
-  el.classList.add('sel',tp);
-  // re-render note if exists
-  if(key==='texture'){
-    let note=document.querySelector('.info-note.f');
-    if(!note){note=document.createElement('div');note.className='info-note f';el.closest('.sinner').insertBefore(note,el.closest('.sinner').lastElementChild);}
-    note.style.animation='none';note.offsetHeight;note.style.animation='up .2s ease both';
-    note.innerHTML=fTextureNote(val);
-  }
-  if(CONSULTANTS[consultant]&&['pet','scene'].includes(key)) setTimeout(goNext,360);
-}
-function pickScene(key,val,el){
-  ans[key]=val;
-  el.closest('.scene-cards').querySelectorAll('.scard').forEach(s=>s.classList.remove('sel'));
-  el.classList.add('sel');
-  setTimeout(goNext,380);
-}
 
 // ════════════════════════════════════
 // RECEIPT
@@ -2274,10 +1497,9 @@ const RMAP = {
   series:   ()=>ans.series?{k:'소파',v:ans.series}:null,
 };
 function receiptHtml(keys){
-  const tp=consultant?consultant.toLowerCase():'t';
   const rows=keys.map(k=>RMAP[k]?.()).filter(Boolean);
   if(!rows.length) return '';
-  return `<div class="receipt ${tp}">${rows.map(r=>`<div class="rr"><span class="rk">${r.k}</span><span class="rv ${tp}">${r.v}</span></div>`).join('')}</div>`;
+  return `<div class="receipt">${rows.map(r=>`<div class="rr"><span class="rk">${r.k}</span><span class="rv">${r.v}</span></div>`).join('')}</div>`;
 }
 
 // ════════════════════════════════════
@@ -2602,178 +1824,6 @@ function onFaqSearch(v){
 // CHAT ENGINE
 // ════════════════════════════════════
 let chatHistory = [];
-
-/* ── P5: 세션 기억 (localStorage) ── */
-const STORAGE_KEY = 'alma_chat_session';
-const STORAGE_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000; // 7일
-
-function saveSession(){
-  try {
-    const data = { history: chatHistory, ts: Date.now() };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch(e){ console.warn('[Session] Save failed:', e.message); }
-}
-
-function loadSession(){
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return null;
-    const data = JSON.parse(raw);
-    if(Date.now() - data.ts > STORAGE_EXPIRE_MS){ clearSession(); return null; }
-    return data;
-  } catch(e){ return null; }
-}
-
-function clearSession(){
-  localStorage.removeItem(STORAGE_KEY);
-  chatHistory = [];
-}
-
-function getSessionSummary(){
-  const session = loadSession();
-  if(!session || !session.history || session.history.length < 2) return null;
-  // 가장 많이 언급된 시리즈 찾기
-  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','사티모션','클렉트','로바','라임','사티큐브','디딤'];
-  const allText = session.history.map(m=>m.content).join(' ');
-  let topSeries = null, topCount = 0;
-  for(const s of seriesNames){
-    const cnt = (allText.match(new RegExp(s,'g'))||[]).length;
-    if(cnt > topCount){ topCount = cnt; topSeries = s; }
-  }
-  const userMsgCount = session.history.filter(m=>m.role==='user').length;
-  const elapsed = Date.now() - session.ts;
-  const elapsedText = elapsed < 3600000 ? '방금 전' : elapsed < 86400000 ? '오늘' : Math.floor(elapsed/86400000)+'일 전';
-  return { topSeries, userMsgCount, elapsedText, history: session.history };
-}
-
-/* ── P6: 리드 수집 ── */
-let leadShown = false;
-let leadSubmitted = false;
-const LEAD_THRESHOLD = 4; // 4턴 이상 대화 후 CTA 표시
-
-function shouldShowLead(){
-  if(leadShown || leadSubmitted) return false;
-  const userMsgs = chatHistory.filter(m=>m.role==='user').length;
-  return userMsgs >= LEAD_THRESHOLD;
-}
-
-function injectLeadCTA(){
-  if(!shouldShowLead()) return;
-  leadShown = true;
-  const msgs = document.getElementById('chatMsgs');
-  const cta = document.createElement('div');
-  cta.className = 'lead-cta';
-  cta.id = 'leadCta';
-  const session = getSessionSummary();
-  const seriesText = session && session.topSeries ? session.topSeries + ' 관련 ' : '';
-  cta.innerHTML = `
-    <div class="lead-cta-title">📋 ${seriesText}상담 연결해 드릴까요?</div>
-    <div class="lead-cta-desc">연락처를 남겨주시면 전문 컨설턴트가 직접 연락드려요.<br>매장 방문 예약이나 추가 상담을 도와드립니다.</div>
-    <div class="lead-form" id="leadForm">
-      <input class="lead-input" id="leadName" placeholder="이름 (선택)" maxlength="20">
-      <input class="lead-input" id="leadContact" placeholder="휴대폰 번호" maxlength="60">
-      <div class="lead-row">
-        <button class="lead-submit" onclick="submitLead()">상담 신청</button>
-        <button class="lead-dismiss" onclick="dismissLead()">괜찮아요</button>
-      </div>
-    </div>`;
-  msgs.appendChild(cta);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-function dismissLead(){
-  const el = document.getElementById('leadCta');
-  if(el) el.remove();
-  leadSubmitted = true; // 다시 안 보이게
-}
-
-async function submitLead(){
-  const name = document.getElementById('leadName').value.trim();
-  const contact = document.getElementById('leadContact').value.trim();
-  if(!contact){ document.getElementById('leadContact').focus(); return; }
-
-  const btn = document.querySelector('.lead-submit');
-  btn.disabled = true;
-  btn.textContent = '신청 중...';
-
-  // 관심 시리즈 + 대화 요약 추출
-  const session = getSessionSummary();
-  const summary = chatHistory.slice(-6).map(m => (m.role==='user'?'Q':'A') + ': ' + m.content.slice(0,80)).join('\n');
-
-  try {
-    await fetch('/api/lead', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name: name || '미입력',
-        contact,
-        series: session?.topSeries || '',
-        msgCount: chatHistory.filter(m=>m.role==='user').length,
-        summary,
-        ts: new Date().toISOString()
-      })
-    });
-  } catch(e){
-    console.warn('[Lead] Submit failed:', e.message);
-  }
-
-  // 성공 표시
-  const form = document.getElementById('leadForm');
-  form.innerHTML = '<div class="lead-done">✓ 신청 완료! 컨설턴트가 곧 연락드릴게요.</div>';
-  leadSubmitted = true;
-}
-
-/* ── P7: 위저드 ↔ 자유대화 전환 ── */
-let guideSuggested = false;
-
-function shouldSuggestGuide(){
-  if(guideSuggested) return false;
-  const userMsgs = chatHistory.filter(m=>m.role==='user');
-  if(userMsgs.length < 3) return false;
-  // 최근 3턴 내 추천/선택 고민 키워드
-  const recent = userMsgs.slice(-3).map(m=>m.content).join(' ');
-  const triggers = ['추천','뭐가 좋','어떤 소파','고르기','선택','비교','차이','모르겠'];
-  return triggers.some(k => recent.includes(k));
-}
-
-function injectGuideSuggest(){
-  if(!shouldSuggestGuide()) return;
-  guideSuggested = true;
-  const msgs = document.getElementById('chatMsgs');
-  const card = document.createElement('div');
-  card.className = 'guide-suggest';
-  card.id = 'guideSuggest';
-  card.innerHTML = `
-    <div class="guide-suggest-title">✦ 단계별 상담도 가능해요</div>
-    <div class="guide-suggest-desc">공간 크기·라이프스타일 기준으로 체계적으로 소파를 좁혀볼 수 있어요.</div>
-    <div class="guide-suggest-btns">
-      <button class="guide-suggest-btn pri" onclick="switchToGuide('T')">공간 기반으로 찾기</button>
-      <button class="guide-suggest-btn pri" onclick="switchToGuide('F')">라이프스타일로 찾기</button>
-      <button class="guide-suggest-btn sec" onclick="this.closest('.guide-suggest').remove()">괜찮아요</button>
-    </div>`;
-  msgs.appendChild(card);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-function switchToGuide(type){
-  // 자유대화 → 위저드 전환 (대화 맥락 유지)
-  const el = document.getElementById('guideSuggest');
-  if(el) el.remove();
-  closeOverlay('chatPanel');
-  consultant = type;
-  pickType(type);
-  startFlow();
-}
-
-function openChatFromWizard(){
-  // 위저드 → 자유대화 전환 (현재 단계 맥락 전달)
-  const stepInfo = steps()[curStep];
-  const context = stepInfo ? stepInfo.label + ' 단계에서 궁금한 점이 있어요' : '';
-  openChat();
-  if(context && chatHistory.length === 0){
-    setTimeout(()=>sendMessage(context), 300);
-  }
-}
 let chatLoading = false;
 let chatUnread = 0;
 
@@ -2795,73 +1845,7 @@ const PRODUCT_CARDS = {
   '카포네 그랑':{en:'CAPONE GRAND',url:'https://www.alloso.co.kr/collection/list', img:'', price:'318~1,089만', desc:'대형 섹셔널 · 코너 구성'},
   '레지나':     {en:'REGINA',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'219~739만', desc:'클래식 다리형 · 격식 있는 디자인'},
   '사티모션':   {en:'SATI MOTION',url:'https://www.alloso.co.kr/collection/list', img:'', price:'249~838만', desc:'전동 리클라이너 · 원터치 각도 조절'},
-  '사티큐브':   {en:'SATI CUBE',  url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'1인 감싸안는 구조 · 스위블 360° 회전'},
-  '로바':       {en:'LOVA',       url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'전동 리클라이너 · 콤팩트 디자인'},
-  '라임':       {en:'LIME',       url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'전동 리클라이너 · 슬림한 팔걸이'},
-  '디딤':       {en:'DIDIM',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'미정', desc:'좌식+입식 모듈 · Note Design Studio · 2026 신제품'},
-  '클렉트':     {en:'KLECT',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'26~1,199만', desc:'모듈 시스템 · 단종 예정 · 재고 한정'},
-  '레지나':     {en:'REGINA',     url:'https://www.alloso.co.kr/collection/list', img:'', price:'219~739만', desc:'클래식 다리형 · 단종 예정 · 재고 한정'},
-  '케렌시아1인':{en:'QUERENCIA 1P',url:'https://www.alloso.co.kr/collection/detail?categoryNo=82', img:'', price:'미정', desc:'아트 오브제형 1인 · 유선형 디자인'},
-};
-
-const MATERIAL_LIBRARY_URL = 'https://www.alloso.co.kr/decology/material_library';
-const R2_CHIP_BASE = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/materials/';
-const COLOR_CHIPS = {
-  '클라우드':{a:'소프트프리모',h:'#E8E4DF',c:'가죽_클라우드(Cloud).jpg'},
-  '카멜':{a:'소프트프리모',h:'#C4956A',c:'가죽_카멜(Camel).jpg'},
-  '피오니':{a:'소프트프리모',h:'#D4869C',c:'가죽_피오니.jpg'},
-  '파우더':{a:'드리밍헤비',h:'#DDD0C4',c:'가죽_파우더(Powder).jpg'},
-  '노체':{a:'드리밍헤비',h:'#6B4E3D',c:'가죽_노체(Noce).jpg'},
-  '세이지':{a:'드리밍헤비',h:'#9AAA8C',c:'가죽_세이지(Sage).jpg'},
-  '템즈그레이':{a:'드리밍헤비',h:'#7A7570',c:'가죽_템즈그레이(Thames Gray).jpg'},
-  '뮤트블랙':{a:'드리밍헤비',h:'#1E1E1E'},
-  '테라코타':{a:'드리밍헤비',h:'#C07050',c:'가죽_테라크타(Terra cotta).jpg'},
-  '카도마리노':{a:'드리밍헤비',h:'#2A5A38',c:'가죽_카도마리노(Cardo Marino).jpg'},
-  '조이풀옐로우':{a:'드리밍헤비',h:'#E8D060'},
-  '올드로즈':{a:'드리밍헤비',h:'#C89898'},
-  '블루피코크':{a:'드리밍헤비',h:'#3A5A6A'},
-  '셔우드탠':{a:'르아테',h:'#A07C5C',c:'가죽_셔우드탠(Sherwood Tan).jpg'},
-  '모빅':{a:'르아테',h:'#4A4540',c:'가죽_모빅(Movik).jpg'},
-  '버번':{a:'르아테',h:'#8B5E3C',c:'가죽_버번(Bourbon).jpg'},
-  '온드':{a:'르아테',h:'#D8CFD0',c:'가죽_온드(Onde).jpg'},
-  '오비드':{a:'르아테',h:'#5A4A3A',c:'가죽_오비드(Ovid).jpg'},
-  '모튼':{a:'르아테',h:'#8A7060',c:'가죽_모튼(Mouton).jpg'},
-  '프렌치모이어':{a:'베지탄',h:'#8CB4D8',c:'가죽_프렌치 모이어(French Moire).jpg'},
-  '쿠오이오':{a:'베지탄',h:'#9A6E48',c:'가죽_쿠오이오(Quoio).jpg'},
-  '오키드':{a:'베지탄',h:'#8A6880',c:'가죽_오키드(Orchid).jpg'},
-  '아이리쉬':{a:'베지탄',h:'#5E7A5E',c:'가죽_아이리쉬(Irish).jpg'},
-  '마쉬':{a:'단테',h:'#6A7A6A',c:'가죽_마쉬(Marsh).jpg'},
-  '머스키블랙':{a:'단테',h:'#1E1E1E',c:'가죽_머스키블랙(Musky Black).jpg'},
-  '녹스':{a:'단테',h:'#2A2520',c:'가죽_녹스(Nox).jpg'},
-  '토프':{a:'단테',h:'#8A7E70'},
-  '멜로우크림':{a:'노르딕',h:'#F0E6D0',c:'패브릭_멜로우크림(Mellow Cream).jpg'},
-  '핑크블리스':{a:'노르딕',h:'#E8B4B8'},
-  '딥올리브':{a:'노르딕',h:'#5A6E4A',c:'패브릭_딥 올리브(Deep Olive).jpg'},
-  '그레이아울':{a:'솔라',h:'#8A8580',c:'패브릭_그레이 아울(Gray Owl).jpg'},
-  '웜브리즈':{a:'솔라',h:'#E8DDD0'},
-  '이브닝허쉬':{a:'솔라',h:'#5A5550'},
-  '샤모아':{a:'아크레',h:'#D8C8A8'},
-  '블루베이':{a:'아크레',h:'#5A8AA0'},
-  '블러쉬':{a:'아크레',h:'#DAA8A0'},
-  '몬드':{a:'아크레',h:'#C4B090',c:'패브릭_몬드(Mond).jpg'},
-  '쉘':{a:'스칼렛',h:'#E8DCD0'},
-  '머스탱':{a:'스칼렛',h:'#6A4A3A',c:'패브릭_머스탱(Mustang).jpg'},
-  '마리골드':{a:'스칼렛',h:'#D4A040',c:'패브릭_마리골드(Marigold).jpg'},
-  '클레이':{a:'스칼렛',h:'#B09080'},
-  '아이린':{a:'루소',h:'#D0C8C0'},
-  '뮤티드핑크':{a:'루소',h:'#C8A0A0',c:'패브릭_뮤티드 핑크(Muted pink).jpg'},
-  '셀릭':{a:'루소',h:'#7A7A7A'},
-  '시나몬':{a:'라리오',h:'#A06040'},
-  '우드랜드':{a:'라리오',h:'#5A6850'},
-  '코스믹블루':{a:'라리오',h:'#3A4A6A'},
-  '마누카':{a:'릴레이트',h:'#D0B890',c:'패브릭_마누카(Manuka).jpg'},
-  '미모사':{a:'릴레이트',h:'#E0C848',c:'패브릭_미모사(Mimosa).jpg'},
-  '모스':{a:'릴레이트',h:'#5A6A48',c:'패브릭_모스(Moss).jpg'},
-  '민트밤':{a:'릴레이트',h:'#A0C0A8',c:'패브릭_민트 밤(Mint Balm).jpg'},
-  '번트엄버':{a:'릴레이트',h:'#6A4A38'},
-  '카놀리크림':{a:'부클레',h:'#F0E8D0'},
-  '허니콤':{a:'부클레',h:'#D4B060'},
-  '아이스블루':{a:'부클레',h:'#B0C8D8'},
+  '클렉트':     {en:'KLECT',      url:'https://www.alloso.co.kr/collection/list', img:'', price:'26~1,199만', desc:'모듈 시스템 · 높은 커스터마이징'},
 };
 
 const CHAT_SYSTEM = `당신은 Alloso 전용 AI 리빙 어드바이저 'ALMA'입니다.
@@ -2886,50 +1870,11 @@ const CHAT_SYSTEM = `당신은 Alloso 전용 AI 리빙 어드바이저 'ALMA'입
 
 【브랜드】 Alloso — 퍼시스그룹 하이엔드 소파 브랜드. 주문제작. 친환경 E0 목재.
 
-【소파 시리즈 — 현재 운영】
-- 사티(모던, 57~849만) 사티모션(리클라이너, 249~838만) 사티큐브(1인 감싸안는 구조, 스위블 360°회전)
-- 로바(전동 리클라이너) 라임(전동 리클라이너, 슬림 팔걸이)
-- 케렌시아(로우모듈, 110~948만) 케렌시아1인(아트 오브제형) 보눔OP(오픈암, 279~819만) 보눔FU(모듈, 64~898만)
-- 바드(스칸디나비안, 16~798만) 홀리데이(가족, 89만~) 에브리데이(캐주얼, 152만~)
-- 카포네(쿠션백, 54~699만) 카포네그랑(섹셔널, 318~1089만)
-- 스탠(대형, ~2049만) 밀로(모듈, ~2176만) 비하르(로우, 15~1066만)
-- 디딤(좌식+입식 모듈, 2026 신제품) 엘머(1인 전용, 458~558만)
-- 단종: 레지나(재고 한정), 클렉트(재고 한정), 테오(재고 한정)
-- 테이블: 케렌시아 테이블(사이드, Ø400 H535, 애쉬원목+스틸), 디딤 소반
-
-【바드 상세 — AI가 반드시 참조】
-- 품목: 3인(W2600 D900 H860), 2인 싱글베드(W1900 D900 H860), 데이베드, 오토만(W840 D600 H380), 플랫쿠션(W580 D580 H120)
-- 다리: 스틸다리 2색(블랙/크롬). 원목 다리 아님. 높이 조절 불가.
-- 헤드레스트: 없음. 조절형 헤드레스트 미지원.
-- 등받이: 등받이를 뒤로 눕히면 데이베드(침대)로 전환 가능 (데이베드 구성만)
-- 내장재: 40K 고밀도 폼 + 마이크로파이버(26년 2월 구스에서 변경) + 다운필 등쿠션 + 새니타이즈 항균 솜
-- 기타: 이탈리아 Intes 고탄성 밴드, S자 스프링, 하부 메쉬 마감
-- 쿠션: 등받이쿠션 + 플랫쿠션 포함 (3인: 각 2EA, 2인: 각 1EA)
-- 컨셉: 덴마크어로 '가치'. 간결한 직선형, 미니멀 스케일, 슬림한 팔걸이+등받이
-- 타겟: 20평 이상, 깔끔하고 모던한 스타일 선호, 로봇청소기 사용 가능
-
-【케렌시아 상세 — AI가 반드시 참조】
-- 품목: 3모듈 라운지(W2040 D2050 H750), 코너 라운지(W3180 D2140 H750), 싱글라운지(W2050 D1020 H750), 싱글(W1085 D1020 H750), 1인(W1145 D945 H750)
-- 다리: 애쉬 원목 다리 (24/11/15 리뉴얼). 5cm(로우) / 15cm(하이) 구매 시 선택 가능 (추가요금 없음). 추후 별도 추가구매도 가능.
-- 디자이너: Claudio Bellini. 2020 IDEA, 2021 Design Award 수상.
-- 컨셉: 한국 좌식 문화를 반영한 저상형 소파. '케렌시아'는 투우가 쉬는 안식처를 뜻함.
-- 특징: 팔걸이~등받이 아치형 실루엣, 깊은 좌판(눕기 가능), 럼버쿠션으로 허리 지지, 어린 자녀·반려동물에 안전한 낮은 좌고.
-- 쿠션: 럼버 쿠션 + 사이드 쿠션 포함.
-
-【디딤 상세 — 2026 신제품, AI가 반드시 참조】
-- 품목: 4모듈 라운지(W1920 D1920 H650, 102kg), 패밀리 라운지(W1920 D1920 H650, 95kg), 4인(W2880 D960 H650, 94kg), 1인 코너(W960 D960 H650), 암리스(W960 D960 H650), 오토만(W960 D960 H375)
-- 다리: 글라이더 (스틸다리·원목 아님)
-- 디자이너: Note Design Studio
-- 컨셉: 좌식 생활과 전통 가옥에서 영감. '디디다(밟다)'에서 비롯된 이름. 좌식+입식 모두 아우르는 소파.
-- 특징: 4개 모듈 좌/우 구분 없이 4방향 사용 가능, 단차를 통해 어린이~반려동물까지 자유 사용, 라지 쿠션+서포트 쿠션 옵션.
-- 내장재: 40K+35K 고밀도 폼 + 마이크로파이버, 스위스 simalfa 수성 접착제, 이태리 Intes 고탄성 밴드
-- 디딤 소반: 디딤과 함께 사용하는 사이드 테이블
-
-【사티 큐브 상세 — 신제품, AI가 반드시 참조】
-- 품목: 1인(W920 D900 H740, 32kg), 스위블 1인(W920 D900 H750, 360° 회전 기능)
-- 컨셉: "나에게 꼭 맞는 거실 속 작은 방". 감싸안는 형상으로 어깨 라인 안정적 지지.
-- 스위블: 360도 회전으로 풍요로운 소파 위 생활 지원. 오프라인 매장 전용(테스트 운영 중).
-- 디자이너: Studio One
+【소파 시리즈 16종】
+- 레지나(다리형, 219~739만) 바드(스칸디나비안, 16~798만) 보눔OP(오픈암, 279~819만) 보눔FU(모듈, 64~898만)
+- 카포네(쿠션백, 54~699만) 카포네그랑(섹셔널, 318~1089만) 사티(모던, 57~849만) 사티모션(리클라이너, 249~838만)
+- 케렌시아(로우모듈, 110~948만) 스탠(대형, ~2049만) 테오(대형, ~1808만) 밀로(모듈, ~2176만)
+- 비하르(로우, 15~1066만) 클렉트(모듈, 26~1199만) 에브리데이(캐주얼, 152만~) 홀리데이(가족, 89만~)
 
 【가죽 — 3개 등급·6개 아티클】
 
@@ -3113,40 +2058,24 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 
 【제품 카드 표시 규칙】
 - 특정 시리즈를 추천하거나 설명할 때, 답변 끝에 [PRODUCT:시리즈명] 마커를 넣으세요.
-- 시리즈명: 사티, 케렌시아, 보눔, 바드, 밀로, 엘머, 스탠, 테오, 비하르, 에브리데이, 홀리데이, 카포네, 카포네그랑, 레지나, 사티모션, 클렉트, 로바, 라임, 사티큐브, 디딤
+- 시리즈명: 사티, 케렌시아, 보눔, 바드, 밀로, 엘머, 스탠, 테오, 비하르, 에브리데이, 홀리데이, 카포네, 카포네그랑, 레지나, 사티모션, 클렉트
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
-- 고객이 "이미지 만들어줘", "보여줘", "인테리어 봐줘", "놓으면 어떨까", "모습 보고 싶어" 등 시각적 요청을 하면 짧게 답하세요. 시스템이 자동으로 AI 이미지를 생성합니다. "이미지를 제공할 수 없습니다"라고 절대 하지 마세요.
-- 고객이 체계적 추천을 원하는 느낌이면("뭐가 좋을지 모르겠어요", "비교해주세요") 답변 마지막에 "체계적으로 찾아보고 싶으시면 **단계별 상담**도 준비되어 있어요." 정도로 자연스럽게 안내. 강제 유도하지 마세요.
-
-【컬러 스와치 표시 규칙】
-- 특정 컬러를 추천하거나 언급할 때 [SWATCH:컬러명] 마커를 사용하세요.
-- 컬러명은 공백 없이: 멜로우크림, 핑크블리스, 카도마리노, 그레이아울, 뮤트블랙, 버번, 코스믹블루 등
-- 고객이 실제 색감을 볼 수 있도록 칩 이미지가 인라인으로 표시됩니다.
-- 예시: "따뜻한 느낌을 원하시면 [SWATCH:멜로우크림]이나 [SWATCH:카놀리크림] 컬러가 잘 어울려요."
-- 한 답변에 최대 4~5개까지. 컬러를 단순 나열하지 말고 추천 이유와 함께 자연스럽게 배치하세요.
-
-【소파 비교 표시 규칙】
-- 고객이 두 시리즈를 비교하거나 "차이점", "vs", "뭐가 다른지" 물으면 답변 끝에 [COMPARE:시리즈A,시리즈B] 마커를 넣으세요.
-- 예시: "사티와 보눔은 이런 차이가 있어요.\n\n[COMPARE:사티,보눔OP]"
-- 한 답변에 비교 카드는 1개만. 비교 전에 텍스트로 핵심 차이를 설명해주세요.
 
 【라이프스타일 추천 매핑】
 고객이 생활 장면을 언급하면 제품+소재+컬러를 자연스럽게 연결하세요.
-- "아이가 있어요" → 홀리데이, 에브리데이, 디딤(좌식+입식, 단차 안전) + 노르딕/루소(워터프루프) + 밝은 톤
-- "반려동물" → 사티, 에브리데이, 디딤(낮은 높이, 안전) + 루소(더블플로킹) + 소프트프리모
-- "서재/1인" → 엘머, 사티큐브(감싸안는 1인+스위블), 케렌시아1인 + 르아테 레더 + 버번/코스믹블루
+- "아이가 있어요" → 홀리데이, 에브리데이, 사티 + 노르딕/루소(워터프루프) + 밝은 톤
+- "반려동물" → 사티, 에브리데이 + 루소(더블플로킹) + 소프트프리모
+- "서재/1인" → 엘머, 케렌시아, 바드 데이베드 + 르아테 레더 + 버번/코스믹블루
 - "넓은 거실" → 스탠, 카포네 그랑, 밀로 + 드리밍헤비 + 릴레이트
-- "미니멀/모던" → 사티, 보눔, 바드 + 솔라 + 그레이아울/뮤트블랙
+- "미니멀/모던" → 사티, 보눔, 테오 + 솔라 + 그레이아울/뮤트블랙
 - "내추럴/북유럽" → 바드, 비하르, 케렌시아 + 부클레위브/노르딕 + 웜톤
-- "좌식/바닥 생활" → 디딤(좌식+입식 전환), 케렌시아(5cm 로우), 비하르 + 부클레/노르딕
-- "럭셔리/고급" → 카포네 그랑, 케렌시아, 스탠 + 베지탄/단테
+- "럭셔리/고급" → 레지나, 카포네 그랑, 케렌시아 + 베지탄/단테
 - "커플/신혼" → 사티 2인, 바드, 보눔 + 아크레(블러쉬/몬드)
-- "눕기/낮잠" → 바드 데이베드, 사티모션, 로바, 케렌시아 + 부클레/드리밍헤비 파우더
-- "TV/영화" → 사티모션, 로바, 라임, 홀리데이, 스탠 + 소프트프리모/솔라
-- "접대/손님" → 카포네(쿠션백, 세련된 인상), 보눔(오픈암, 공간감) + 드리밍헤비/릴레이트
-- 단종 시리즈(레지나, 클렉트, 테오) 문의 시: "현재 재고 한정으로 운영 중이에요. 매장에 재고 확인 후 안내드릴 수 있어요."라고 안내`;
+- "눕기/낮잠" → 바드 데이베드, 사티모션, 케렌시아 + 부클레/드리밍헤비 파우더
+- "TV/영화" → 사티모션, 홀리데이, 스탠 + 소프트프리모/솔라
+- "접대/손님" → 레지나, 카포네, 보눔 + 드리밍헤비/릴레이트`;
 
 const QUICK_CHIPS = [
   '추천 소파 알려줘',
@@ -3156,32 +2085,6 @@ const QUICK_CHIPS = [
   '3D 스튜디오에서 배치해볼래요',
   '매장 어디 있어?',
 ];
-
-function resumeSession(){
-  const session = loadSession();
-  if(!session || !session.history) { openChat(); return; }
-  chatHistory = session.history;
-  // 채팅 패널 열고 이전 대화 복원
-  const msgs = document.getElementById('chatMsgs');
-  msgs.innerHTML = '';
-  // 복원 헤더
-  const hdr = document.createElement('div');
-  hdr.style.cssText = 'text-align:center;padding:12px 0 8px;font-size:10px;color:var(--muted);letter-spacing:.08em;';
-  hdr.textContent = '— 이전 상담 내역 —';
-  msgs.appendChild(hdr);
-  // 메시지 복원
-  chatHistory.forEach(m => {
-    if(m.role === 'user') appendUserMsg(m.content);
-    else appendBotMsg(m.content);
-  });
-  // 이어서 상담 안내
-  appendBotMsg('이전 상담 내역을 불러왔어요. 이어서 궁금한 점을 물어보세요.');
-  openOverlay('chatPanel');
-  chatUnread = 0;
-  updateFabBadge();
-  setTimeout(()=>{ document.getElementById('chatTa').focus(); }, 400);
-  renderChips();
-}
 
 function openChat(){
   if(!document.getElementById('chatMsgs').children.length){
@@ -3234,15 +2137,9 @@ function autoResize(ta){
 function sendChat(){
   const ta = document.getElementById('chatTa');
   const text = ta.value.trim();
-  if(chatLoading) return;
-  if(pendingPhoto){
-    ta.value=''; ta.style.height='auto'; hideChips();
-    chatLoading = true;
-    sendImagine(text || '이 거실에 소파 놓아줘').then(()=>{ chatLoading = false; });
-    return;
-  }
-  if(!text) return;
-  ta.value=''; ta.style.height='auto'; hideChips();
+  if(!text || chatLoading) return;
+  ta.value=''; ta.style.height='auto';
+  hideChips();
   sendMessage(text);
 }
 
@@ -3270,37 +2167,6 @@ function appendBotMsg(text){
       <div class="msg-time">${nowTime()}</div>
     </div>`;
   msgs.appendChild(row);
-  scrollMsgs();
-}
-
-/* 스트리밍용: 빈 버블 생성 → 텍스트 점진 업데이트 → 완료 시 formatMsg 적용 */
-function createStreamBubble(){
-  const msgs = document.getElementById('chatMsgs');
-  const row = document.createElement('div');
-  row.className = 'msg-row bot';
-  row.innerHTML = `
-    <div class="msg-av">A</div>
-    <div>
-      <div class="msg-bubble bot" id="streamBubble"></div>
-      <div class="msg-time">${nowTime()}</div>
-    </div>`;
-  msgs.appendChild(row);
-  scrollMsgs();
-  return document.getElementById('streamBubble');
-}
-
-function updateStreamBubble(bubble, text){
-  // 스트리밍 중에는 간단한 포맷만 (볼드 + 줄바꿈)
-  bubble.innerHTML = escHtml(text)
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\n/g,'<br>');
-  scrollMsgs();
-}
-
-function finalizeStreamBubble(bubble, text){
-  // 스트리밍 완료 후 제품카드 등 풀 포맷 적용
-  bubble.innerHTML = formatMsg(text);
-  bubble.removeAttribute('id');
   scrollMsgs();
 }
 
@@ -3352,49 +2218,6 @@ function formatMsg(text){
   html = html.replace(/\[STUDIO_LINK\]/g, function(){
     return `<a class="studio-deeplink" href="${buildStudioDeeplink()}" target="_blank">3D 스튜디오 열기 →</a>`;
   });
-  // [SWATCH:컬러명] → 인라인 컬러 칩 스와치
-  html = html.replace(/\[SWATCH:([^\]]+)\]/g, function(match, name){
-    const key = name.trim().replace(/\s/g,'');
-    const c = COLOR_CHIPS[key] || COLOR_CHIPS[name.trim()];
-    if(!c) return name.trim();
-    const chipStyle = c.c
-      ? `background-image:url('${R2_CHIP_BASE}${encodeURI(c.c)}');background-color:${c.h}`
-      : `background:${c.h}`;
-    return `<a class="color-swatch" href="${MATERIAL_LIBRARY_URL}" target="_blank">
-      <div class="color-swatch-chip" style="${chipStyle}"></div>
-      <span class="color-swatch-name">${name.trim()}</span>
-      <span class="color-swatch-art">${c.a}</span>
-    </a>`;
-  });
-  // [COMPARE:시리즈A,시리즈B] → 나란히 비교 카드
-  html = html.replace(/\[COMPARE:([^\]]+)\]/g, function(match, names){
-    const parts = names.split(',').map(n=>n.trim());
-    if(parts.length < 2) return '';
-    const cols = parts.slice(0,2).map(name => {
-      const s = SERIES[name];
-      const p = PRODUCT_CARDS[name];
-      if(!s) return null;
-      const minP = s.price?.ess_f?.[0] || s.price?.prem_f?.[0] || 0;
-      const maxP = Object.values(s.price||{}).reduce((mx,arr)=>Math.max(mx,arr[1]||0),0);
-      const priceText = minP && maxP ? Math.round(minP/10000)+'~'+Math.round(maxP/10000)+'만원' : '';
-      const widths = s.w.map(w=>Math.round(w/10)+'cm').join(' / ');
-      const imgHtml = p?.img ? `<img class="compare-img" src="${p.img}" alt="${name}" onerror="this.style.display='none'">` : '';
-      const url = p?.url || MATERIAL_LIBRARY_URL;
-      return `<div class="compare-col">
-        ${imgHtml}
-        <div class="compare-name">${p?.en||name}</div>
-        <div class="compare-ko">${name}</div>
-        <div class="compare-row"><span class="compare-label">유형</span><span class="compare-val">${s.type}</span></div>
-        <div class="compare-row"><span class="compare-label">폭</span><span class="compare-val">${widths}</span></div>
-        <div class="compare-row"><span class="compare-label">최소 공간</span><span class="compare-val">${s.minSqm}평~</span></div>
-        <div class="compare-row"><span class="compare-label">특징</span><span class="compare-val">${s.desc.slice(0,30)}</span></div>
-        <div class="compare-price">${priceText}</div>
-        <a class="compare-link" href="${url}" target="_blank">자세히 보기 →</a>
-      </div>`;
-    }).filter(Boolean);
-    if(cols.length < 2) return '';
-    return `<div class="compare-card">${cols.join('')}</div>`;
-  });
   return html;
 }
 
@@ -3402,26 +2225,12 @@ function buildStudioDeeplink(){
   let url = '/alloso-studio.html';
   const params = [];
   const lastMsgs = chatHistory.slice(-6).map(m=>m.content).join(' ');
-  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','클렉트','로바','라임','사티큐브','디딤'];
+  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','클렉트'];
   for(const s of seriesNames){
     if(lastMsgs.includes(s)){params.push('sofa='+encodeURIComponent(s));break;}
   }
   if(params.length) url += '?' + params.join('&');
   return url;
-}
-
-/* ── C: 맥락 기반 동적 후속 칩 ── */
-function generateContextChips(reply, userMsg){
-  const combined = (reply + ' ' + userMsg);
-  const chips = [];
-  const series = ['사티','케렌시아','보눔','바드','엘머','스탠','비하르','카포네','홀리데이','에브리데이','밀로','디딤'].filter(s=>reply.includes(s));
-  if(series.length >= 2) chips.push(series[0]+' vs '+series[1]+' 비교해줘');
-  if(series.length >= 1 && !combined.includes('가격') && !combined.includes('얼마')) chips.push(series[0]+' 가격 알려줘');
-  if(combined.includes('패브릭')||combined.includes('레더')||combined.includes('가죽')||combined.includes('소재')) chips.push('소재 샘플 받고 싶어');
-  if(combined.includes('가격')||combined.includes('얼마')||combined.includes('만원')){chips.push('패브릭 vs 레더 차이는?');chips.push('매장에서 직접 보고 싶어');}
-  if(combined.includes('추천')||combined.includes('어울')){chips.push('3D 스튜디오에서 배치해볼래요');chips.push('소재 차이 알려줘');}
-  if(chips.length === 0) chips.push('추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어');
-  return chips.slice(0, 3);
 }
 
 function escHtml(s){
@@ -3451,15 +2260,13 @@ async function sendMessage(text){
 
   appendUserMsg(text);
   chatHistory.push({role:'user', content:text});
-  saveSession();
   showTyping();
 
   let reply = '';
   let followChips = [];
   let usedAPI = false;
-  let streamRendered = false;
 
-  // ── 1차: Anthropic API 시도 (스트리밍 + 맥락 요약) ──
+  // ── 1차: Anthropic API 시도 (맥락 요약 포함) ──
   try {
     let apiMessages = chatHistory.filter(m=>m.role==='user'||m.role==='assistant');
     let systemWithContext = CHAT_SYSTEM;
@@ -3477,51 +2284,13 @@ async function sendMessage(text){
         messages: apiMessages
       })
     });
-    if(apiRes.ok && apiRes.headers.get('content-type')?.includes('text/event-stream')){
-      // ── 스트리밍 응답 처리 ──
-      hideTyping();
-      const bubble = createStreamBubble();
-      const reader = apiRes.body.getReader();
-      const decoder = new TextDecoder();
-      let streamText = '';
-      let buffer = '';
-
-      while(true){
-        const {done, value} = await reader.read();
-        if(done) break;
-        buffer += decoder.decode(value, {stream:true});
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        for(const line of lines){
-          if(!line.startsWith('data: ')) continue;
-          const data = line.slice(6).trim();
-          if(data === '[DONE]') continue;
-          try {
-            const evt = JSON.parse(data);
-            if(evt.text){
-              streamText += evt.text;
-              updateStreamBubble(bubble, streamText);
-            }
-          } catch(e){}
-        }
-      }
-
-      if(streamText.length > 5){
-        reply = streamText;
-        usedAPI = true;
-        streamRendered = true;
-        finalizeStreamBubble(bubble, streamText);
-        followChips = generateContextChips(reply, text);
-      } else {
-        bubble.closest('.msg-row')?.remove();
-      }
-    } else if(apiRes.ok){
-      // ── 비스트리밍 폴백 (JSON 응답) ──
+    if(apiRes.ok){
       const data = await apiRes.json();
       if(data.reply && data.reply.length > 5){
         reply = data.reply;
         usedAPI = true;
-        followChips = generateContextChips(reply, text);
+        // API 응답 후 기본 후속 칩
+        followChips = ['추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어'];
       }
     }
   } catch(e){
@@ -3534,33 +2303,12 @@ async function sendMessage(text){
     const result = getDemoReply(text);
     reply = typeof result === 'string' ? result : result.text;
     followChips = typeof result === 'string' ? [] : (result.chips || []);
-
-    if(reply === '__IMAGINE__'){
-      hideTyping();
-      chatLoading = false;
-      await sendImagine(text);
-      return;
-    }
-
-    hideTyping();
-    appendBotMsg(reply);
   }
 
-  // 비스트리밍 API 응답 렌더링
-  if(usedAPI && !streamRendered){
-    hideTyping();
-    appendBotMsg(reply);
-  }
+  hideTyping();
 
   chatHistory.push({role:'assistant', content:reply});
-  saveSession();
-
-  // API 응답 후 이미지 요청이었으면 이미지도 생성
-  const imgCheck = ['보여줘','봐줘','봐주','놓아줘','넣어줘','꾸며줘','배치해줘','만들어줘','합성','이미지','모습 보고','인테리어'];
-  const seriesInCtx = Object.keys(PRODUCT_CARDS).some(s => text.includes(s) || chatHistory.slice(-6).some(m=>m.content.includes(s)));
-  if(usedAPI && imgCheck.some(k=>text.includes(k)) && seriesInCtx){
-    await sendImagine(text);
-  }
+  appendBotMsg(reply);
 
   // 후속 질문 칩 표시
   if(followChips.length > 0){
@@ -3574,229 +2322,8 @@ async function sendMessage(text){
   const panel = document.getElementById('chatPanel');
   if(!panel.classList.contains('open')){ chatUnread++; updateFabBadge(); }
 
-  // 리드 수집 CTA (충분한 대화 후)
-  injectLeadCTA();
-
-  // 위저드 전환 제안 (추천 고민 감지 시)
-  injectGuideSuggest();
-
   chatLoading = false;
   document.getElementById('chatSend').disabled = false;
-}
-/* ── 나노바나나 이미지 생성 ── */
-let pendingPhoto = null;
-const R2_GLB = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/Alloso%20series%20(glb)/';
-const GLB_MAP = {
-  '사티':R2_GLB+'%EC%82%AC%ED%8B%B0%20%EC%99%80%EC%9D%B4%EB%93%9C%201%EC%9D%B8%20(%EC%9A%B0).glb',
-  '케렌시아':R2_GLB+'%EC%BC%80%EB%A0%8C%EC%8B%9C%EC%95%84%20%EC%8B%B1%EA%B8%80.glb',
-  '보눔':R2_GLB+'%EB%B3%B4%EB%88%94%201%EC%9D%B8%20(%EC%9A%B0).glb',
-  '바드':R2_GLB+'%EB%B0%94%EB%93%9C%20%EB%8D%B0%EC%9D%B4%EB%B2%A0%EB%93%9C.glb',
-  '밀로':R2_GLB+'%EB%B0%80%EB%A1%9C%201%EC%9D%B8%20(%EC%9A%B0).glb',
-  '엘머':R2_GLB+'%EC%97%98%EB%A8%B8.glb',
-  '스탠':R2_GLB+'%EC%8A%A4%ED%83%A0%202%EC%9D%B8%20(%EC%9A%B0).glb',
-  '홀리데이':R2_GLB+'%ED%99%80%EB%A6%AC%EB%8D%B0%EC%9D%B4%202%EC%9D%B8%20%EC%99%80%EC%9D%B4%EB%93%9C%20(%EC%A2%8C).glb',
-  '카포네그랑':R2_GLB+'%EC%B9%B4%ED%8F%AC%EB%84%A4%EA%B7%B8%EB%9E%91%201%EC%9D%B8(%EC%A2%8C).glb',
-};
-
-function renderGLB(glbUrl, hexColor){
-  if(!window.THREE || !THREE.GLTFLoader){ console.warn('[GLB] Three.js not loaded'); return Promise.resolve(null); }
-  return new Promise((resolve) => {
-    const w=512, h=384;
-    const renderer = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
-    renderer.setSize(w, h);
-    renderer.setClearColor(0xf5f4f0);
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, w/h, 0.1, 100);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(3,5,4); scene.add(dl);
-
-    new THREE.GLTFLoader().load(glbUrl, (gltf) => {
-      const m = gltf.scene;
-      if(hexColor){
-        const c = new THREE.Color(hexColor);
-        m.traverse(ch => { if(ch.isMesh) ch.material = new THREE.MeshStandardMaterial({color:c, roughness:0.4, metalness:0.1}); });
-      }
-      const box = new THREE.Box3().setFromObject(m);
-      const ct = box.getCenter(new THREE.Vector3());
-      const sz = box.getSize(new THREE.Vector3());
-      m.position.sub(ct);
-      const d = Math.max(sz.x, sz.y, sz.z);
-      camera.position.set(d*1.2, d*0.8, d*1.5);
-      camera.lookAt(0,0,0);
-      scene.add(m);
-      renderer.render(scene, camera);
-      const img = renderer.domElement.toDataURL('image/jpeg', 0.85);
-      renderer.dispose();
-      console.log('[GLB] Rendered OK');
-      resolve(img);
-    }, undefined, (err) => { console.warn('[GLB] Load error:', err.message||err); resolve(null); });
-
-    setTimeout(()=> resolve(null), 15000);
-  });
-}
-function handlePhotoUpload(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const img = new Image();
-    img.onload = function(){
-      const max = 1024; let w = img.width, h = img.height;
-      if(w > max || h > max){ if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;} }
-      const c = document.createElement('canvas'); c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      pendingPhoto = c.toDataURL('image/jpeg',0.8);
-      const wrap = document.querySelector('.chat-input-wrap');
-      const old = document.getElementById('photoPreview'); if(old) old.remove();
-      const p = document.createElement('div'); p.className='photo-preview'; p.id='photoPreview';
-      p.innerHTML = `<img src="${pendingPhoto}"><button class="photo-preview-close" onclick="cancelPhoto()">✕</button>`;
-      wrap.insertBefore(p, wrap.firstChild);
-      document.getElementById('chatTa').placeholder = '이 거실에 어떤 소파를 놓아볼까요?';
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-  event.target.value = '';
-}
-
-function cancelPhoto(){
-  pendingPhoto = null;
-  const p = document.getElementById('photoPreview'); if(p) p.remove();
-  document.getElementById('chatTa').placeholder = '소파에 대해 자유롭게 물어보세요';
-}
-
-async function sendImagine(userText){
-  const hasPhoto = !!pendingPhoto;
-  const photo = pendingPhoto;
-  if(hasPhoto) cancelPhoto();
-
-  // 소파명 감지 (긴 이름 우선)
-  const allText = (userText + ' ' + chatHistory.slice(-4).map(m=>m.content).join(' ')).replace(/사티\s*큐브/g,'사티큐브').replace(/카포네\s*그랑/g,'카포네그랑').replace(/사티\s*모션/g,'사티모션');
-  const seriesNames = Object.keys(PRODUCT_CARDS).sort((a,b)=>b.length-a.length);
-  let sofaName = seriesNames.find(s=>allText.includes(s)) || '사티';
-  const card = PRODUCT_CARDS[sofaName];
-
-  // 시리즈별 디자인 묘사 (이미지 생성용)
-  const SOFA_LOOKS = {
-    '사티': 'a sleek modern low-profile sofa with thin metal legs, clean straight lines, deep seat cushions, minimalist frame, light fabric upholstery',
-    '케렌시아': 'a very low floor-level modular sofa with curved armrests flowing into the backrest, deep wide seat for lounging, wooden short legs, organic arch silhouette',
-    '바드': 'a Scandinavian style sofa with slim steel legs, minimal thin arms, clean rectangular shape, light colored fabric, daybed convertible design',
-    '보눔': 'a modern open-arm sofa with no armrests, wide generous seating, clean boxy shape, premium fabric or leather',
-    '카포네': 'a cushion-back sofa with plush rounded cushions, comfortable deep seating, modern relaxed design',
-    '카포네그랑': 'a large L-shaped sectional sofa with plush cushion back, generous corner configuration, premium leather',
-    '홀리데이': 'a family-friendly large sofa with rounded soft edges, deep comfortable cushions, warm fabric upholstery, cozy design',
-    '에브리데이': 'a casual comfortable sofa with soft rounded shape, plush cushions, family-friendly durable fabric',
-    '스탠': 'a very large premium modular sofa system, wide deep seating, luxurious proportions, statement piece',
-    '비하르': 'a low-profile natural style sofa, wide flat seat, organic relaxed design, natural toned fabric',
-    '엘머': 'a single-person lounge chair with wide seat, high backrest, curved comfortable design, premium leather',
-    '사티큐브': 'a single-person cube-shaped swivel chair, enveloping high sides that wrap around the sitter, compact square form, 360 rotation base',
-    '디딤': 'a floor-level modular sofa with very low height, Japanese-Korean floor sitting inspired, cushion modules that can be rearranged',
-    '사티모션': 'a modern electric recliner sofa with power headrest and legrest, sleek design with hidden mechanism',
-    '로바': 'a compact electric recliner with modern design',
-    '라임': 'a slim electric recliner with thin armrests',
-  };
-  const sofaLook = SOFA_LOOKS[sofaName] || 'a premium Korean designer sofa';
-
-  // 컬러 감지
-  let sofaColor = '';
-  let colorDesc = '';
-  const colorNames = Object.keys(COLOR_CHIPS).sort((a,b)=>b.length-a.length);
-  for(const c of colorNames){ if(allText.includes(c)){ sofaColor = c; break; } }
-  if(!sofaColor){
-    if(allText.includes('블랙')||allText.includes('검정')) { sofaColor='뮤트블랙'; colorDesc='matte black'; }
-    else if(allText.includes('화이트')||allText.includes('크림')) { sofaColor='클라우드'; colorDesc='cream white'; }
-    else if(allText.includes('그레이')||allText.includes('회색')) { sofaColor='그레이아울'; colorDesc='warm gray'; }
-    else if(allText.includes('브라운')||allText.includes('갈색')) { sofaColor='버번'; colorDesc='warm brown leather'; }
-  }
-  if(sofaColor && !colorDesc){
-    const chip = COLOR_CHIPS[sofaColor];
-    if(chip){
-      const isLeather = ['소프트프리모','드리밍헤비','르아테','베지탄','단테'].includes(chip.a);
-      // 자연어 컬러 묘사 (AI가 이해하기 쉬운 형태)
-      const COLOR_DESC_MAP = {
-        '클라우드':'cream white soft leather','카멜':'warm camel tan leather','피오니':'soft pink leather',
-        '파우더':'light beige powder leather','노체':'rich dark walnut brown leather','세이지':'muted sage green leather',
-        '템즈그레이':'warm medium gray leather','뮤트블랙':'deep matte black leather','테라코타':'warm terracotta orange-brown leather',
-        '카도마리노':'deep forest green leather','조이풀옐로우':'bright mustard yellow leather','올드로즈':'dusty rose pink leather',
-        '블루피코크':'deep teal blue leather','셔우드탠':'warm honey tan leather','모빅':'glossy black leather with subtle sheen',
-        '버번':'rich warm bourbon brown leather','온드':'soft pearl gray leather','오비드':'dark espresso brown leather',
-        '모튼':'warm mocha brown leather','프렌치모이어':'soft French blue leather','쿠오이오':'natural tan cognac leather',
-        '오키드':'muted orchid purple leather','아이리쉬':'deep Irish green leather',
-        '마쉬':'olive marsh green leather','머스키블랙':'deep black leather','녹스':'very dark charcoal black leather','토프':'warm taupe leather',
-        '멜로우크림':'soft mellow cream fabric','핑크블리스':'light blush pink fabric','딥올리브':'deep olive green fabric',
-        '그레이아울':'warm owl gray fabric','웜브리즈':'warm beige breeze fabric','이브닝허쉬':'dark charcoal evening fabric',
-        '샤모아':'chamois sand fabric','블루베이':'ocean blue fabric','블러쉬':'soft blush fabric','몬드':'warm sand mond fabric',
-        '쉘':'soft shell white fabric','머스탱':'dark mustang brown fabric','마리골드':'bright marigold yellow fabric','클레이':'warm clay fabric',
-        '아이린':'light silver gray fabric','뮤티드핑크':'muted dusty pink fabric','셀릭':'medium charcoal gray fabric',
-        '시나몬':'warm cinnamon brown fabric','우드랜드':'forest woodland green fabric','코스믹블루':'deep cosmic navy blue fabric',
-        '마누카':'warm manuka honey fabric','미모사':'bright mimosa yellow fabric','모스':'natural moss green fabric',
-        '민트밤':'fresh mint green fabric','번트엄버':'dark burnt umber brown fabric',
-        '카놀리크림':'cannoli cream boucle fabric','허니콤':'golden honeycomb boucle fabric','아이스블루':'light ice blue boucle fabric',
-      };
-      colorDesc = COLOR_DESC_MAP[sofaColor] || `${sofaColor} (${isLeather?'leather':'fabric'})`;
-    }
-  }
-
-  // 사용자 메시지
-  const msgs = document.getElementById('chatMsgs');
-  const userRow = document.createElement('div'); userRow.className='msg-row user';
-  userRow.innerHTML = `<div><div class="msg-bubble user">${hasPhoto?'<img src="'+photo+'" style="max-width:180px;border-radius:6px;display:block;margin-bottom:6px">':''}${escHtml(userText)}</div><div class="msg-time">${nowTime()}</div></div>`;
-  msgs.appendChild(userRow); scrollMsgs();
-
-  // 로딩
-  const loadRow = document.createElement('div'); loadRow.className='msg-row bot'; loadRow.id='imagineLoading';
-  loadRow.innerHTML = `<div class="msg-av">A</div><div class="msg-bubble bot"><div class="imagine-loading">✨ <strong>${sofaName}</strong>${sofaColor?' '+sofaColor:''} 인테리어 이미지를 생성하고 있어요<span class="dots">...</span><br><span style="font-size:10px;opacity:.6">AI가 인테리어 이미지를 생성 중입니다 (10~20초)</span></div></div>`;
-  msgs.appendChild(loadRow); scrollMsgs();
-
-  // GLB 3D 렌더링 → 제품 형태 참조 (기본 색상, 형태만)
-  let productImage = null;
-  const glbUrl = GLB_MAP[sofaName];
-  if(glbUrl){
-    productImage = await renderGLB(glbUrl, null); // 색상 적용 안 함 — 형태만 참조
-  }
-
-  // 공간 조건 추출
-  let details = [];
-  if(allText.includes('오크')) details.push('oak wood floor');
-  if(allText.includes('아이보리')) details.push('ivory walls');
-  if(allText.includes('화이트')) details.push('white walls');
-  if(allText.match(/\d+평/)) details.push(allText.match(/\d+평/)[0]+' size room');
-  if(allText.includes('안방')||allText.includes('침실')) details.push('bedroom');
-  if(allText.includes('서재')) details.push('study room');
-  const roomDesc = details.length ? details.join(', ') + '. ' : '';
-
-  const colorPrompt = colorDesc ? ` The sofa color/material is ${colorDesc}.` : '';
-  const prompt = hasPhoto
-    ? `Place ${sofaLook} naturally in this room photo.${colorPrompt} Match lighting and perspective. Generate an image.`
-    : `A photorealistic modern Korean apartment living room. ${roomDesc}The main furniture is ${sofaLook}.${colorPrompt} Magazine-style interior photography, natural window lighting, warm atmosphere. Generate an image.`;
-
-  try {
-    const res = await fetch('/api/imagine', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ roomImage: hasPhoto ? photo : null, sofaName, prompt, productImage: productImage || null, colorDesc: colorDesc || '' })
-    });
-    document.getElementById('imagineLoading')?.remove();
-
-    const data = await res.json();
-    if(res.ok && data.image){
-      const botRow = document.createElement('div'); botRow.className='msg-row bot';
-      botRow.innerHTML = `<div class="msg-av">A</div><div><div class="msg-bubble bot" style="padding:4px"><div class="ai-image-result"><img src="${data.image}"><div class="ai-image-label">AI 참고 이미지 · 실제 제품과 차이가 있을 수 있습니다</div></div></div><div class="msg-time">${nowTime()}</div></div>`;
-      msgs.appendChild(botRow); scrollMsgs();
-      chatHistory.push({role:'user',content:userText},{role:'assistant',content:`${sofaName} 인테리어 이미지 생성 완료`});
-      saveSession();
-    } else {
-      appendBotMsg(`지금은 이미지 생성이 어려워요. 대신 **${sofaName}** 제품을 자세히 확인해보세요.\n\n[PRODUCT:${sofaName}]\n\n3D 스튜디오에서 직접 배치해보실 수도 있어요.\n\n[STUDIO_LINK]`);
-    }
-  } catch(e){
-    document.getElementById('imagineLoading')?.remove();
-    appendBotMsg(`이미지 생성이 지연되고 있어요. **${sofaName}** 정보를 먼저 확인해보세요.\n\n[PRODUCT:${sofaName}]`);
-  }
-
-  const chips = document.getElementById('chatChips');
-  chips.innerHTML = ['다른 소파로 바꿔보기',sofaName+' 가격 알려줘','매장에서 직접 보고 싶어'].map(c=>`<div class="chat-chip" onclick="sendChip(this,'${c}')">${c}</div>`).join('');
-  chips.className = 'chat-chips';
-  return true;
 }
 
 function getDemoReply(text){
@@ -3827,11 +2354,11 @@ function getDemoReply(text){
 
   // ── 아이·자녀 + 소재 ──
   if((t.includes('아이')||t.includes('아기')||t.includes('자녀')||t.includes('어린이')||t.includes('유아')||t.includes('육아'))&&(t.includes('추천')||t.includes('패브릭')||t.includes('소재')||t.includes('뭐가')||t.includes('어떤')))
-    return R('아이가 있는 가정이라면 **이지 케어 패브릭** 또는 **노르딕(Aquaclean 워터프루프)**이 최적이에요.\n\n· 음료·음식 흘려도 **물만으로 세척** 가능\n· 오코텍스 CLASS 1 인증으로 **유아 안전** 보장\n\n시리즈는 **홀리데이**(패밀리·포근)나 **카포네그랑**(내구성·대가족)을 추천드려요. [SWATCH:멜로우크림]이나 [SWATCH:웜브리즈] 같은 밝은 톤이 따뜻해요.\n\n[PRODUCT:홀리데이]\n[PRODUCT:에브리데이]',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요','매장에서 직접 보고 싶어']);
+    return R('아이가 있는 가정이라면 **이지 케어 패브릭** 또는 **노르딕(Aquaclean 워터프루프)**이 최적이에요.\n\n· 음료·음식 흘려도 **물만으로 세척** 가능\n· 오코텍스 CLASS 1 인증으로 **유아 안전** 보장\n· 어두운 색상(차콜·네이비)보다 **중간 톤(샌드·웜그레이)**이 오염이 덜 눈에 띄어요\n\n시리즈는 **홀리데이**(패밀리·포근)나 **카포네그랑**(내구성·대가족)을 추천드려요.',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요','매장에서 직접 보고 싶어']);
 
   // ── 고양이/강아지 + 발톱/내구성/스크래치 ──
   if((t.includes('고양이')||t.includes('강아지')||t.includes('발톱')||t.includes('스크래치'))&&(t.includes('내구')||t.includes('색상')||t.includes('추천')||t.includes('어떤')||t.includes('좋')||t.includes('컬러')))
-    return R('반려동물 발톱 내구성에는 **루소 패브릭**(직조감이 촘촘해서 올이 안 뜯김)이 가장 강해요.\n\n· **반려동물 털 색상과 비슷한 톤**을 고르면 털이 덜 눈에 띄어요\n· 노르딕 워터프루프도 좋지만 발톱 내구성은 루소가 한 수 위예요\n\n시리즈는 **카포네**(쿠션백, 낮은 높이)가 반려동물 가정에 인기 많아요.\n\n[PRODUCT:카포네]\n[PRODUCT:에브리데이]',['소재 샘플 받고 싶어','매장에서 직접 보고 싶어']);
+    return R('반려동물 발톱 내구성에는 **루소 패브릭**(직조감이 촘촘해서 올이 안 뜯김)이 가장 강해요.\n\n· 색상은 **중간 톤(샌드·웜그레이·세이지)**이 털과 스크래치가 덜 눈에 띄어요\n· 짙은 색(미드나잇·차콜)은 밝은 털이, 밝은 색(아이보리)은 어두운 털이 눈에 띄니 **반려동물 털 색상과 비슷한 톤**을 고르세요\n· 노르딕 워터프루프도 좋지만 발톱 내구성은 루소가 한 수 위예요\n\n시리즈는 **카포네**(쿠션백, 낮은 높이)가 반려동물 가정에 인기 많아요.',['소재 샘플 받고 싶어','매장에서 직접 보고 싶어']);
 
   // ── 3+1 vs 4인 / 조합 고민 ──
   if((t.includes('3인')||t.includes('3+1')||t.includes('3인+1인'))&&(t.includes('4인')||t.includes('고민')||t.includes('기준')||t.includes('vs')||t.includes('어떤')))
@@ -3843,25 +2370,19 @@ function getDemoReply(text){
 
   // ── 좁은 공간 / 원룸 / 작은 거실 ──
   if(t.includes('좁')||t.includes('작은 거실')||t.includes('원룸')||t.includes('소형'))
-    return R('작은 공간에는 **컴팩트한 시리즈**가 좋아요.\n\n· **바드** (W190cm~) — 스칸디 감성, 슬림한 깊이\n· **사티 2인** (W220cm) — 미니멀하지만 충분한 좌석\n· **엘머** — 1인 전용, 서재·원룸에 딱\n\n소파 앞 통행 공간 **최소 45cm**만 확보하면 돼요.\n\n[PRODUCT:바드]\n[PRODUCT:엘머]',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
+    return R('작은 공간에는 **컴팩트한 시리즈**가 좋아요.\n\n· **사티 1인** (W85cm) — 원룸·서재에 딱\n· **바드** (W180cm~) — 스칸디 감성, 슬림한 깊이 88cm\n· **사티 2인** (W220cm) — 미니멀하지만 충분한 좌석\n\n소파 앞 통행 공간 **최소 45cm**만 확보하면 돼요.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
 
   // ── 넓은 공간 / 대형 ──
   if(t.includes('넓')||t.includes('대형')||t.includes('큰 거실')||t.includes('30평'))
-    return R('넓은 거실에는 존재감 있는 시리즈가 어울려요.\n\n· **스탠** — 대형 모듈 풀세트 W478cm, 압도적 스케일\n· **카포네그랑** — 코너 배치로 L자형 구성\n· **케렌시아** — 3.5인 로우형으로 고급스러운 라운지\n\n공간 비율 60~70% 이하로 배치하면 여유로워 보여요.\n\n[PRODUCT:스탠]\n[PRODUCT:케렌시아]',['3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어']);
+    return R('넓은 거실에는 존재감 있는 시리즈가 어울려요.\n\n· **스탠** — 대형 모듈 풀세트 W478cm, 압도적 스케일\n· **카포네그랑** — 코너 배치로 L자형 구성\n· **케렌시아** — 3.5인 로우형으로 고급스러운 라운지\n\n공간 비율 60~70% 이하로 배치하면 여유로워 보여요.',['3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어']);
 
   // ── 신혼 / 커플 ──
   if(t.includes('신혼')||t.includes('커플')||t.includes('둘이'))
-    return R('신혼 거실 꾸미시는군요! 딱 맞는 소파를 찾아드릴게요.\n\n먼저, 거실이 몇 평 정도예요?',['20평 이하','25평 정도','30평 이상','잘 모르겠어']);
-
-  if(t.includes('20평 이하')&&chatHistory.some(m=>m.content.includes('신혼')))
-    return R('20평 이하 신혼 거실이라면 슬림한 디자인이 좋아요.\n\n· **바드 2인** (W190cm) — 스칸디 감성, 슬림한 깊이로 공간 절약\n· **사티 2인** (W220cm) — 모던 미니멀, 첫 소파로 인기\n\n[SWATCH:멜로우크림]이나 [SWATCH:그레이아울] 컬러가 밝고 넓어 보여요.\n\n[PRODUCT:바드]\n[PRODUCT:사티]',['소재 샘플 받고 싶어','바드 vs 사티 비교해줘','가격이 궁금해요']);
-
-  if((t.includes('25평')||t.includes('30평'))&&chatHistory.some(m=>m.content.includes('신혼')))
-    return R('25평 이상 신혼 거실이면 3인 소파도 여유롭게 놓을 수 있어요.\n\n· **사티 3인** (W280cm) — 모던·미니멀의 정석\n· **보눔OP 3인** (W320cm) — 오픈암으로 넓은 개방감\n· **케렌시아** — 로우 모듈, 럭셔리한 분위기\n\n[SWATCH:셀릭]이나 [SWATCH:몬드] 컬러가 세련된 신혼 거실에 어울려요.\n\n[PRODUCT:사티]\n[PRODUCT:보눔]',['소재 차이 알려줘','케렌시아도 궁금해','3D 스튜디오에서 배치해볼래요']);
+    return R('신혼·커플에게 추천드려요.\n\n· **사티 2인** (W220cm) — 모던·미니멀, 첫 소파로 인기\n· **보눔OP 2인** (W232cm) — 오픈암으로 개방감\n· **바드 2인** (W190cm) — 북유럽 감성, 가성비\n\n처음 소파를 구입하시면 **소재 샘플**을 먼저 받아보시는 걸 추천해요.',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요']);
 
   // ── 눕기 / 낮잠 ──
   if(t.includes('눕')||t.includes('낮잠')||t.includes('누워'))
-    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n· **로바 / 라임** — 전동 리클라이너, 콤팩트 사이즈\n\n[PRODUCT:케렌시아]\n[PRODUCT:비하르]',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n\n매장에서 직접 누워보시는 걸 강력 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
 
   // ── 예산 / 가성비 ──
   if(t.includes('가성비')||t.includes('저렴')||t.includes('싼')||t.includes('예산'))
@@ -3877,23 +2398,16 @@ function getDemoReply(text){
 
   // ── 기존 인테리어 매칭 ──
   if(t.includes('인테리어')||t.includes('분위기')||t.includes('스타일'))
-    return R('인테리어 스타일별 소파 추천이에요.\n\n· **모던·미니멀** → 사티, 보눔OP\n· **내추럴·북유럽** → 바드, 비하르\n· **럭셔리·로우** → 케렌시아, 스탠\n· **캐주얼·패밀리** → 에브리데이, 홀리데이\n\n어떤 스타일이 끌리세요?',['모던 스타일 더 보여줘','내추럴 스타일 추천해줘','3D 스튜디오에서 배치해볼래요']);
+    return R('인테리어 스타일별 소파 추천이에요.\n\n· **모던·미니멀** → 사티, 보눔OP\n· **클래식·고급** → 레지나\n· **내추럴·북유럽** → 바드, 카포네, 비하르\n· **럭셔리·로우** → 케렌시아, 스탠\n· **캐주얼·패밀리** → 에브리데이, 홀리데이\n\n**Alloso Studio**에서 바닥·벽 색상과 함께 확인해 보세요.',['3D 스튜디오에서 배치해볼래요','소재 샘플 받고 싶어']);
 
 
   // ── 추천 (신규) ──
   if(t.includes('추천'))
-    return R('고객님의 공간과 생활 패턴에 따라 추천이 달라져요.\n\n· **신혼·커플** → 사티, 바드\n· **패밀리** → 카포네그랑, 홀리데이\n· **1인 공간** → 엘머, 사티큐브\n· **럭셔리 로우** → 케렌시아, 비하르\n\n거실 크기와 분위기를 알려주시면 더 정확하게 추천해 드릴게요.',['신혼 거실 추천해줘','넓은 거실에 큰 소파 원해','1인용 소파 찾고 있어','가격대가 궁금해요']);
+    return R('고객님의 공간과 생활 패턴에 따라 추천이 달라져요.\n\n· **1인 가구** → 사티 1인, 바드\n· **패밀리** → 카포네그랑, 홀리데이\n· **반려동물** → 루소 패브릭 + 카포네\n· **럭셔리 로우** → 케렌시아, 비하르\n\n**Alloso Studio**에서 공간 사이즈를 입력하면 AI가 맞춤 추천해 드려요.',['3D 스튜디오에서 배치해볼래요','반려동물 추천 소재는?','가격대가 궁금해요']);
 
   // ── 비교 (신규) ──
-  if(t.includes('비교')){
-    // 특정 시리즈 2개가 언급된 경우 자동 비교
-    const seriesNames = Object.keys(SERIES);
-    const mentioned = seriesNames.filter(s => t.includes(s));
-    if(mentioned.length >= 2){
-      return R(`**${mentioned[0]}**와 **${mentioned[1]}**를 비교해 드릴게요.\n\n[COMPARE:${mentioned[0]},${mentioned[1]}]`,['다른 시리즈도 비교해줘','매장에서 직접 보고 싶어']);
-    }
-    return R('어떤 시리즈를 비교하고 싶으신가요?\n\n· **사티 vs 레지나** — 모던 미니멀 vs 클래식\n· **카포네 vs 보눔** — 쿠션백 vs 오픈암\n· **케렌시아 vs 비하르** — 럭셔리 로우 vs 내추럴 로우\n\n구체적인 시리즈명을 말씀해주시면 상세 비교해 드려요.',['사티 vs 레지나 비교해줘','카포네 vs 보눔 비교해줘']);
-  }
+  if(t.includes('비교'))
+    return R('어떤 시리즈를 비교하고 싶으신가요?\n\n· **사티 vs 레지나** — 모던 미니멀 vs 클래식\n· **카포네 vs 보눔** — 쿠션백 vs 오픈암\n· **케렌시아 vs 비하르** — 럭셔리 로우 vs 내추럴 로우\n\n구체적인 시리즈명을 말씀해주시면 상세 비교해 드려요.',['사티 vs 레지나 차이가 뭐야?','카포네 vs 보눔 비교해줘']);
 
   // ── 상담/예약 ──
   if(t.includes('상담 예약')||t.includes('인테리어 상담')||t.includes('상담 받'))
@@ -4010,8 +2524,8 @@ function getDemoReply(text){
     return R('**케렌시아**는 로우 모듈형 소파로, 사선 디자인이 특징. 가죽 마감재도 선택 가능(오프라인 매장 전용). 소비자가 110만원대.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
   if(t.includes('딱딱')||t.includes('하드'))
     return R('탄성감이 있고 하부를 잡아주는 소파를 찾으시면 **케렌시아**와 **카포네** 시리즈를 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
-  if(t.includes('리클라이너')||t.includes('전동')||t.includes('회전'))
-    return R('알로소 리클라이너·모션 소파를 소개해 드릴게요.\n\n**전동 리클라이너:**\n· **사티모션** — 전동 등받이+레그레스트, USB 충전, 1~3인 (249~838만)\n· **로바** — 전동 리클라이너, 콤팩트 디자인\n· **라임** — 전동 리클라이너, 슬림한 팔걸이\n\n**360° 회전:**\n· **사티 큐브 스위블** — 감싸안는 1인 소파, 360도 회전 (매장 전용)\n\n매장에서 직접 앉아보시고 체험하시는 걸 추천드려요!',['매장 어디 있어?','사티모션 가격 알려줘','3D 스튜디오에서 배치해볼래요']);
+  if(t.includes('리클라이너')||t.includes('전동'))
+    return R('**사티모션**이 전동 리클라이너 소파예요. 등받이·레그레스트 자유 조절. 소비자가 **249만원대**.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
   if(t.includes('모듈'))
     return R('모듈형 소파는 **보눔FU, 케렌시아, 비하르, 클렉트** 등이 있어요. 공간에 맞게 섹션을 자유 조합 가능.',['3D 스튜디오에서 배치해볼래요','이사할 때 유리한 소파는?']);
   if(t.includes('로봇청소기')||t.includes('청소기'))
@@ -4042,15 +2556,6 @@ function getDemoReply(text){
   // ── 브랜드 ──
   if(t.includes('퍼시스')||t.includes('alloso')||t.includes('알로소'))
     return R('Alloso는 **퍼시스그룹**의 하이엔드 소파 브랜드예요. 일룸·시디즈·퍼시스 등 국내 대표 가구 브랜드를 보유한 그룹이에요.',['추천 소파 알려줘','매장 어디 있어?']);
-
-  // ── 이미지 생성 트리거 ──
-  const imgKw = ['보여줘','봐줘','봐주','놓은 모습','놓아줘','넣어줘','꾸며줘','배치해줘','만들어줘','크기로 봐','인테리어','어떨까','어울릴까','모습 보고','느낌 보여','이미지 생성','이미지 만들','합성','사진 생성','사진 만들'];
-  const hasImgKw = imgKw.some(k=>t.includes(k));
-  const hasSeries = Object.keys(PRODUCT_CARDS).some(s=>t.includes(s));
-  const histHasSeries = chatHistory.slice(-6).some(m=>Object.keys(PRODUCT_CARDS).some(s=>m.content.includes(s)));
-  if(hasImgKw && (hasSeries || histHasSeries || pendingPhoto)){
-    return {text:'__IMAGINE__', chips:[]};
-  }
 
   // ── 3D 스튜디오 연결 (딥링크) ──
   if(t.includes('스튜디오')||t.includes('3d')||t.includes('배치'))
@@ -4105,7 +2610,10 @@ function closeStudio(){
 
 function startFlowFromStudio(){
   closeStudio();
-  renderTypeSelect();
+  if (typeof openChat === 'function') {
+    openChat();
+    setTimeout(()=>{ if(typeof sendMessage==='function') sendMessage('지금 3D 스튜디오에서 본 공간에 어울리는 소파를 추천해주세요'); }, 300);
+  }
 }
 
 function pyungToSize(){
