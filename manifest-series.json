@@ -1,0 +1,586 @@
+{
+  "version": "2026.05.1",
+  "updated": "2026-05-11",
+  "source": [
+    "product_manual_xlsx_2026",
+    "contract_agreement",
+    "estimate_template",
+    "invoice_template",
+    "material_manual"
+  ],
+  "r2_base": "https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/products/",
+
+  "tables_by_space": {
+    "_comment": "공간 사이즈 기반 테이블 페어링 큐레이션 (우선안, 추후 상세 가이드 적용 예정)",
+    "wide": {
+      "tables": ["레이어"],
+      "placement": "소파 전면 배치"
+    },
+    "narrow": {
+      "tables": ["페일리", "바인"],
+      "placement": "소파 옆 또는 코너 배치"
+    },
+    "special": {
+      "_comment": "특정 시리즈 전용 페어 (paired_table 필드 우선)",
+      "케렌시아 테이블": "모듈 소파 사이 끼움 (케렌시아 전용)"
+    }
+  },
+
+  "default_color_fallback": ["모빅", "노체", "클라우드", "버번", "카멜", "오키드"],
+
+  "categories": {
+    "sofa": "소파",
+    "sofa_variant": "소파 변종",
+    "table": "테이블/퍼니싱",
+    "accessory": "악세서리"
+  },
+
+  "series": {
+    "사티": {
+      "ko": "사티", "en": "SATI",
+      "folder": "sati", "code": "ACSB32",
+      "category": "sofa", "released": "2018-03-07",
+      "features": ["모듈 결합·분리 가능"],
+      "synonyms": ["싸티", "시티"],
+      "variants": ["사티 모션", "사티 큐브", "사티 큐브 스위블"]
+    },
+    "사티 모션": {
+      "ko": "사티 모션", "en": "SATI MOTION",
+      "folder": "sati motion", "code": "ACSF32",
+      "category": "sofa_variant", "parent": "사티",
+      "released": "2023-07-31",
+      "features": ["발 받침 리클라이너 기능", "1인·3인 옵션만"],
+      "synonyms": ["사티 리클라이너", "사티 리클", "사티 리크라이너"]
+    },
+    "사티 큐브": {
+      "ko": "사티 큐브", "en": "SATI CUBE",
+      "folder": "sati cube", "code": "ACSP32",
+      "category": "sofa_variant", "parent": "사티",
+      "features": ["사티 1인보다 컴팩트한 사이즈"],
+      "synonyms": []
+    },
+    "사티 큐브 스위블": {
+      "ko": "사티 큐브 스위블", "en": "SATI CUBE SWIVEL",
+      "folder": "sati cube swivel",
+      "category": "sofa_variant", "parent": "사티 큐브",
+      "features": ["사티 큐브 + 360도 회전 기능"],
+      "synonyms": []
+    },
+
+    "케렌시아": {
+      "ko": "케렌시아", "en": "QUERENCIA",
+      "folder": "querencia", "code": "ACSB23",
+      "category": "sofa", "released": "2018-03-07",
+      "features": ["사선 디자인이 특징", "5세트 / 8단품 구성"],
+      "synonyms": ["퀘렌시아", "카렌시아"],
+      "variants": ["케렌시아 1인", "케렌시아 페이브 쿠션", "케렌시아 테이블"],
+      "paired_table": "케렌시아 테이블"
+    },
+    "케렌시아 테이블": {
+      "ko": "케렌시아 테이블", "en": "QUERENCIA TABLE",
+      "folder": "querencia table",
+      "category": "table", "parent": "케렌시아",
+      "features": ["케렌시아 소파 페어 테이블"]
+    },
+
+    "바드": {
+      "ko": "바드", "en": "VARD",
+      "folder": "vard", "code": "ACSB37",
+      "category": "sofa", "released": "2025-02-13",
+      "features": ["3세트 / 6단품 구성", "2025년 신제품"],
+      "synonyms": []
+    },
+
+    "보눔 풀베이스": {
+      "ko": "보눔 풀베이스", "en": "BONUM FULL BASE",
+      "folder": "bonum FU", "code": "ACSB02",
+      "category": "sofa", "parent_brand": "보눔",
+      "features": ["풀베이스 (다리 미노출)"],
+      "synonyms": ["보넘 풀베이스", "보놈 풀베이스", "보눔 풀"]
+    },
+    "보눔 오픈베이스": {
+      "ko": "보눔 오픈베이스", "en": "BONUM OPEN BASE",
+      "folder": "bonum OP", "code": "ACSB10",
+      "category": "sofa", "parent_brand": "보눔",
+      "features": ["오픈베이스 (다리 노출형)", "로봇청소기 호환"],
+      "synonyms": ["보넘 오픈베이스", "보놈 오픈베이스", "보눔 오픈"]
+    },
+    "_brand_보눔": {
+      "ko": "보눔", "en": "BONUM",
+      "is_brand_group": true,
+      "members": ["보눔 풀베이스", "보눔 오픈베이스"],
+      "synonyms": ["보넘", "보놈"]
+    },
+
+    "엘머": {
+      "ko": "엘머 (마마)", "en": "ELMER",
+      "folder": "elmer", "code": "ACSB25",
+      "category": "sofa", "released": "2022-05-18",
+      "features": ["엘머 마마 = 기본형", "하부 결합부에 구멍은 좌판·등판 연결용 (하자 X)"],
+      "synonyms": ["앨머", "엘머 마마", "마마 엘머", "마마"],
+      "variants": ["엘머 파파"]
+    },
+    "엘머 파파": {
+      "ko": "엘머 파파", "en": "ELMER PAPA",
+      "folder": "elmer papa",
+      "category": "sofa_variant", "parent": "엘머",
+      "features": ["엘머보다 등받이 높고 크기도 큰 버전"],
+      "synonyms": ["앨머 파파", "파파 엘머", "파파 앨머", "파파"]
+    },
+
+    "홀리데이": {
+      "ko": "홀리데이", "en": "HOLIDAY",
+      "folder": "holiday", "code": "ACSB38",
+      "category": "sofa", "released": "2021-08-05",
+      "features": ["4세트 / 9단품 구성"],
+      "synonyms": ["홀리대이"],
+      "variants": ["홀리데이 미니"]
+    },
+    "홀리데이 미니": {
+      "ko": "홀리데이 미니", "en": "HOLIDAY MINI",
+      "folder": "holiday mini", "code": "ACSP38",
+      "category": "sofa_variant", "parent": "홀리데이",
+      "released": "2022-08-19",
+      "features": ["홀리데이의 작은 버전", "2024.11 리뉴얼 (2.0)"],
+      "synonyms": ["홀리대이 미니"]
+    },
+
+    "에브리데이": {
+      "ko": "에브리데이", "en": "EVERYDAY",
+      "folder": "everyday", "code": "ACSB35",
+      "category": "sofa", "released": "2024-11-08",
+      "features": ["3세트 / 5단품 구성"],
+      "synonyms": []
+    },
+
+    "카포네": {
+      "ko": "카포네", "en": "CARPONE",
+      "folder": "carpone", "code": "ACSB24",
+      "category": "sofa", "released": "2021-08-05",
+      "tagline": "부드러운 치즈에 올라앉은 듯 휴식의 유토피아",
+      "features": ["4인·3인·오토만 구성", "국민소파 컨셉 — 보편적 취향 타겟", "로봇청소기 호환", "팔걸이 = 필로우 타입 (자연스러운 주름)"],
+      "synonyms": ["카포니", "카포내", "키포네"],
+      "variants": ["카포네 그랑"]
+    },
+    "카포네 그랑": {
+      "ko": "카포네 그랑", "en": "CARPONE GRAND",
+      "folder": "carpone grand", "code": "ACSF24",
+      "category": "sofa_variant", "parent": "카포네",
+      "released": "2023-02-15",
+      "features": ["등판 앞뒤 스윙 기능"],
+      "synonyms": ["카포네 그란", "카포니 그랑", "카포네 그링", "카포내 그랑"]
+    },
+
+    "스탠": {
+      "ko": "스탠", "en": "STANN",
+      "folder": "stann", "code": "ACSB33",
+      "category": "sofa", "released": "2023-12-15",
+      "features": ["9세트 / 12단품 구성", "로봇청소기 호환"],
+      "synonyms": ["스텐"]
+    },
+
+    "밀로": {
+      "ko": "밀로", "en": "MILO",
+      "folder": "milo", "code": "ACSB30",
+      "category": "sofa", "released": "2023-12-15",
+      "features": ["7세트 / 7단품 구성", "로봇청소기 호환"],
+      "synonyms": ["미로"]
+    },
+
+    "비하르": {
+      "ko": "비하르", "en": "BEHAR",
+      "folder": "behar", "code": "ACSB07",
+      "category": "sofa", "released": "2018-11-23",
+      "features": ["7세트 / 10단품 구성"],
+      "synonyms": ["비아르"]
+    },
+
+    "테오": {
+      "ko": "테오", "en": "THEO",
+      "folder": "theo", "code": "ACSB34",
+      "category": "sofa", "released": "2023-12-15",
+      "features": ["8세트 / 13단품 구성"],
+      "synonyms": ["태오"]
+    },
+
+    "레지나": {
+      "ko": "레지나", "en": "REGINA",
+      "folder": "regina", "code": "ACSB27",
+      "category": "sofa", "released": "2019-05-10",
+      "features": ["좌방석 쿠션 탈부착 가능", "로봇청소기 호환"],
+      "synonyms": []
+    },
+
+    "디딤소반": {
+      "ko": "디딤소반", "en": "DIDIM",
+      "folder": "didim",
+      "category": "sofa",
+      "features": ["저상형 소파"],
+      "synonyms": ["디딤"]
+    },
+
+    "디토": {
+      "ko": "디토", "en": "DITTO",
+      "folder": "ditto", "code": "ACSB08",
+      "category": "sofa", "released": "2018-05-31",
+      "synonyms": []
+    },
+
+    "클렉트": {
+      "ko": "클렉트", "en": "CLEKT",
+      "folder": "clerkt", "code": "ACSB36",
+      "category": "sofa", "released": "2019-12-31",
+      "features": ["7세트 / 8단품 구성", "2023.09 리뉴얼 (2.0)", "로봇청소기 호환"],
+      "synonyms": ["클랙트", "콜렉트", "콜랙트"]
+    },
+
+    "뚜따": {
+      "ko": "뚜따", "en": "TUTTA",
+      "folder": "tutta", "code": "ACSB09",
+      "category": "sofa", "released": "2018-06-15",
+      "synonyms": ["뚜띠"]
+    },
+
+    "라임": {
+      "ko": "라임", "en": "LIME",
+      "folder": "lime", "code": "ACSF04",
+      "category": "sofa", "released": "2020-03-16",
+      "synonyms": []
+    },
+
+    "베르디": {
+      "ko": "베르디", "en": "VERDI",
+      "folder": "verdi", "code": "ACSB11",
+      "category": "sofa", "released": "2020-11-17",
+      "synonyms": ["배르디"]
+    },
+
+    "모브": {
+      "ko": "모브", "en": "MOUVE",
+      "folder": "mouve", "code": "ACSP07",
+      "category": "sofa", "released": "2025-11-11",
+      "features": ["2025년 신제품"],
+      "synonyms": []
+    },
+
+    "바인": {
+      "ko": "바인", "en": "VYNE",
+      "folder": "vyne", "code": "ATQQ012A",
+      "category": "table", "released": "2025-12-12",
+      "features": ["2025년 신제품 (퍼시스 그룹 디자인)"],
+      "synonyms": []
+    },
+
+    "페일리": {
+      "ko": "페일리", "en": "PEILI",
+      "folder": "peili",
+      "category": "table",
+      "features": ["좁은 평수 소파 옆·코너 배치 추천"],
+      "synonyms": []
+    },
+
+    "레이어": {
+      "ko": "레이어", "en": "LAYER",
+      "folder": "layer",
+      "code": "ATQQ008",
+      "category": "table",
+      "released": "2023-12-15",
+      "features": ["넓은 평수 거실 추천", "소파 전면 배치"],
+      "synonyms": [],
+      "r2_image_available": false,
+      "note": "R2 이미지 미업로드. fusion 시 텍스트 묘사로만 활용"
+    },
+
+    "펫 스텝": {
+      "ko": "펫 스텝", "en": "PET STEPS",
+      "folder": "pet", "code": "ACSP05",
+      "category": "accessory", "released": "2021-10-31",
+      "features": ["반려동물 소파 진입용 계단", "기본 사이즈 W580 × D450 × H260mm", "맞춤 제작 불가", "커버 분리·세탁 불가"],
+      "synonyms": ["팻스탭", "강아지 계단"]
+    },
+    "펫 베드": {
+      "ko": "펫 베드", "en": "PET BED",
+      "folder": "pet", "code": "ACSP06",
+      "category": "accessory", "released": "2024-01-15",
+      "synonyms": ["팻베드", "강아지 방석", "강아지 침대"]
+    }
+  },
+
+  "size_terms": {
+    "오토만": { "en": "Ottoman", "synonyms": ["오트만", "스툴", "발받침", "푸프"] }
+  },
+
+  "variant_rules": {
+    "default_behavior": "show_primary_mention_variants",
+    "key_principle": "이름이 다르면 기능·모양 다른 별도 제품. 통합 추천 X. 메인 보여주고 변종은 짧게 언급.",
+    "primary_to_variants": {
+      "사티": ["사티 모션", "사티 큐브", "사티 큐브 스위블"],
+      "엘머": ["엘머 파파"],
+      "카포네": ["카포네 그랑"],
+      "홀리데이": ["홀리데이 미니"],
+      "케렌시아": ["케렌시아 1인", "케렌시아 페이브 쿠션", "케렌시아 테이블"],
+      "보눔": ["보눔 풀베이스", "보눔 오픈베이스"]
+    }
+  },
+
+  "articles": {
+    "노르딕": { "ko": "노르딕", "en": "NORDIC", "type": "fabric", "active": true },
+    "솔라": { "ko": "솔라", "en": "SOLAR", "type": "fabric", "active": true, "synonyms": ["쏠라"] },
+    "아크레": { "ko": "아크레", "en": "ACRE", "type": "fabric", "active": true, "synonyms": ["아크네", "아크래"] },
+    "스칼렛": { "ko": "스칼렛", "en": "SCARLET", "type": "fabric", "active": true },
+    "루소": { "ko": "루소", "en": "ROUSSO", "type": "fabric", "active": true, "synonyms": ["루쏘"], "note": "노르딕과 비슷하지만 직조감 작음 - 반려동물 가정에 추천" },
+    "부클레": { "ko": "부클레", "en": "BOUCLE", "type": "fabric", "active": true, "synonyms": ["부클래", "부클"] },
+    "부클레 위브": { "ko": "부클레 위브", "en": "BOUCLE WEAVE", "type": "fabric", "active": true, "synonyms": ["부클래 위브", "부클 위브", "위브 부클"] },
+    "라리오": { "ko": "라리오", "en": "LARIO", "type": "fabric", "active": true },
+    "소프트 프리모": { "ko": "소프트 프리모", "en": "SOFT PRIMO", "type": "leather", "active": true, "synonyms": ["프리모"], "note": "기존 솔리드 토넬로에서 이름 변경됨" },
+    "드리밍 헤비": { "ko": "드리밍 헤비", "en": "DREAMING HEAVY", "type": "leather", "active": true, "synonyms": ["드리밍 해비", "드라이빙 헤비"] },
+    "르아테": { "ko": "르아테", "en": "LE ATE", "type": "leather", "active": true, "synonyms": ["르아떼", "르 아테"] },
+    "베지탄": { "ko": "베지탄", "en": "VEGI TAN", "type": "leather", "active": true, "synonyms": ["배지탄"] },
+    "단테": { "ko": "단테", "en": "DANTE", "type": "leather", "active": true, "synonyms": ["단태"] },
+    "메이트": { "ko": "메이트", "en": "MATE", "type": "leather", "active": true, "synonyms": ["매이트"] }
+  },
+
+  "colors": {
+    "모빅": { "en": "MOVIK", "desc_en": "glossy black leather with subtle sheen" },
+    "노체": { "en": "NOCE", "desc_en": "rich dark walnut brown leather" },
+    "버번": { "en": "BOURBON", "desc_en": "warm caramel bourbon leather", "synonyms": ["버빈"] },
+    "사하라": { "en": "SAHARA", "desc_en": "sandy desert beige leather" },
+    "세이지": { "en": "SAGE", "desc_en": "muted sage green leather" },
+    "셔우드 탠": { "en": "SHERWOOD TAN", "desc_en": "deep forest green tan leather", "synonyms": ["셔우드", "셔우드 텐"] },
+    "아이리쉬": { "en": "IRISH", "desc_en": "irish cream leather", "synonyms": ["아이리시", "아이쉬"] },
+    "오키드": { "en": "ORCHID", "desc_en": "soft pink orchid leather" },
+    "쿠오이오": { "en": "CUOIO", "synonyms": ["꾸오이오", "쿠오이"] },
+    "마쉬": { "en": "MARSH", "synonyms": ["마시"] },
+    "토프": { "en": "TAUPE", "desc_en": "warm taupe leather", "synonyms": ["토페", "타우프"] },
+    "녹스": { "en": "NOX", "synonyms": ["눅스"] },
+    "머스키 블랙": { "en": "MUSKY BLACK", "synonyms": ["블랙 머스크", "머스크 블랙"] },
+    "클라우드": { "en": "CLOUD", "desc_en": "cream white soft leather" },
+    "피오니": { "en": "PEONY", "synonyms": ["피오나"] },
+    "카멜": { "en": "CAMEL", "synonyms": ["카맬", "키멜"] },
+    "크레테": { "en": "CRETE", "synonyms": ["크레떼", "그레떼", "크레태", "크래태", "크래테"] },
+    "딥": { "en": "DEEP" },
+    "그릭 스카이": { "en": "GREEK SKY", "synonyms": ["그리 스카이", "스카이 그릭"] },
+    "카프리": { "en": "CAPRI", "synonyms": ["키프리", "카프라"] },
+    "파우더": { "en": "POWDER" },
+    "펄": { "en": "PEARL" },
+    "테라 코타": { "en": "TERRA COTTA", "synonyms": ["태라 코타"] },
+    "나이트 블루": { "en": "NIGHT BLUE", "synonyms": ["블루 나이트"] },
+    "카도 마리노": { "en": "CARDO MARINO", "desc_ko": "딥 그린 (와인/레드 아님 — 주의)" },
+    "파나마": { "en": "PANAMA" },
+    "앰브라": { "en": "AMBRA", "synonyms": ["암브라"] },
+    "프렌치 모이어": { "en": "FRENCH MOIRE", "synonyms": ["프렌치 모아르"] },
+    "크림 오트": { "en": "Cream Oat", "synonyms": ["오트 크림"] },
+    "몰트 그레이": { "en": "Malt Gray", "synonyms": ["그레이 몰트", "몰트 그래이"] },
+    "아일 블루": { "en": "Isle Blue", "synonyms": ["블루 아일"] },
+    "핑크 블리스": { "en": "PINK BLISS", "synonyms": ["핑크 블레스", "블리스 핑크"] },
+    "로즈 우드": { "en": "ROSE WOOD" },
+    "비스코티": { "en": "BISCOTTI" },
+    "멜로우 크림": { "en": "MELLOW CREAM", "desc_en": "soft mellow cream fabric", "synonyms": ["옐로우 크림"] },
+    "딥 올리브": { "en": "DEEP OLIVE", "synonyms": ["올리브 딥"] },
+    "멜란지 그레이": { "en": "MELANGE GREY", "synonyms": ["그레이 멜란지"] },
+    "런던 스톤": { "en": "LONDON STONE", "synonyms": ["스톤 런던", "런던 모던"] },
+    "오드 로즈": { "en": "OUD ROSE" },
+    "그레이 아울": { "en": "GRAY OWL" },
+    "이브닝 허쉬": { "en": "EVENING HUSH", "synonyms": ["이브닝 허시"] },
+    "웜 브리즈": { "en": "WARM BREEZE", "synonyms": ["웜 브르즈", "윔 브리즈"] },
+    "샤모아": { "en": "CHAMOIS", "synonyms": ["사모아", "샤모이"] },
+    "블러쉬": { "en": "BLUSH", "synonyms": ["블러시"] },
+    "로사": { "en": "ROSA" },
+    "실버 헤이즈": { "en": "SILVER HAZE", "synonyms": ["실버 해이즈"] },
+    "블루 베이": { "en": "BLUE BAY", "synonyms": ["블루 배이"] },
+    "윌로우": { "en": "WILLOW", "synonyms": ["월로우"] },
+    "달리아": { "en": "DAHLIA" },
+    "몬드": { "en": "MOND" },
+    "쉘": { "en": "SHELL" },
+    "클레이": { "en": "CLAY" },
+    "마리골드": { "en": "MARIGOLD" },
+    "머스탱": { "en": "MUSTANG" },
+    "아이린": { "en": "IRENE" },
+    "셀릭": { "en": "CELIC", "synonyms": ["샐릭", "셀리"] },
+    "뮤티드 핑크": { "en": "MUTED PINK" },
+    "카놀리 크림": { "en": "CANNOLI CREAM", "synonyms": ["카눌리 크림", "카놀라 크림"] },
+    "버터 밀크": { "en": "BUTTER MILK" },
+    "허니콤": { "en": "HONEYCOMB", "synonyms": ["허니 콤보"] },
+    "아이스 블루": { "en": "ICE BLUE", "synonyms": ["블루 아이스"] },
+    "브리켓": { "en": "BRIQUETTE" },
+    "올리바": { "en": "OLIVA" },
+    "클레어": { "en": "CLAIR", "synonyms": ["클래어", "클리어"] },
+    "번트 베이지": { "en": "BURNT BEIGE", "synonyms": ["번트 배이지", "베이지 번트", "배이지 번트"] },
+    "서머 헤이즈": { "en": "SUMMER HAZE" },
+    "시나몬": { "en": "CINNAMON" },
+    "우드랜드": { "en": "WOODLAND" },
+    "코스믹 블루": { "en": "COSMIC BLUE" },
+    "더스트 블루": { "en": "DUST BLUE" }
+  },
+
+  "discontinued": {
+    "products": {
+      "오데트": { "en": "ODETTE", "code": "ACSB16" },
+      "필리아": { "en": "PHILIA", "code": "ACSB13" },
+      "아비뇽": { "en": "AVIGNON", "code": "ACSB15" },
+      "루야": { "en": "RUYA", "code": "ACSB03", "discontinued_date": "2023-09-04" },
+      "드브니르": { "en": "DEVNIR", "code": "ACSB17" },
+      "덴오브": { "en": "DENOF", "code": "ACSF01", "discontinued_date": "2023-09-04" },
+      "사누아": { "en": "SANNOIS", "code": "ACSB20" },
+      "베카": { "en": "BECCA", "code": "ACSF07" }
+    },
+    "articles": {
+      "소프트 토넬로": {
+        "en": "SOFT TONELLO",
+        "replacement": "소프트 프리모",
+        "message": "소프트 토넬로는 단종되어 후속 아티클인 소프트 프리모로 안내드려요.",
+        "synonyms": ["소프트 토낼로", "소프트 토넬료", "토넬로", "토낼로"]
+      },
+      "브리오": {
+        "en": "BRIO",
+        "message": "브리오는 단종된 아티클이에요. 비슷한 톤의 다른 아티클을 안내드릴 수 있어요."
+      },
+      "머테리얼": {
+        "en": "MATERIAL",
+        "message": "머테리얼은 단종된 아티클이에요.",
+        "synonyms": ["머터리얼"]
+      }
+    },
+    "colors": ["유카", "프림로즈", "샌드 베이", "브라운 캐럿", "오리온"]
+  },
+
+  "brand": {
+    "ko": "알로소",
+    "en": "Alloso",
+    "tagline": "Inspiration Evokes Tomorrow",
+    "synonyms": ["알로쏘", "알론소", "일로소"]
+  },
+
+  "policies": {
+    "returns": {
+      "key_message": "제품 설치 후에는 반품·교환이 불가합니다. 설치 전 단계별 위약금 규정이 적용돼요.",
+      "made_to_order": {
+        "label": "주문 제작품 (소파·퍼니싱)",
+        "stages": [
+          { "when": "계약 당일 취소", "fee": "위약금 없음" },
+          { "when": "계약 다음날 ~ 제작 착수 전일 취소", "fee": "제품 금액의 10%", "ref": "제작 착수 전일 = 납품일 D-11일 (영업일)" },
+          { "when": "제작 착수일 이후 취소", "fee": "실손해 배상", "ref": "제작 착수일 = 납품일 D-10일 (영업일)" },
+          { "when": "제품 설치 후", "fee": "교환·반품 불가" }
+        ]
+      },
+      "stock_items": {
+        "label": "일반 제품 (주문 제작품 외)",
+        "stages": [
+          { "when": "계약 당일 ~ 배송 시작 전 취소", "fee": "위약금 없음" },
+          { "when": "배송 시작 후 ~ 배송 당일 취소", "fee": "실손해 배상", "ref": "배송 시작일 = 배송일 D-4일 (영업일)" },
+          { "when": "제품 설치 후 취소", "fee": "반품 불가" }
+        ],
+        "return_shipping_fees": {
+          "러그": "12,500원",
+          "쿠션": "8,800원",
+          "소파패드": "11,000원",
+          "펫 스텝·펫 베드": "11,000원",
+          "룸슈즈": "6,000원",
+          "가죽케어키트": "6,000원"
+        }
+      },
+      "exceptions": [
+        "제품 하자로 인한 교환·반품은 반품 배송비 없음",
+        "단순 변심 + 사용 흔적 있는 경우 반품 불가",
+        "택 제거·오염·화장품 향수 향 밴 경우 = 고객 책임"
+      ]
+    },
+    "delivery": {
+      "lead_time": "영업일 기준 12-14일",
+      "installation": "전문 설치팀이 무료로 시공",
+      "weekend": "일요일·공휴일 배송 및 시공 불가",
+      "schedule_notice": "주문 당일 알림톡으로 배송예정일 안내. 익일 15시까지 미수신 시 고객센터 문의.",
+      "schedule_change_deadline": "배송예정일 13일 전(영업일)까지 변경 가능",
+      "delivery_specs": {
+        "elevator_min": "내부 사이즈 W900 × D1200 × H2300mm 이상",
+        "door_min": "출입문 W800mm 이상 (사티·로바: W850mm)",
+        "ceiling_min": "실내 천장 H2300mm 이상 (3인 단품 기준)",
+        "L_shape_entry": "'ㄱ'자 진입로 시 엘리베이터 사이즈와 동일 면적 필요"
+      },
+      "surcharges": {
+        "jeju_islands": "소비자가 기준 4%",
+        "stairs_above_3F_no_elevator": "사다리차·지게차 사용 시 추가",
+        "elevator_fee": "별도 엘리베이터 사용료 있는 경우 추가",
+        "furniture_move": "기존 가구 이동 필요 시 추가"
+      },
+      "free_disposal": "동일 품목·동일 사이즈에 한해 무상 폐기장 이동 (가구 수거는 X)"
+    },
+    "estimate": {
+      "valid_until": "익월 첫째주 일요일까지",
+      "personal_info": {
+        "purpose": "구매의사 확인",
+        "items": "고객명, 연락처",
+        "retention": "5년",
+        "consent_optional": true
+      }
+    },
+    "contact": {
+      "customer_service": "1588-1526",
+      "as_center": "1577-1641",
+      "hours": "평일 09:30~17:30 (주말·공휴일 휴무)"
+    },
+    "service": {
+      "cleaning": {
+        "name": "알로소 클리닝 서비스",
+        "type": "유료",
+        "url": "https://www.alloso.co.kr/service/service?type=care"
+      },
+      "material_sample": {
+        "type": "무료",
+        "url": "https://brand.naver.com/alloso/lounge/article/5000478849"
+      }
+    }
+  },
+
+  "material_notes": {
+    "leather_natural_characteristics": [
+      "상처·주름·이색은 천연 가죽의 자연 특징 (인조가죽과 구별점)",
+      "부위별 두께·조직 차이로 색상·질감·무늬 다를 수 있음",
+      "사용 시 부분 눌림 가능 — 두드리면 자연 복원",
+      "새 제품 특유의 냄새는 환기로 사라짐 (친환경 소재 사용)"
+    ],
+    "leather_care": [
+      "마른 걸레로 가볍게 닦아내기",
+      "왁스·기름 포함 세정제 사용 시 변색 위험 — 가죽 전용 클리너 권장",
+      "전문 클리닝 서비스 가능 (유료)"
+    ],
+    "fabric_characteristics": [
+      "장기 사용 시 정전기·보푸라기 발생 가능",
+      "커피·주스 등 음료의 영구 얼룩 주의",
+      "세탁 시 변형 우려 — 라벨 표시 방법 준수"
+    ],
+    "fabric_care": [
+      "가벼운 먼지는 청소기로 제거",
+      "심한 오염은 물에 중성세제 푼 천으로 가볍게 문지른 후 마른 천으로 수분 제거",
+      "기능성 패브릭은 스팀청소기 잦은 사용 금지 (코팅 손상)"
+    ],
+    "wood_characteristics": [
+      "원목·무늬목은 천연 소재라 색상 완벽히 균일하지 않음",
+      "재단 각도에 따라 결·색상 다르게 보임",
+      "옹이는 나무 가지가 났던 부위 — 원목의 자연 특징"
+    ],
+    "store_vs_home": "매장의 노란 할로겐 조명 vs 가정의 햇빛·형광등 차이로 색상이 다르게 보일 수 있어요. 매장에서 실제 착석·확인 권장."
+  },
+
+  "robot_vacuum_compatible_series": [
+    "카포네", "레지나", "베카", "보눔 오픈베이스", "클렉트", "밀로", "스탠"
+  ],
+
+  "ux_rules": {
+    "variant_response": "메인 시리즈명만 입력되면 → 메인을 보여주고 변종 존재를 짧게 언급. 예: '홀리데이를 보여드릴게요. 작은 버전인 홀리데이 미니도 있어요.'",
+    "different_names_different_products": "변종 이름이 다르면 기능·모양이 확연히 다른 별도 제품. 임의로 통합 추천 X.",
+    "discontinued_response": "단종 안내 + 대체 제품 추천 (소프트 토넬로 → 소프트 프리모, 단종 컬러는 후속 컬러)",
+    "no_return_after_install_explicit": "반품 문의 시 → 단계별 위약금 안내 + '설치 후에는 교환·반품이 불가'임을 명확히 전달. 절대 모호하게 표현 X.",
+    "table_pairing": "특히 인테리어 합성 이미지 생성 시 → 소파 + 어울리는 테이블을 세트로 추천. 케렌시아 ↔ 케렌시아 테이블 같은 페어는 우선 매칭.",
+    "image_generation_disclaimer": "AI 생성 이미지는 실제 제품과 조명·색상이 다를 수 있다는 점 명시",
+    "as_inquiry": "제품 하자 관련 문의 → AS 센터(1577-1641) 안내",
+    "store_visit_recommendation": "착석감·색상 정확한 확인이 필요한 응답 → 매장 방문 권장",
+    "consumer_friendly_terminology": {
+      "시작가": "소비자가",
+      "납기": "배송 예정일",
+      "시공팀": "설치 전문팀",
+      "해피콜": "확인 전화",
+      "오더메이드": "주문 제작"
+    }
+  }
+}
