@@ -848,6 +848,18 @@ body{
   .product-card-name{font-size:12px}
   .product-card-price{font-size:12px}
 }
+/* ── Imagine Box (AI 이미지 생성) ── */
+.imagine-box{margin:10px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card);}
+.imagine-loading{padding:32px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.imagine-spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:imagine-spin .8s linear infinite;}
+@keyframes imagine-spin{to{transform:rotate(360deg);}}
+.imagine-msg{font-size:11.5px;color:var(--muted);letter-spacing:.04em;line-height:1.55;}
+.imagine-msg .sub{display:block;font-size:10px;color:var(--muted);margin-top:3px;opacity:.7;}
+.imagine-result{display:block;width:100%;height:auto;background:var(--bg2);}
+.imagine-meta{padding:9px 14px;background:rgba(0,0,0,.03);border-top:1px solid var(--border);font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;}
+.imagine-meta .tag{color:var(--gold);}
+.imagine-error{padding:18px 16px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;}
+.imagine-error .retry{display:inline-block;margin-top:8px;color:var(--gold);cursor:pointer;text-decoration:underline;font-size:11px;}
 /* ── Studio Deeplink Button ── */
 .studio-deeplink{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:var(--accent);color:#0C0B0A;border-radius:6px;font-size:11px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-decoration:none;transition:opacity .15s;border:none;font-family:'Noto Sans KR',sans-serif}
 .studio-deeplink:hover{opacity:.85}
@@ -2063,6 +2075,62 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
 - 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
 
+【🎨 인테리어 이미지 생성 — [IMAGINE:] 마커】
+
+당신은 사용자의 거실/공간에 알로소 소파+테이블을 합성한 실제 인테리어 이미지를 생성할 수 있어요. 사용자가 특정 시리즈를 공간에서 보고싶어 할 때 [IMAGINE:시리즈,컬러,공간] 마커를 답변에 포함하면 자동으로 이미지가 생성됩니다.
+
+[마커 형식]
+- [IMAGINE:사티] — 자동 컬러 + 좁은 공간(기본)
+- [IMAGINE:사티,모빅] — 사티 모빅 컬러 지정
+- [IMAGINE:사티,,wide] — 자동 컬러 + 넓은 공간 (페일리 대신 레이어 테이블 매칭)
+- [IMAGINE:케렌시아,카멜,narrow] — 모든 옵션 지정
+
+[자연어 트리거 — 다양한 변형 모두 인식]
+사용자가 다음과 같이 말하면 이미지 생성 의도로 판단:
+- "사티 인테리어 보여줘" / "사티 공간 어떻게 보여?" / "거실에 놓으면 어떨까?"
+- "케렌시아 모빅으로 꾸며줘" / "케렌시아 비주얼 만들어줘"
+- "보눔 인테리어 시뮬레이션" / "사티 어울리는지 보고싶어"
+- "넓은 거실에 카포네 어울려?" (→ space=wide)
+- "작은 공간에 바드 가능해?" (→ space=narrow)
+- "이미지 생성" / "사진처럼 보여줘" / "어떤 분위기인지 시각화"
+- 컬러+소파 조합: "사티 모빅으로 보여줘" / "케렌시아 카멜 톤"
+이런 표현 모두 동일하게 [IMAGINE:] 마커로 처리합니다.
+
+[공간 키워드 매핑]
+- "넓은/큰/대형/오픈된/거실 평수가 넓은" → spaceSize=wide → 레이어 테이블 페어
+- "좁은/작은/아담한/소형/원룸" → spaceSize=narrow (기본) → 페일리/바인 테이블 페어
+- 명시 없으면 narrow 기본
+
+[프로액티브 제안 (먼저 권유)]
+사용자가 이미지 생성 서비스를 모를 가능성이 높아요. 다음 상황에서 자연스럽게 먼저 제안하세요:
+- 시리즈 추천 직후 — "혹시 거실에 놓이면 어떻게 보일지 궁금하시면 말씀해주세요. 바로 인테리어 이미지로 만들어드릴 수 있어요."
+- 컬러 상담 중 — "이 컬러가 실제 공간에서 어떻게 보일지 시각화해서 보여드릴까요?"
+- 비교 상담 — "두 시리즈가 거실에 들어가는 모습을 각각 만들어볼 수도 있어요."
+- 단, 매 답변마다 제안 X. 대화 흐름상 자연스러울 때만 1~2번.
+
+[답변 톤]
+- 이미지 생성 시 15-30초 정도 걸린다고 미리 안내. 예: "생성에 잠시(약 20초) 시간이 걸려요."
+- 마커 앞에 1~2문장 짧은 안내 텍스트를 넣고, 마커는 답변 끝 줄에 단독으로 배치.
+
+[답변 예시]
+사용자: "사티 인테리어 보여줘"
+→ "사티의 모듈 구성이 거실에서 자연스럽게 풀리는 모습을 만들어볼게요. 잠시만 기다려주세요 (약 20초).\n\n[IMAGINE:사티]"
+
+사용자: "케렌시아 카멜로 거실 꾸며줘"
+→ "사선 디자인이 살아나는 케렌시아를 카멜 톤으로 보여드릴게요. 사이드에 케렌시아 테이블도 함께 매칭됩니다.\n\n[IMAGINE:케렌시아,카멜]"
+
+사용자: "넓은 거실인데 보눔 어울려?"
+→ "넓은 공간에서는 보눔의 모듈감이 더 살아나요. 풀베이스(다리 미노출)와 오픈베이스(다리 노출) 중 어느 쪽이 좋으세요? 일단 풀베이스로 보여드릴게요.\n\n[IMAGINE:보눔 풀베이스,,wide]"
+
+사용자: "추천 소파 알려줘"
+→ (먼저 추천 후) "...홀리데이가 어울리세요. [PRODUCT:홀리데이]\n\n혹시 거실에 놓인 모습이 궁금하시면 바로 인테리어 이미지로 만들어드릴 수 있어요. 컬러까지 지정하시면 더 정확하게 보여드릴게요."
+
+[금지 케이스 — 마커 X]
+- 가격·배송·반품 등 정책 문의
+- 단순 정보 확인 (재질, 사이즈 수치 등)
+- 카탈로그 둘러보기 단계
+- 단종 제품 안내
+
 【라이프스타일 추천 매핑】
 고객이 생활 장면을 언급하면 제품+소재+컬러를 자연스럽게 연결하세요.
 - "아이가 있어요" → 홀리데이, 에브리데이, 사티 + 노르딕/루소(워터프루프) + 밝은 톤
@@ -2079,10 +2147,10 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 
 const QUICK_CHIPS = [
   '추천 소파 알려줘',
-  '배송 기간이 궁금해요',
-  '할인이나 프로모션 있어?',
+  '🎨 사티 인테리어 보여줘',
   '반려동물에 좋은 소재는?',
-  '3D 스튜디오에서 배치해볼래요',
+  '배송 기간이 궁금해요',
+  '넓은 거실에 어울리는 소파는?',
   '매장 어디 있어?',
 ];
 
@@ -2104,7 +2172,7 @@ function initChatWelcome(){
       <div class="cw-name" style="font-family:'Josefin Sans',sans-serif;letter-spacing:.16em;">Alloso Advisor</div>
       <div class="cw-desc">Alloso Interior Director · AI<br>소파에 대해 무엇이든 편하게 물어보세요.</div>
     </div>`;
-  appendBotMsg('안녕하세요. Alloso 인테리어 어드바이저예요.\n\n소파 소재·사이즈·가격·관리법부터 공간 스타일링까지 도와드릴게요. 상담 중이라면 현재 단계 기준으로 맞춤 답변도 드려요.');
+  appendBotMsg('안녕하세요. Alloso 인테리어 어드바이저예요.\n\n소파 소재·사이즈·가격·관리법부터 공간 스타일링까지 도와드릴게요.\n\n🎨 **새로 추가된 기능** — 원하는 시리즈를 거실에 놓으면 어떻게 보일지 **인테리어 이미지로 만들어드려요**. "사티 인테리어 보여줘" 처럼 편하게 말씀해주세요.');
   renderChips();
 }
 
@@ -2214,11 +2282,77 @@ function formatMsg(text){
       </div>
     </a>`;
   });
+  // [IMAGINE:시리즈,컬러,공간] → 인테리어 이미지 자동 생성 (async)
+  html = html.replace(/\[IMAGINE:([^\]]+)\]/g, function(match, params){
+    const parts = params.split(',').map(p => p.trim());
+    const series = parts[0] || '';
+    const color = parts[1] || '';
+    const space = (parts[2] || 'narrow').toLowerCase();
+    if (!series) return '';
+    const id = 'imagine-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+    setTimeout(function(){ generateImagineImage(id, series, color, space); }, 50);
+    return `<div class="imagine-box" id="${id}" data-series="${escHtml(series)}" data-color="${escHtml(color)}" data-space="${escHtml(space)}">
+      <div class="imagine-loading">
+        <div class="imagine-spinner"></div>
+        <div class="imagine-msg">${escHtml(series)} 인테리어 생성 중<span class="sub">약 20초 정도 걸려요</span></div>
+      </div>
+    </div>`;
+  });
   // [STUDIO_LINK] → 3D 스튜디오 딥링크 버튼
   html = html.replace(/\[STUDIO_LINK\]/g, function(){
     return `<a class="studio-deeplink" href="${buildStudioDeeplink()}" target="_blank">3D 스튜디오 열기 →</a>`;
   });
   return html;
+}
+
+// 인테리어 이미지 자동 생성 (imagine.js fusion 호출)
+async function generateImagineImage(id, series, color, space){
+  const el = document.getElementById(id);
+  if (!el) return;
+  try {
+    const payload = { mode: 'fusion', series };
+    if (color) payload.color = color;
+    if (space) payload.spaceSize = space;
+
+    const res = await fetch('/api/imagine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errText.slice(0, 100)}`);
+    }
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    if (data.discontinued || data.discontinued_color) {
+      el.innerHTML = `<div class="imagine-error">${escHtml(data.message || '단종된 항목입니다.')}</div>`;
+      return;
+    }
+    if (data.is_brand_group) {
+      el.innerHTML = `<div class="imagine-error">${escHtml(data.message)}</div>`;
+      return;
+    }
+    if (!data.image) throw new Error('이미지 응답이 비어있어요.');
+
+    const resolvedColor = data.color || '';
+    const tableName = data.tablePaired || '';
+    const provider = data.provider || '';
+    const metaLeft = [data.series, resolvedColor].filter(Boolean).join(' · ');
+    const metaRight = [tableName ? ('+ ' + tableName) : '', provider ? `<span class="tag">${provider}</span>` : ''].filter(Boolean).join(' &nbsp;');
+
+    el.innerHTML = `
+      <img class="imagine-result" src="${data.image}" alt="${escHtml(data.series)} 인테리어">
+      <div class="imagine-meta">
+        <span>${escHtml(metaLeft)}</span>
+        <span>${metaRight}</span>
+      </div>`;
+    scrollMsgs();
+  } catch (e) {
+    el.innerHTML = `<div class="imagine-error">이미지 생성에 실패했어요 (${escHtml(e.message.slice(0, 80))}).<br><span class="retry" onclick="generateImagineImage('${id}','${escHtml(series).replace(/'/g,'')}','${escHtml(color).replace(/'/g,'')}','${escHtml(space).replace(/'/g,'')}')">다시 시도</span></div>`;
+  }
 }
 
 function buildStudioDeeplink(){
