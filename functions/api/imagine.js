@@ -1,22 +1,27 @@
 // ════════════════════════════════════════════════════════════════════
-// /functions/api/imagine.js  ·  v2
-// ALMA · Image API · Manifest-driven (R2 catalog + variant rules)
+// /functions/api/imagine.js  ·  v3
+// ALMA · Image API · R2 Auto-Discovery (no more manual filename config)
 // ════════════════════════════════════════════════════════════════════
-// Modes:
-//   'direct'  → R2 실사 사진 URL 각도별 (정면·측면·부감)
-//   'fusion'  → R2 실사 시드 + Nanobanana 인테리어 합성 (테이블 페어링)
-//   'resolve' → 사용자 입력(유사어 포함) → 정규 시리즈명 + 카테고리 + 단종 여부
+// Bindings required (Cloudflare Pages Settings → Functions → Bindings):
+//   PRODUCTS  → R2 bucket: alloso-assets
+//   AI        → Workers AI
 //
-// Catalog: /manifest-series.json on R2 (cached at edge for 1 hour)
+// Env vars:
+//   GOOGLE_API_KEY (Gemini)
+//
+// Modes:
+//   'resolve' → 시리즈 입력 정규화 (유사어·단종 안내·브랜드 그룹 분기)
+//   'direct'  → R2 폴더에서 정면·측면·부감 URL 자동 탐색
+//   'fusion'  → R2 시드 (소파+테이블) + Nanobanana 인테리어 합성
 // ════════════════════════════════════════════════════════════════════
 
 const MANIFEST_URL = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/manifest-series.json';
 const ANGLES = ['정면', '측면', '부감'];
-const CACHE_TTL = 3600; // 1시간
-const CACHE_KEY = 'https://internal.alma/manifest-series-v2';
+const CACHE_TTL = 3600;
+const CACHE_KEY = 'https://internal.alma/manifest-series-v3';
 
 // ────────────────────────────────────────────────────────────────────
-// Manifest Loader (with edge cache)
+// Manifest loader (edge cached)
 // ────────────────────────────────────────────────────────────────────
 async function loadManifest() {
   const cache = caches.default;
@@ -38,8 +43,7 @@ async function loadManifest() {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Series Resolver — 사용자 입력 → 정규 시리즈
-// 유사어 / 띄어쓰기 변형 / 단종 / 변종 처리
+// Normalization + Resolvers
 // ────────────────────────────────────────────────────────────────────
 function normalize(s) {
   return (s || '').replace(/\s+/g, '').toLowerCase();
@@ -51,7 +55,6 @@ function resolveSeries(input, manifest) {
   const series = manifest.series || {};
   const discontinued = manifest.discontinued?.products || {};
 
-  // 1. 단종 제품 매칭
   for (const [name, info] of Object.entries(discontinued)) {
     const candidates = [name, info.en].filter(Boolean).map(normalize);
     if (candidates.includes(norm)) {
@@ -63,9 +66,8 @@ function resolveSeries(input, manifest) {
     }
   }
 
-  // 2. 정확한 시리즈명 매칭 (한글 또는 영문)
   for (const [name, info] of Object.entries(series)) {
-    if (name.startsWith('_')) continue; // skip _brand_보눔 같은 그룹
+    if (name.startsWith('_')) continue;
     const candidates = [name, info.ko, info.en, ...(info.synonyms || [])]
       .filter(Boolean).map(normalize);
     if (candidates.includes(norm)) {
@@ -80,7 +82,6 @@ function resolveSeries(input, manifest) {
     }
   }
 
-  // 3. 브랜드 그룹 매칭 (예: "보눔" → _brand_보눔 → 풀베이스·오픈베이스)
   for (const [name, info] of Object.entries(series)) {
     if (!info.is_brand_group) continue;
     const candidates = [info.ko, info.en, ...(info.synonyms || [])]
@@ -98,16 +99,12 @@ function resolveSeries(input, manifest) {
   return null;
 }
 
-// ────────────────────────────────────────────────────────────────────
-// Color Resolver
-// ────────────────────────────────────────────────────────────────────
 function resolveColor(input, manifest) {
   if (!input) return null;
   const norm = normalize(input);
   const colors = manifest.colors || {};
   const discontinued = manifest.discontinued?.colors || [];
 
-  // 단종 컬러
   if (discontinued.map(normalize).includes(norm)) {
     return {
       resolved: input,
@@ -116,99 +113,22 @@ function resolveColor(input, manifest) {
     };
   }
 
-  // 정확 매칭
   for (const [name, info] of Object.entries(colors)) {
     const candidates = [name, info.en, ...(info.synonyms || [])]
       .filter(Boolean).map(normalize);
     if (candidates.includes(norm)) {
-      return {
-        resolved: name,
-        en: info.en,
-        desc_en: info.desc_en || null,
-      };
-    }
-  }
-
-  return null;
-}
-
-// ────────────────────────────────────────────────────────────────────
-// URL builder for R2 product images
-// ────────────────────────────────────────────────────────────────────
-function buildUrl(manifest, folder, filename) {
-  return manifest.r2_base + encodeURIComponent(folder) + '/' + encodeURIComponent(filename);
-}
-
-function buildFilename({ series, size = '1인', material = '가죽', color, angle }) {
-  return `[alloso] ${series}_${size}_${material}_${color}_${angle}.png`;
-}
-
-async function urlExists(url) {
-  try {
-    const r = await fetch(url, { method: 'HEAD' });
-    return r.ok;
-  } catch { return false; }
-}
-
-async function fetchImageBase64(url) {
-  const r = await fetch(url);
-  if (!r.ok) return null;
-  const buf = await r.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary);
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Direct mode — 시리즈의 컬러별 실사 URL 찾기
-// ────────────────────────────────────────────────────────────────────
-async function getDirectUrls(manifest, resolved, { color, size = '1인', material = '가죽' }) {
-  const folder = resolved.folder;
-  const seriesKo = resolved.info.ko;
-
-  const urls = {};
-  await Promise.all(ANGLES.map(async (angle) => {
-    const filename = buildFilename({ series: seriesKo, size, material, color, angle });
-    const url = buildUrl(manifest, folder, filename);
-    if (await urlExists(url)) urls[angle] = url;
-  }));
-  return urls;
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Table pairing — 소파에 어울리는 테이블 찾기
-// ────────────────────────────────────────────────────────────────────
-function findPairedTable(manifest, sofaName) {
-  const series = manifest.series || {};
-  const sofa = series[sofaName];
-  if (!sofa) return null;
-
-  // 명시적 페어 (e.g. 케렌시아 → 케렌시아 테이블)
-  if (sofa.paired_table) {
-    return series[sofa.paired_table] || null;
-  }
-
-  // 같은 시리즈 prefix를 가진 테이블 검색
-  for (const [name, info] of Object.entries(series)) {
-    if (info.category === 'table' && name.startsWith(sofaName)) {
-      return info;
+      return { resolved: name, en: info.en, desc_en: info.desc_en || null };
     }
   }
   return null;
 }
 
-// ────────────────────────────────────────────────────────────────────
-// Variant mention helper
-// ────────────────────────────────────────────────────────────────────
 function getVariantMention(manifest, seriesName) {
   const rules = manifest.variant_rules?.primary_to_variants || {};
   const variants = rules[seriesName];
   if (!variants || !variants.length) return null;
-
   const existing = variants.filter(v => manifest.series?.[v]);
   if (!existing.length) return null;
-
   return {
     variants: existing,
     message: `${seriesName}를 보여드릴게요. ${existing.join(', ')}도 있어요.`,
@@ -216,7 +136,78 @@ function getVariantMention(manifest, seriesName) {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Gemini call
+// R2 Auto-Discovery — 폴더 안의 파일을 점수화해서 최적 레퍼런스 선택
+// ────────────────────────────────────────────────────────────────────
+async function listFolder(env, folder) {
+  if (!env.PRODUCTS) return [];
+  const prefix = `products/${folder}/`;
+  const allObjects = [];
+  let cursor;
+  do {
+    const result = await env.PRODUCTS.list({ prefix, cursor, limit: 1000 });
+    allObjects.push(...(result.objects || []));
+    cursor = result.truncated ? result.cursor : null;
+  } while (cursor);
+  return allObjects.filter(o => /\.(png|jpe?g|webp)$/i.test(o.key));
+}
+
+function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredMaterial }) {
+  let score = 0;
+  if (name.includes(preferredAngle)) score += 50;
+  else if (name.includes('측면')) score += 30;
+  else if (name.includes('정면')) score += 20;
+  else if (name.includes('부감')) score += 10;
+  if (preferredColor && name.includes(preferredColor)) score += 100;
+  if (preferredMaterial && name.includes(preferredMaterial)) score += 20;
+  return score;
+}
+
+async function findBestReference(env, folder, opts = {}) {
+  const files = await listFolder(env, folder);
+  if (files.length === 0) return null;
+  const scored = files.map(f => ({
+    key: f.key,
+    name: f.key.split('/').pop(),
+    score: scoreFile(f.key, opts),
+  }));
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0];
+}
+
+async function fetchR2AsBase64(env, key) {
+  const obj = await env.PRODUCTS.get(key);
+  if (!obj) return null;
+  const buf = await obj.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function keyToPublicUrl(manifest, key) {
+  const baseHost = manifest.r2_base.replace(/products\/$/, '');
+  return baseHost + key.split('/').map(encodeURIComponent).join('/');
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Table pairing
+// ────────────────────────────────────────────────────────────────────
+function selectPairedTable(manifest, resolved, spaceSize) {
+  if (resolved.info?.paired_table && manifest.series[resolved.info.paired_table]) {
+    const t = manifest.series[resolved.info.paired_table];
+    return { table: t, name: resolved.info.paired_table, reason: 'explicit_pair' };
+  }
+  const spaceConfig = manifest.tables_by_space?.[spaceSize];
+  const tableNames = spaceConfig?.tables || [];
+  for (const tName of tableNames) {
+    const t = manifest.series[tName];
+    if (t) return { table: t, name: tName, reason: `space_${spaceSize}`, placement: spaceConfig.placement };
+  }
+  return null;
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Gemini / FLUX
 // ────────────────────────────────────────────────────────────────────
 async function callGemini(env, imageBase64s, prompt) {
   const apiKey = env.GOOGLE_API_KEY;
@@ -234,12 +225,10 @@ async function callGemini(env, imageBase64s, prompt) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ contents: [{ parts }] }),
   });
-
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`Gemini ${res.status}: ${errText.slice(0, 200)}`);
   }
-
   const data = await res.json();
   const responseParts = data?.candidates?.[0]?.content?.parts || [];
   for (const p of responseParts) {
@@ -260,11 +249,9 @@ async function callFlux(env, prompt) {
 // ────────────────────────────────────────────────────────────────────
 export async function onRequestPost(context) {
   const { request, env } = context;
-
   try {
     const body = await request.json();
-    const { mode = 'direct', series, color, size = '1인', material = '가죽', scenePrompt, includeTable = true } = body;
-
+    const { mode = 'direct', series, color, scenePrompt, includeTable = true } = body;
     if (!series) return json({ error: 'series is required' }, 400);
 
     const manifest = await loadManifest();
@@ -284,7 +271,6 @@ export async function onRequestPost(context) {
     if (resolved.category === 'discontinued') {
       return json({ mode, discontinued: true, message: resolved.message });
     }
-
     if (resolved.is_brand_group) {
       return json({ mode, is_brand_group: true, message: resolved.message, members: resolved.members });
     }
@@ -293,20 +279,33 @@ export async function onRequestPost(context) {
     if (colorResolved?.discontinued) {
       return json({ mode, discontinued_color: true, message: colorResolved.message });
     }
-    const finalColor = colorResolved?.resolved || color;
-    const colorDescEn = colorResolved?.desc_en || finalColor;
-
+    const finalColor = colorResolved?.resolved || color || null;
+    const seriesPreferredColor = finalColor || resolved.info?.default_color || null;
     const variantMention = getVariantMention(manifest, resolved.resolved);
+
+    if (!env.PRODUCTS) {
+      return json({ error: 'R2 binding PRODUCTS not configured' }, 500);
+    }
 
     // ── DIRECT MODE ──────────────────────────────────────────────
     if (mode === 'direct') {
-      if (!finalColor) return json({ error: 'color is required for direct mode' }, 400);
-      const urls = await getDirectUrls(manifest, resolved, { color: finalColor, size, material });
+      const folder = resolved.folder;
+      const files = await listFolder(env, folder);
+      const matching = finalColor ? files.filter(f => f.key.includes(finalColor)) : files;
+
+      const urls = {};
+      for (const angle of ANGLES) {
+        const found = matching.find(f => f.key.includes(angle));
+        if (found) urls[angle] = keyToPublicUrl(manifest, found.key);
+      }
+
       return json({
         mode,
         series: resolved.resolved,
         color: finalColor,
-        size, material,
+        folder,
+        totalFilesInFolder: files.length,
+        matchingColorCount: matching.length,
         urls,
         found: Object.keys(urls).length,
         variantMention: variantMention?.message || null,
@@ -317,80 +316,67 @@ export async function onRequestPost(context) {
     if (mode === 'fusion') {
       const seriesKo = resolved.info.ko;
       const folder = resolved.folder;
-      const spaceSize = body.spaceSize || 'narrow'; // 'wide' | 'narrow' | 'auto'
+      const spaceSize = body.spaceSize || 'narrow';
 
-      // 1. 컬러 자동 결정 (사용자 미지정 시 fallback 시퀀스)
-      let workingColor = finalColor;
-      let colorAutoSelected = false;
-      if (!workingColor) {
-        const fallbacks = manifest.default_color_fallback || ['모빅'];
-        for (const c of fallbacks) {
-          const test = buildFilename({ series: seriesKo, size, material, color: c, angle: '측면' });
-          const url = buildUrl(manifest, folder, test);
-          if (await urlExists(url)) {
-            workingColor = c;
-            colorAutoSelected = true;
-            break;
-          }
-        }
-      }
-      const workingColorDescEn = (workingColor && manifest.colors?.[workingColor]?.desc_en) || workingColor || 'natural';
-
-      // 2. 소파 레퍼런스 (측면 우선, 정면·부감 폴백)
+      // 1. 소파 레퍼런스 자동 탐색
+      const sofaPick = await findBestReference(env, folder, {
+        preferredColor: seriesPreferredColor,
+        preferredAngle: '측면',
+      });
       let sofaBase64 = null;
       let sofaRef = null;
-      for (const angle of ['측면', '정면', '부감']) {
-        if (!workingColor) break;
-        const filename = buildFilename({ series: seriesKo, size, material, color: workingColor, angle });
-        const url = buildUrl(manifest, folder, filename);
-        const b64 = await fetchImageBase64(url);
-        if (b64) { sofaBase64 = b64; sofaRef = url; break; }
-      }
+      let resolvedColor = finalColor;
+      let colorAutoSelected = false;
 
-      // 3. 테이블 페어링 — 명시 페어 > 공간 기반
-      let pairedTable = null;
-      let tableSelectionReason = null;
-      if (includeTable) {
-        // 명시 페어 (e.g. 케렌시아 → 케렌시아 테이블)
-        if (resolved.info.paired_table && manifest.series[resolved.info.paired_table]) {
-          pairedTable = manifest.series[resolved.info.paired_table];
-          pairedTable._name = resolved.info.paired_table;
-          tableSelectionReason = 'explicit_pair';
-        } else {
-          // 공간 기반 선택
-          const spaceConfig = manifest.tables_by_space?.[spaceSize];
-          const tableNames = spaceConfig?.tables || [];
-          for (const tName of tableNames) {
-            const t = manifest.series[tName];
-            if (t) {
-              pairedTable = { ...t, _name: tName, _placement: spaceConfig.placement };
-              tableSelectionReason = `space_${spaceSize}`;
+      if (sofaPick) {
+        sofaBase64 = await fetchR2AsBase64(env, sofaPick.key);
+        sofaRef = keyToPublicUrl(manifest, sofaPick.key);
+        // 자동 선택된 컬러 추출 (메타데이터용)
+        if (!finalColor && manifest.colors) {
+          for (const cName of Object.keys(manifest.colors)) {
+            if (sofaPick.name.includes(cName)) {
+              resolvedColor = cName;
+              colorAutoSelected = true;
               break;
             }
           }
         }
       }
 
-      // 4. 테이블 이미지 fetch (없으면 텍스트 묘사만)
+      const workingColorDescEn =
+        (resolvedColor && manifest.colors?.[resolvedColor]?.desc_en) ||
+        resolvedColor || 'natural';
+
+      // 2. 테이블 페어링
+      let pairedTable = null;
+      let tableMeta = null;
+      if (includeTable) {
+        tableMeta = selectPairedTable(manifest, resolved, spaceSize);
+        if (tableMeta) pairedTable = tableMeta.table;
+      }
+
+      // 3. 테이블 레퍼런스 자동 탐색
       let tableBase64 = null;
       let tableRef = null;
-      if (pairedTable && pairedTable.r2_image_available !== false) {
-        for (const angle of ['측면', '정면']) {
-          const tFilename = `[alloso] ${pairedTable.ko}_${angle}.png`;
-          const url = buildUrl(manifest, pairedTable.folder, tFilename);
-          const b64 = await fetchImageBase64(url);
-          if (b64) { tableBase64 = b64; tableRef = url; break; }
+      if (pairedTable && pairedTable.folder) {
+        const tablePick = await findBestReference(env, pairedTable.folder, {
+          preferredAngle: '측면',
+        });
+        if (tablePick) {
+          tableBase64 = await fetchR2AsBase64(env, tablePick.key);
+          tableRef = keyToPublicUrl(manifest, tablePick.key);
         }
       }
 
-      // 5. 프롬프트 구성
+      // 4. 프롬프트 구성
       const scene = scenePrompt || (spaceSize === 'wide'
         ? 'a spacious Korean modern living room with high ceilings, large windows, soft natural light, warm oak floor, minimalist styling'
         : 'a cozy Korean modern living room with soft natural light, warm wood floor, minimalist styling');
 
       let tableText = '';
       if (pairedTable) {
-        const placement = pairedTable._placement || (tableSelectionReason === 'explicit_pair' ? 'integrated with the sofa modules' : 'beside the sofa');
+        const placement = tableMeta?.placement ||
+          (tableMeta?.reason === 'explicit_pair' ? 'integrated with the sofa modules' : 'beside the sofa');
         if (tableBase64) {
           tableText = ` Place the ${pairedTable.ko} table ${placement} as a complementary set.`;
         } else {
@@ -420,7 +406,7 @@ export async function onRequestPost(context) {
           warning = `Gemini failed: ${e.message.slice(0, 80)}`;
         }
       } else {
-        warning = 'No matching reference image found. Using text-only generation.';
+        warning = 'No matching reference image found via R2 listing. Using text-only generation.';
       }
 
       if (!resultBase64) {
@@ -436,15 +422,16 @@ export async function onRequestPost(context) {
       return json({
         mode,
         series: resolved.resolved,
-        color: workingColor,
+        color: resolvedColor,
         colorAutoSelected,
         spaceSize,
         provider,
         warning,
         sofaReferenceUsed: sofaRef,
-        tablePaired: pairedTable ? (pairedTable._name || pairedTable.ko) : null,
+        sofaPickedFilename: sofaPick?.name || null,
+        tablePaired: tableMeta?.name || null,
         tableReferenceUsed: tableRef,
-        tableSelectionReason,
+        tableSelectionReason: tableMeta?.reason || null,
         variantMention: variantMention?.message || null,
         image: `data:image/png;base64,${resultBase64}`,
       });
