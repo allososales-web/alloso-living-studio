@@ -820,18 +820,6 @@ body{
   letter-spacing:.12em;color:rgba(255,255,255,.55);text-align:center;line-height:1.6;
 }
 
-/* ── Studio hero button (featured) ── */
-.studio-btn{
-  width:calc(100% - 32px);margin:20px 16px 0;
-  background:var(--accent);border:none;border-radius:4px;
-  padding:22px 20px;cursor:pointer;text-align:left;
-  position:relative;overflow:hidden;transition:opacity .2s;
-}
-.studio-btn::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(139,115,85,.18) 0%,transparent 60%);
-}
-.studio-btn:hover{opacity:.88;}
 /* ── Product Preview Card ── */
 .product-card{display:flex;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin:8px 0;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit;}
 .product-card:hover{border-color:var(--gold-lt);background:rgba(139,115,85,.06);}
@@ -860,9 +848,6 @@ body{
 .imagine-meta .tag{color:var(--gold);}
 .imagine-error{padding:18px 16px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;}
 .imagine-error .retry{display:inline-block;margin-top:8px;color:var(--gold);cursor:pointer;text-decoration:underline;font-size:11px;}
-/* ── Studio Deeplink Button ── */
-.studio-deeplink{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:var(--accent);color:#0C0B0A;border-radius:6px;font-size:11px;font-weight:500;letter-spacing:.06em;cursor:pointer;text-decoration:none;transition:opacity .15s;border:none;font-family:'Noto Sans KR',sans-serif}
-.studio-deeplink:hover{opacity:.85}
 /* ── Home One-Question Hero ── */
 .home-oq{text-align:center;padding:48px 24px 20px;position:relative}
 .home-oq-brand{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.45em;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
@@ -979,158 +964,6 @@ body{
 .tc.sel .tc-badge{display:flex;}
 .tc.sel.space .tc-badge{background:var(--t-accent);}
 .tc.sel.life  .tc-badge{background:var(--f-accent);}
-
-/* ══ STUDIO PANEL ══ */
-.studio-panel{
-  position:absolute;inset:0;z-index:60;
-  background:var(--surface);
-  display:flex;flex-direction:column;
-  transform:translateY(100%);
-  transition:transform .4s cubic-bezier(.4,0,.2,1);
-}
-.studio-panel.open{transform:translateY(0);}
-
-/* studio top bar */
-.sp-bar{
-  flex-shrink:0;padding:12px 16px 11px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;background:var(--surface);
-}
-.sp-back{
-  width:30px;height:30px;border-radius:50%;background:var(--card2);
-  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:14px;color:var(--muted);flex-shrink:0;
-}
-.sp-title-wrap{flex:1;}
-.sp-eye{font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:1px;}
-.sp-title{font-family:'Josefin Sans',sans-serif;font-size:16px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);}
-.sp-phase{
-  font-size:10px;color:var(--muted);background:var(--card2);
-  border:1px solid var(--border);border-radius:20px;padding:3px 10px;
-  flex-shrink:0;letter-spacing:.06em;
-}
-
-/* studio body */
-.sp-body{flex:1;overflow-y:auto;background:var(--bg);}
-.sp-body::-webkit-scrollbar{width:3px;}
-.sp-body::-webkit-scrollbar-thumb{background:var(--border2);}
-
-/* phase screens inside studio */
-.sp-phase-screen{display:none;flex-direction:column;gap:0;}
-.sp-phase-screen.active{display:flex;animation:up .28s ease both;}
-
-/* canvas wrapper */
-.canvas-wrap{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;
-}
-#roomCanvas{
-  border:1.5px solid var(--border2);border-radius:2px;
-  display:block;cursor:crosshair;background:#FAFAF8;
-  box-shadow:var(--sh);
-}
-
-/* studio input row */
-.sp-input-group{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:14px 16px;
-}
-.sp-input-row{display:flex;gap:8px;align-items:center;}
-.sp-input-label{font-size:10px;color:var(--muted);letter-spacing:.08em;width:52px;flex-shrink:0;}
-.sp-input{
-  flex:1;background:var(--card2);border:1px solid var(--border);
-  border-radius:2px;padding:8px 10px;font-family:'Noto Sans KR',sans-serif;
-  font-size:12.5px;font-weight:300;color:var(--accent);outline:none;
-  transition:border-color .15s;
-}
-.sp-input:focus{border-color:var(--gold);}
-.sp-unit{font-size:11px;color:var(--muted);flex-shrink:0;}
-
-/* sofa picker inside studio */
-.sofa-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;
-  padding:14px 16px;background:var(--bg);
-}
-.sofa-pick{
-  background:var(--surface);border:1.5px solid var(--border);border-radius:3px;
-  padding:10px 11px;cursor:pointer;transition:all .18s;
-}
-.sofa-pick:hover{border-color:var(--border2);}
-.sofa-pick.sel{border-color:var(--accent);background:rgba(26,26,24,.02);}
-.sofa-pick.fit{border-color:#4A8A60;}
-.sofa-pick.nofit{opacity:.45;cursor:not-allowed;}
-.sp-name{font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:3px;}
-.sp-dim{font-size:9.5px;color:var(--muted);}
-.sp-price{font-size:10px;color:var(--gold);margin-top:3px;}
-.sp-fit-badge{
-  display:inline-block;font-size:8.5px;letter-spacing:.1em;
-  padding:1px 6px;border-radius:20px;margin-top:4px;
-}
-.fit-ok{background:#E8F4EC;color:#2A6A40;border:1px solid #B8D8C0;}
-.fit-tight{background:#FFF4E0;color:#8A6020;border:1px solid #E0CC90;}
-
-/* studio CTA */
-.sp-cta{
-  padding:14px 16px;background:var(--surface);border-top:1px solid var(--border);
-  display:flex;gap:8px;flex-shrink:0;
-}
-.sp-cta-sec{
-  flex:1;background:var(--card2);border:1px solid var(--border);
-  border-radius:2px;padding:12px;font-size:11px;color:var(--text2);
-  cursor:pointer;transition:border-color .15s;letter-spacing:.06em;text-align:center;
-}
-.sp-cta-sec:hover{border-color:var(--border2);}
-.sp-cta-pri{
-  flex:1.5;background:var(--accent);border:none;border-radius:2px;
-  padding:12px;font-size:11px;color:rgba(255,255,255,.9);
-  cursor:pointer;transition:opacity .15s;letter-spacing:.06em;text-align:center;
-}
-.sp-cta-pri:hover{opacity:.85;}
-
-/* dimension overlay */
-.dim-tag{
-  position:absolute;background:var(--accent);color:rgba(255,255,255,.9);
-  font-size:8.5px;padding:2px 6px;border-radius:2px;pointer-events:none;
-  white-space:nowrap;letter-spacing:.04em;
-}
-
-/* studio step nav */
-.sp-steps{
-  display:flex;gap:6px;padding:12px 16px;background:var(--surface);
-  border-bottom:1px solid var(--border);align-items:center;
-}
-.sp-step{
-  flex:1;height:3px;border-radius:2px;background:var(--border);
-  transition:background .3s;
-}
-.sp-step.done{background:var(--accent);}
-.sp-step.active{background:var(--gold);}
-.sp-step-label{font-size:9px;color:var(--muted);letter-spacing:.1em;}
-
-/* recommendation chip */
-.rec-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:3px;
-  padding:14px 15px;margin:0 16px 8px;
-  display:flex;align-items:flex-start;gap:11px;
-  animation:up .25s ease both;box-shadow:var(--sh);
-}
-.rec-rank{
-  width:26px;height:26px;border-radius:50%;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Josefin Sans',sans-serif;font-size:11px;
-  background:var(--accent);color:rgba(200,184,128,.9);
-}
-.rec-body{flex:1;}
-.rec-name{font-family:'Josefin Sans',sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:3px;}
-.rec-why{font-size:10.5px;color:var(--text);line-height:1.55;}
-.rec-price{font-size:10px;color:var(--gold);margin-top:4px;}
-.rec-cta{
-  font-size:10px;color:var(--gold);font-weight:400;
-  padding:5px 10px;border:1px solid rgba(139,115,85,.3);border-radius:2px;
-  cursor:pointer;flex-shrink:0;align-self:center;white-space:nowrap;
-  transition:all .15s;
-}
-.rec-cta:hover{background:rgba(139,115,85,.08);}
 
 /* ══════════════════════════════════════
    DESKTOP RESPONSIVE  ≥769px
@@ -1282,104 +1115,6 @@ body{
     <span class="chat-fab-badge" id="chatFabBadge" style="display:none"></span>
   </div>
 
-  <!-- ══ STUDIO PANEL ══ -->
-  <div class="studio-panel" id="studioPanel">
-    <div class="sp-bar">
-      <div class="sp-back" onclick="closeStudio()">←</div>
-      <div class="sp-title-wrap">
-        <div class="sp-eye">Alloso · Feature</div>
-        <div class="sp-title">Studio</div>
-      </div>
-      <div class="sp-phase" id="spPhaseLabel">STEP 1</div>
-    </div>
-    <div class="sp-steps" id="spSteps">
-      <div class="sp-step active" id="st0"></div>
-      <div class="sp-step" id="st1"></div>
-      <div class="sp-step" id="st2"></div>
-      <div class="sp-step" id="st3"></div>
-    </div>
-    <div class="sp-body" id="spBody">
-
-      <!-- PHASE 0: Room Input -->
-      <div class="sp-phase-screen active" id="sp0">
-        <div style="padding:20px 16px 12px;">
-          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">01 — 공간 입력</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:300;color:var(--accent);letter-spacing:.06em;margin-bottom:6px;">거실 크기를 알려주세요</div>
-          <div style="font-size:11px;color:var(--muted);line-height:1.6;">정확하지 않아도 괜찮아요. 대략적인 크기로도 어울리는 소파를 찾아드려요.</div>
-        </div>
-        <div class="sp-input-group">
-          <div style="font-size:10px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;text-transform:uppercase;">거실 치수</div>
-          <div class="sp-input-row" style="margin-bottom:8px;">
-            <div class="sp-input-label">가로폭</div>
-            <input class="sp-input" id="roomW" type="number" placeholder="예: 420" min="200" max="1000">
-            <div class="sp-unit">cm</div>
-          </div>
-          <div class="sp-input-row">
-            <div class="sp-input-label">깊이</div>
-            <input class="sp-input" id="roomD" type="number" placeholder="예: 350" min="200" max="1000">
-            <div class="sp-unit">cm</div>
-          </div>
-        </div>
-        <div class="sp-input-group">
-          <div style="font-size:10px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;text-transform:uppercase;">또는 평수로 입력</div>
-          <div class="sp-input-row">
-            <div class="sp-input-label">거실 평수</div>
-            <input class="sp-input" id="roomPyung" type="number" placeholder="예: 15" min="5" max="60" oninput="pyungToSize()">
-            <div class="sp-unit">평</div>
-          </div>
-        </div>
-        <div style="padding:14px 16px 20px;">
-          <button onclick="goToSP(1)" style="width:100%;background:var(--accent);border:none;border-radius:2px;padding:14px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;" id="sp0Btn">공간 확인하기 →</button>
-        </div>
-      </div>
-
-      <!-- PHASE 1: Floor Plan Canvas -->
-      <div class="sp-phase-screen" id="sp1">
-        <div style="padding:16px 16px 8px;">
-          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">02 — 배치 확인</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:15px;font-weight:300;color:var(--accent);letter-spacing:.06em;">소파를 선택하고 배치해보세요</div>
-        </div>
-        <div class="canvas-wrap">
-          <canvas id="roomCanvas" width="330" height="240"></canvas>
-          <div style="display:flex;gap:14px;font-size:9.5px;color:var(--muted);">
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#DDD5C0;display:inline-block;border:1px solid #C4C2BC;"></span> 거실</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:rgba(42,72,112,.25);display:inline-block;border:1px solid rgba(42,72,112,.4);"></span> 소파</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:rgba(74,138,96,.15);display:inline-block;border:1px dashed rgba(74,138,96,.5);"></span> 동선</span>
-          </div>
-        </div>
-        <div class="sofa-grid" id="spSofaGrid"></div>
-        <div style="padding:0 16px 14px;" id="spSofaInfo"></div>
-      </div>
-
-      <!-- PHASE 2: AI Recommendation -->
-      <div class="sp-phase-screen" id="sp2">
-        <div style="padding:16px 16px 12px;">
-          <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">03 — AI 추천</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:15px;font-weight:300;color:var(--accent);letter-spacing:.06em;margin-bottom:4px;" id="recTitle">공간에 맞는 소파</div>
-          <div style="font-size:10.5px;color:var(--muted);" id="recSub"></div>
-        </div>
-        <div id="recList" style="padding:0 0 8px;"></div>
-      </div>
-
-      <!-- PHASE 3: Complete -->
-      <div class="sp-phase-screen" id="sp3">
-        <div style="padding:36px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <div style="font-size:28px;">✦</div>
-          <div style="font-family:'Josefin Sans',sans-serif;font-size:18px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);">Perfect Fit</div>
-          <div id="spFinalSummary" style="font-size:11px;color:var(--muted);line-height:1.75;text-align:center;max-width:260px;"></div>
-          <div style="width:100%;background:var(--border);height:1px;margin:8px 0;"></div>
-          <div style="font-size:10px;color:var(--muted);">다음 단계로 상담을 계속하거나<br>쇼룸에서 실물을 확인해보세요.</div>
-          <button onclick="startFlowFromStudio()" style="margin-top:6px;width:100%;background:var(--accent);border:none;border-radius:2px;padding:13px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.9);cursor:pointer;">소파 상담 시작하기 →</button>
-          <button onclick="openCare(); closeStudio();" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:2px;padding:11px;font-size:10.5px;color:var(--muted);cursor:pointer;letter-spacing:.08em;">Alloso Care 보기</button>
-        </div>
-      </div>
-
-    </div><!-- /sp-body -->
-    <div class="sp-cta" id="spCta">
-      <button class="sp-cta-sec" id="spPrev" onclick="spNav(-1)" style="display:none;">← 이전</button>
-      <button class="sp-cta-pri" id="spNext" onclick="spNav(1)">다음 →</button>
-    </div>
-  </div><!-- /studio-panel -->
 
 </div>
 
@@ -1481,7 +1216,7 @@ function renderWelcome(){
       </div>
       <div class="home-oq-divider">또는</div>
       <div class="home-oq-links">
-        <button class="home-oq-link" onclick="location.href='/alloso-studio.html'">3D 스튜디오 →</button>
+        <button class="home-oq-link" onclick="homeAsk('인테리어 이미지로 보여줘')">🎨 인테리어 시각화</button>
         <button class="home-oq-link" onclick="openFAQ()">자주 묻는 질문</button>
         <button class="home-oq-link" onclick="openCare()">소재 관리 가이드</button>
       </div>
@@ -1962,10 +1697,10 @@ const CHAT_SYSTEM = `당신은 Alloso 전용 AI 리빙 어드바이저 'ALMA'입
 
 [상담/예약]
 Q: 인테리어 상담은 어떻게 받을 수 있나요?
-A: 알로소 매장에서 3D 공간 플래너 상담을 받으실 수 있습니다. 네이버 플레이스에서 가까운 매장을 검색 후 예약하시면, 현장에서 전문 상담사의 공간 큐레이팅 상담을 받으실 수 있습니다.
+A: 두 가지 방법이 있어요. ① **온라인** — 이 챗봇에서 "사티 인테리어 보여줘"처럼 말씀하시면 실시간으로 거실 인테리어 이미지를 만들어 드려요. ② **오프라인** — 알로소 매장에서 전문 상담사의 공간 큐레이팅 상담을 받으실 수 있습니다. 네이버 플레이스에서 가까운 매장을 검색 후 예약하세요.
 
 Q: 방문 상담 시 어떤 준비가 필요할까요?
-A: ① 공간 사진 또는 도면 ② 원하는 소파 사이즈 (대략적인 길이) ③ 선호하는 디자인/컬러
+A: ① **공간 사진** (가능하면 정면·측면 각도) ② 원하는 소파 사이즈 (대략적인 길이) ③ 선호하는 디자인/컬러. 챗봇에서 미리 인테리어 이미지를 만들어 보고 방문하시면 상담이 더 빠르고 정확해져요.
 
 [제품정보]
 Q: 컬러 및 소재 선택이 가능한가요?
@@ -2073,40 +1808,61 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 시리즈명: 사티, 케렌시아, 보눔, 바드, 밀로, 엘머, 스탠, 테오, 비하르, 에브리데이, 홀리데이, 카포네, 카포네그랑, 레지나, 사티모션, 클렉트
 - 한 답변에 최대 3개까지. 단순 정보 확인 질문에는 넣지 마세요.
 - 예시: "서재 공간에는 엘머가 딱이에요.\n\n[PRODUCT:엘머]"
-- 3D 배치·스튜디오를 원하면 답변 끝에 [STUDIO_LINK]를 넣으세요.
 
 【🎨 인테리어 이미지 생성 — [IMAGINE:] 마커】
 
-당신은 사용자의 거실/공간에 알로소 소파+테이블을 합성한 실제 인테리어 이미지를 생성할 수 있어요. 사용자가 특정 시리즈를 공간에서 보고싶어 할 때 [IMAGINE:시리즈,컬러,공간] 마커를 답변에 포함하면 자동으로 이미지가 생성됩니다.
+당신은 사용자의 거실/공간에 알로소 소파+테이블을 합성한 실제 인테리어 이미지를 생성할 수 있어요. 사용자가 특정 시리즈를 공간에서 보고싶어 할 때 [IMAGINE:시리즈,소파컬러,공간,테이블컬러] 마커를 답변에 포함하면 자동으로 이미지가 생성됩니다.
 
-[마커 형식]
-- [IMAGINE:사티] — 자동 컬러 + 좁은 공간(기본)
-- [IMAGINE:사티,모빅] — 사티 모빅 컬러 지정
-- [IMAGINE:사티,,wide] — 자동 컬러 + 넓은 공간 (페일리 대신 레이어 테이블 매칭)
-- [IMAGINE:케렌시아,카멜,narrow] — 모든 옵션 지정
+[마커 형식 — 4-param]
+- [IMAGINE:사티] — 자동 컬러 + 좁은 공간 + 테이블 자동
+- [IMAGINE:사티,모빅] — 사티 모빅 + 좁은 공간 + 테이블 자동
+- [IMAGINE:사티,모빅,wide] — 사티 모빅 + 넓은 공간 + 테이블 자동
+- [IMAGINE:사티,모빅,narrow,버터옐로우] — 사티 모빅 + 좁은 공간 + 페일리 테이블 버터옐로우
+- [IMAGINE:사티,,narrow,버터옐로우] — 소파 컬러 자동 + 테이블만 버터옐로우 지정
+- 빈 슬롯은 콤마로 비워둠. 슬롯 순서: 시리즈, 소파컬러, 공간(narrow/wide), 테이블컬러
+
+[색상 자연어 → 알로소 컬러명 매핑 (반드시 변환)]
+사용자가 일반 색상 단어로 말하면 알로소 컬러명으로 정확히 변환해서 마커에 넣으세요:
+- "검은색 / 블랙 / 어두운" → 가죽: 뮤트블랙(드리밍헤비) / 머스키블랙(단테). 패브릭: 그레이아울(솔라)
+- "흰색 / 화이트 / 밝은" → 패브릭: 멜로우크림(노르딕) / 카놀리크림(부클레) / 클라우드(소프트프리모)
+- "베이지 / 크림 / 모래" → 클라우드, 카놀리크림, 샤모아, 카멜
+- "노란색 / 옐로우 / 머스타드" → 조이풀옐로우(가죽), 머스탱(패브릭), 미모사(KVADRAT). 페일리 테이블은 버터옐로우
+- "갈색 / 브라운 / 카멜" → 카멜(소프트프리모), 셔우드탠(르아테), 노체(드리밍헤비), 코스믹블루
+- "회색 / 그레이 / 차콜" → 템즈그레이(드리밍헤비), 그레이아울(솔라), 토프(단테)
+- "파란색 / 블루 / 네이비" → 블루피코크(드리밍헤비), 블루베이(아크레), 아이스블루(부클레), 코스믹블루(라리오)
+- "분홍 / 핑크 / 살구" → 올드로즈(드리밍헤비), 블러쉬(아크레), 핑크블리스, 뮤티드핑크
+- "녹색 / 그린 / 올리브" → 세이지(드리밍헤비), 카도마리노(드리밍헤비), 딥올리브(노르딕), 모스(릴레이트)
+- 사용자가 알로소 정식 컬러명을 직접 말하면 그대로 사용 (예: "모빅", "쉘", "노체")
+- 마커에 넣는 건 항상 알로소 컬러명. 응답 텍스트에선 자연스럽게 둘 다 쓸 수 있음 ("검은색 — 뮤트블랙으로 보여드릴게요")
+
+[케렌시아 형태 가이드 — 반드시 인지]
+케렌시아는 두 가지 형태:
+- 둥지형 (기본·디폴트) — 3인 모듈 라운지 패브릭. 둥지처럼 감싸안는 라운지 형태. 컬러: 쉘, 블러쉬, 샤모아, 블루베이, 번트베이지, 셀릭, 아이린, 뮤티드핑크, 옐로우크림 등
+- L자형 — 3모듈 라운지. 오토만 사이드 배치. 패브릭(샬바헤이즈, 올드로즈, 윌브리즈, 이브닝허쉬) 또는 가죽(노체, 클라우드, 파나마, 파우더, 피오니)
+- 사용자가 "케렌시아" 만 말하면 → 둥지형이 기본. [IMAGINE:케렌시아,쉘] 또는 [IMAGINE:케렌시아]
+- 사용자가 "케렌시아 가죽" 또는 "L자로" 라고 하면 → "둥지형 / L자형 중 어떤 형태가 좋으세요?" 한 번 확인 후 마커
+- "동그란 / 둥지 / 라운지" 키워드 → 둥지형 확정, [IMAGINE:케렌시아,컬러]
 
 [자연어 트리거 — 다양한 변형 모두 인식]
 사용자가 다음과 같이 말하면 이미지 생성 의도로 판단:
 - "사티 인테리어 보여줘" / "사티 공간 어떻게 보여?" / "거실에 놓으면 어떨까?"
-- "케렌시아 모빅으로 꾸며줘" / "케렌시아 비주얼 만들어줘"
+- "케렌시아 쉘 컬러로 꾸며줘" / "케렌시아 비주얼 만들어줘"
 - "보눔 인테리어 시뮬레이션" / "사티 어울리는지 보고싶어"
-- "넓은 거실에 카포네 어울려?" (→ space=wide)
-- "작은 공간에 바드 가능해?" (→ space=narrow)
-- "이미지 생성" / "사진처럼 보여줘" / "어떤 분위기인지 시각화"
-- 컬러+소파 조합: "사티 모빅으로 보여줘" / "케렌시아 카멜 톤"
-이런 표현 모두 동일하게 [IMAGINE:] 마커로 처리합니다.
+- "검은색 레더 사티에 페일리 노란색 매칭" → [IMAGINE:사티,뮤트블랙,narrow,버터옐로우]
+- "넓은 거실에 카포네 어울려?" → space=wide
+- "작은 공간에 바드 가능해?" → space=narrow
+- "이미지 생성" / "사진처럼" / "시각화"
 
 [공간 키워드 매핑]
-- "넓은/큰/대형/오픈된/거실 평수가 넓은" → spaceSize=wide → 레이어 테이블 페어
-- "좁은/작은/아담한/소형/원룸" → spaceSize=narrow (기본) → 페일리/바인 테이블 페어
+- "넓은 / 큰 / 대형 / 오픈된 / 평수가 넓은 / 40평" → wide → 레이어 테이블 페어
+- "좁은 / 작은 / 아담한 / 소형 / 원룸 / 20평 이하" → narrow (기본) → 페일리·바인 테이블 페어
 - 명시 없으면 narrow 기본
 
 [프로액티브 제안 (먼저 권유)]
-사용자가 이미지 생성 서비스를 모를 가능성이 높아요. 다음 상황에서 자연스럽게 먼저 제안하세요:
+사용자가 이미지 생성 서비스를 모를 가능성이 높아요. 다음 상황에서 자연스럽게 먼저 제안:
 - 시리즈 추천 직후 — "혹시 거실에 놓이면 어떻게 보일지 궁금하시면 말씀해주세요. 바로 인테리어 이미지로 만들어드릴 수 있어요."
 - 컬러 상담 중 — "이 컬러가 실제 공간에서 어떻게 보일지 시각화해서 보여드릴까요?"
 - 비교 상담 — "두 시리즈가 거실에 들어가는 모습을 각각 만들어볼 수도 있어요."
-- 단, 매 답변마다 제안 X. 대화 흐름상 자연스러울 때만 1~2번.
 
 [답변 톤]
 - 이미지 생성 시 15-30초 정도 걸린다고 미리 안내. 예: "생성에 잠시(약 20초) 시간이 걸려요."
@@ -2116,8 +1872,14 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 사용자: "사티 인테리어 보여줘"
 → "사티의 모듈 구성이 거실에서 자연스럽게 풀리는 모습을 만들어볼게요. 잠시만 기다려주세요 (약 20초).\n\n[IMAGINE:사티]"
 
-사용자: "케렌시아 카멜로 거실 꾸며줘"
-→ "사선 디자인이 살아나는 케렌시아를 카멜 톤으로 보여드릴게요. 사이드에 케렌시아 테이블도 함께 매칭됩니다.\n\n[IMAGINE:케렌시아,카멜]"
+사용자: "검은색 레더 사티, 페일리는 노란색"
+→ "사티를 뮤트블랙(가죽 드리밍헤비)으로, 페일리 테이블은 버터옐로우 톤으로 매칭해드릴게요.\n\n[IMAGINE:사티,뮤트블랙,narrow,버터옐로우]"
+
+사용자: "케렌시아 보여줘"
+→ "케렌시아 둥지형(3인 모듈 라운지)을 자연스러운 톤으로 보여드릴게요.\n\n[IMAGINE:케렌시아]"
+
+사용자: "케렌시아 가죽으로 거실 인테리어"
+→ "케렌시아는 둥지형(패브릭)과 L자형(가죽 또는 패브릭) 두 가지 형태가 있어요. 가죽은 L자형으로 진행할까요? 컬러는 노체·파나마·파우더 중 선호하시는 게 있을까요?"
 
 사용자: "넓은 거실인데 보눔 어울려?"
 → "넓은 공간에서는 보눔의 모듈감이 더 살아나요. 풀베이스(다리 미노출)와 오픈베이스(다리 노출) 중 어느 쪽이 좋으세요? 일단 풀베이스로 보여드릴게요.\n\n[IMAGINE:보눔 풀베이스,,wide]"
@@ -2282,37 +2044,35 @@ function formatMsg(text){
       </div>
     </a>`;
   });
-  // [IMAGINE:시리즈,컬러,공간] → 인테리어 이미지 자동 생성 (async)
+  // [IMAGINE:시리즈,소파컬러,공간,테이블컬러] → 인테리어 이미지 자동 생성 (async)
   html = html.replace(/\[IMAGINE:([^\]]+)\]/g, function(match, params){
     const parts = params.split(',').map(p => p.trim());
     const series = parts[0] || '';
     const color = parts[1] || '';
     const space = (parts[2] || 'narrow').toLowerCase();
+    const tableColor = parts[3] || '';
     if (!series) return '';
     const id = 'imagine-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
-    setTimeout(function(){ generateImagineImage(id, series, color, space); }, 50);
-    return `<div class="imagine-box" id="${id}" data-series="${escHtml(series)}" data-color="${escHtml(color)}" data-space="${escHtml(space)}">
+    setTimeout(function(){ generateImagineImage(id, series, color, space, tableColor); }, 50);
+    return `<div class="imagine-box" id="${id}" data-series="${escHtml(series)}" data-color="${escHtml(color)}" data-space="${escHtml(space)}" data-table-color="${escHtml(tableColor)}">
       <div class="imagine-loading">
         <div class="imagine-spinner"></div>
         <div class="imagine-msg">${escHtml(series)} 인테리어 생성 중<span class="sub">약 20초 정도 걸려요</span></div>
       </div>
     </div>`;
   });
-  // [STUDIO_LINK] → 3D 스튜디오 딥링크 버튼
-  html = html.replace(/\[STUDIO_LINK\]/g, function(){
-    return `<a class="studio-deeplink" href="${buildStudioDeeplink()}" target="_blank">3D 스튜디오 열기 →</a>`;
-  });
   return html;
 }
 
 // 인테리어 이미지 자동 생성 (imagine.js fusion 호출)
-async function generateImagineImage(id, series, color, space){
+async function generateImagineImage(id, series, color, space, tableColor){
   const el = document.getElementById(id);
   if (!el) return;
   try {
     const payload = { mode: 'fusion', series };
     if (color) payload.color = color;
     if (space) payload.spaceSize = space;
+    if (tableColor) payload.tableColor = tableColor;
 
     const res = await fetch('/api/imagine', {
       method: 'POST',
@@ -2339,9 +2099,11 @@ async function generateImagineImage(id, series, color, space){
 
     const resolvedColor = data.color || '';
     const tableName = data.tablePaired || '';
+    const tableColorUsed = data.tableColor || '';
     const provider = data.provider || '';
     const metaLeft = [data.series, resolvedColor].filter(Boolean).join(' · ');
-    const metaRight = [tableName ? ('+ ' + tableName) : '', provider ? `<span class="tag">${provider}</span>` : ''].filter(Boolean).join(' &nbsp;');
+    const tableMeta = tableName + (tableColorUsed ? ` (${tableColorUsed})` : '');
+    const metaRight = [tableMeta ? ('+ ' + tableMeta) : '', provider ? `<span class="tag">${provider}</span>` : ''].filter(Boolean).join(' &nbsp;');
 
     el.innerHTML = `
       <img class="imagine-result" src="${data.image}" alt="${escHtml(data.series)} 인테리어">
@@ -2351,20 +2113,8 @@ async function generateImagineImage(id, series, color, space){
       </div>`;
     scrollMsgs();
   } catch (e) {
-    el.innerHTML = `<div class="imagine-error">이미지 생성에 실패했어요 (${escHtml(e.message.slice(0, 80))}).<br><span class="retry" onclick="generateImagineImage('${id}','${escHtml(series).replace(/'/g,'')}','${escHtml(color).replace(/'/g,'')}','${escHtml(space).replace(/'/g,'')}')">다시 시도</span></div>`;
+    el.innerHTML = `<div class="imagine-error">이미지 생성에 실패했어요 (${escHtml(e.message.slice(0, 80))}).<br><span class="retry" onclick="generateImagineImage('${id}','${escHtml(series).replace(/'/g,'')}','${escHtml(color).replace(/'/g,'')}','${escHtml(space).replace(/'/g,'')}','${escHtml(tableColor || '').replace(/'/g,'')}')">다시 시도</span></div>`;
   }
-}
-
-function buildStudioDeeplink(){
-  let url = '/alloso-studio.html';
-  const params = [];
-  const lastMsgs = chatHistory.slice(-6).map(m=>m.content).join(' ');
-  const seriesNames = ['사티','케렌시아','보눔','바드','밀로','엘머','스탠','테오','비하르','에브리데이','홀리데이','카포네','레지나','클렉트'];
-  for(const s of seriesNames){
-    if(lastMsgs.includes(s)){params.push('sofa='+encodeURIComponent(s));break;}
-  }
-  if(params.length) url += '?' + params.join('&');
-  return url;
 }
 
 function escHtml(s){
@@ -2424,7 +2174,7 @@ async function sendMessage(text){
         reply = data.reply;
         usedAPI = true;
         // API 응답 후 기본 후속 칩
-        followChips = ['추천 소파 알려줘','3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어'];
+        followChips = ['추천 소파 알려줘','🎨 인테리어 이미지 만들어줘','매장 상담 예약하고 싶어'];
       }
     }
   } catch(e){
@@ -2480,7 +2230,7 @@ function getDemoReply(text){
 
   // ── 인사 ──
   if(t.includes('안녕')||t.includes('하이')||t.includes('hello')||t.includes('hi'))
-    return R('안녕하세요! Alloso 인테리어 어드바이저예요. 소파에 대해 무엇이든 물어보세요.',['추천 소파 알려줘','배송 기간이 궁금해요','3D 스튜디오에서 배치해볼래요']);
+    return R('안녕하세요! Alloso 인테리어 어드바이저예요. 소파에 대해 무엇이든 물어보세요.',['추천 소파 알려줘','배송 기간이 궁금해요','🎨 인테리어 이미지 만들어줘']);
   if(t.includes('감사')||t.includes('고마'))
     return R('도움이 되었다면 기뻐요! 추가 질문이 있으시면 언제든 편하게 물어보세요.',['매장 상담 예약하고 싶어']);
 
@@ -2488,7 +2238,7 @@ function getDemoReply(text){
 
   // ── 아이·자녀 + 소재 ──
   if((t.includes('아이')||t.includes('아기')||t.includes('자녀')||t.includes('어린이')||t.includes('유아')||t.includes('육아'))&&(t.includes('추천')||t.includes('패브릭')||t.includes('소재')||t.includes('뭐가')||t.includes('어떤')))
-    return R('아이가 있는 가정이라면 **이지 케어 패브릭** 또는 **노르딕(Aquaclean 워터프루프)**이 최적이에요.\n\n· 음료·음식 흘려도 **물만으로 세척** 가능\n· 오코텍스 CLASS 1 인증으로 **유아 안전** 보장\n· 어두운 색상(차콜·네이비)보다 **중간 톤(샌드·웜그레이)**이 오염이 덜 눈에 띄어요\n\n시리즈는 **홀리데이**(패밀리·포근)나 **카포네그랑**(내구성·대가족)을 추천드려요.',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요','매장에서 직접 보고 싶어']);
+    return R('아이가 있는 가정이라면 **이지 케어 패브릭** 또는 **노르딕(Aquaclean 워터프루프)**이 최적이에요.\n\n· 음료·음식 흘려도 **물만으로 세척** 가능\n· 오코텍스 CLASS 1 인증으로 **유아 안전** 보장\n· 어두운 색상(차콜·네이비)보다 **중간 톤(샌드·웜그레이)**이 오염이 덜 눈에 띄어요\n\n시리즈는 **홀리데이**(패밀리·포근)나 **카포네그랑**(내구성·대가족)을 추천드려요.',['소재 샘플 받고 싶어','🎨 인테리어 이미지 만들어줘','매장에서 직접 보고 싶어']);
 
   // ── 고양이/강아지 + 발톱/내구성/스크래치 ──
   if((t.includes('고양이')||t.includes('강아지')||t.includes('발톱')||t.includes('스크래치'))&&(t.includes('내구')||t.includes('색상')||t.includes('추천')||t.includes('어떤')||t.includes('좋')||t.includes('컬러')))
@@ -2496,27 +2246,27 @@ function getDemoReply(text){
 
   // ── 3+1 vs 4인 / 조합 고민 ──
   if((t.includes('3인')||t.includes('3+1')||t.includes('3인+1인'))&&(t.includes('4인')||t.includes('고민')||t.includes('기준')||t.includes('vs')||t.includes('어떤')))
-    return R('**3인+1인 조합** vs **4인 일체형**, 기준을 정리해 드릴게요.\n\n**3인+1인 추천 상황:**\n· 거실 레이아웃을 자주 바꾸고 싶을 때\n· 1인 소파를 서재/침실로 이동할 가능성이 있을 때\n· 이사가 잦은 경우 (분리 이동 편리)\n\n**4인 추천 상황:**\n· 넓은 L자형 배치가 필요할 때\n· 가족이 함께 눕는 용도가 많을 때\n· 통일된 디자인 라인을 원할 때\n\n공간 크기도 중요해요 — **Alloso Studio**에서 실제 배치를 미리 확인해 보세요.',['3D 스튜디오에서 배치해볼래요','모듈 소파 추천해줘','매장 상담 예약하고 싶어']);
+    return R('**3인+1인 조합** vs **4인 일체형**, 기준을 정리해 드릴게요.\n\n**3인+1인 추천 상황:**\n· 거실 레이아웃을 자주 바꾸고 싶을 때\n· 1인 소파를 서재/침실로 이동할 가능성이 있을 때\n· 이사가 잦은 경우 (분리 이동 편리)\n\n**4인 추천 상황:**\n· 넓은 L자형 배치가 필요할 때\n· 가족이 함께 눕는 용도가 많을 때\n· 통일된 디자인 라인을 원할 때\n\n공간 크기도 중요해요 — 원하시면 **인테리어 이미지로 만들어** 직접 보여드릴 수 있어요. "OO 인테리어 보여줘"라고 말씀해 주세요.',['🎨 인테리어 이미지 만들어줘','모듈 소파 추천해줘','매장 상담 예약하고 싶어']);
 
   // ── 소파+식탁/공간 조합 ──
   if((t.includes('식탁')||t.includes('테이블')||t.includes('같이')||t.includes('함께'))&&(t.includes('소파')||t.includes('배치')||t.includes('놓')))
-    return R('소파와 식탁을 같은 공간에 배치할 때는 **동선 확보**가 핵심이에요.\n\n· 소파 뒤~식탁 사이 **최소 80cm** 확보 (의자 빼는 공간)\n· 15평 이하는 2인 소파 + 4인 식탁이 적합\n· 20평 이상이면 3인 소파 + 6인 식탁도 가능\n\n**Alloso Studio**에서 실제 공간에 배치해 보시는 걸 추천드려요.',['3D 스튜디오에서 배치해볼래요','사이즈 기준 알려줘']);
+    return R('소파와 식탁을 같은 공간에 배치할 때는 **동선 확보**가 핵심이에요.\n\n· 소파 뒤~식탁 사이 **최소 80cm** 확보 (의자 빼는 공간)\n· 15평 이하는 2인 소파 + 4인 식탁이 적합\n· 20평 이상이면 3인 소파 + 6인 식탁도 가능\n\n원하시면 거실에 놓인 모습을 **인테리어 이미지로 만들어** 드릴 수 있어요.',['🎨 인테리어 이미지 만들어줘','사이즈 기준 알려줘']);
 
   // ── 좁은 공간 / 원룸 / 작은 거실 ──
   if(t.includes('좁')||t.includes('작은 거실')||t.includes('원룸')||t.includes('소형'))
-    return R('작은 공간에는 **컴팩트한 시리즈**가 좋아요.\n\n· **사티 1인** (W85cm) — 원룸·서재에 딱\n· **바드** (W180cm~) — 스칸디 감성, 슬림한 깊이 88cm\n· **사티 2인** (W220cm) — 미니멀하지만 충분한 좌석\n\n소파 앞 통행 공간 **최소 45cm**만 확보하면 돼요.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
+    return R('작은 공간에는 **컴팩트한 시리즈**가 좋아요.\n\n· **사티 1인** (W85cm) — 원룸·서재에 딱\n· **바드** (W180cm~) — 스칸디 감성, 슬림한 깊이 88cm\n· **사티 2인** (W220cm) — 미니멀하지만 충분한 좌석\n\n소파 앞 통행 공간 **최소 45cm**만 확보하면 돼요.',['🎨 인테리어 이미지 만들어줘','가격대 알려줘']);
 
   // ── 넓은 공간 / 대형 ──
   if(t.includes('넓')||t.includes('대형')||t.includes('큰 거실')||t.includes('30평'))
-    return R('넓은 거실에는 존재감 있는 시리즈가 어울려요.\n\n· **스탠** — 대형 모듈 풀세트 W478cm, 압도적 스케일\n· **카포네그랑** — 코너 배치로 L자형 구성\n· **케렌시아** — 3.5인 로우형으로 고급스러운 라운지\n\n공간 비율 60~70% 이하로 배치하면 여유로워 보여요.',['3D 스튜디오에서 배치해볼래요','매장 상담 예약하고 싶어']);
+    return R('넓은 거실에는 존재감 있는 시리즈가 어울려요.\n\n· **스탠** — 대형 모듈 풀세트 W478cm, 압도적 스케일\n· **카포네그랑** — 코너 배치로 L자형 구성\n· **케렌시아** — 3.5인 로우형으로 고급스러운 라운지\n\n공간 비율 60~70% 이하로 배치하면 여유로워 보여요.',['🎨 인테리어 이미지 만들어줘','매장 상담 예약하고 싶어']);
 
   // ── 신혼 / 커플 ──
   if(t.includes('신혼')||t.includes('커플')||t.includes('둘이'))
-    return R('신혼·커플에게 추천드려요.\n\n· **사티 2인** (W220cm) — 모던·미니멀, 첫 소파로 인기\n· **보눔OP 2인** (W232cm) — 오픈암으로 개방감\n· **바드 2인** (W190cm) — 북유럽 감성, 가성비\n\n처음 소파를 구입하시면 **소재 샘플**을 먼저 받아보시는 걸 추천해요.',['소재 샘플 받고 싶어','3D 스튜디오에서 배치해볼래요']);
+    return R('신혼·커플에게 추천드려요.\n\n· **사티 2인** (W220cm) — 모던·미니멀, 첫 소파로 인기\n· **보눔OP 2인** (W232cm) — 오픈암으로 개방감\n· **바드 2인** (W190cm) — 북유럽 감성, 가성비\n\n처음 소파를 구입하시면 **소재 샘플**을 먼저 받아보시는 걸 추천해요.',['소재 샘플 받고 싶어','🎨 인테리어 이미지 만들어줘']);
 
   // ── 눕기 / 낮잠 ──
   if(t.includes('눕')||t.includes('낮잠')||t.includes('누워'))
-    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n\n매장에서 직접 누워보시는 걸 강력 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('눕기·낮잠 용도라면 **깊이(D)가 깊은 로우형** 소파가 좋아요.\n\n· **케렌시아** (D110cm) — 럭셔리 로우, 몸이 깊이 빠지는 느낌\n· **비하르** (D102cm) — 내추럴 로우, 넓은 좌판\n· **사티모션** — 전동 리클라이너로 레그레스트 펼침\n\n매장에서 직접 누워보시는 걸 강력 추천드려요.',['매장 어디 있어?','🎨 인테리어 이미지 만들어줘']);
 
   // ── 예산 / 가성비 ──
   if(t.includes('가성비')||t.includes('저렴')||t.includes('싼')||t.includes('예산'))
@@ -2532,12 +2282,12 @@ function getDemoReply(text){
 
   // ── 기존 인테리어 매칭 ──
   if(t.includes('인테리어')||t.includes('분위기')||t.includes('스타일'))
-    return R('인테리어 스타일별 소파 추천이에요.\n\n· **모던·미니멀** → 사티, 보눔OP\n· **클래식·고급** → 레지나\n· **내추럴·북유럽** → 바드, 카포네, 비하르\n· **럭셔리·로우** → 케렌시아, 스탠\n· **캐주얼·패밀리** → 에브리데이, 홀리데이\n\n**Alloso Studio**에서 바닥·벽 색상과 함께 확인해 보세요.',['3D 스튜디오에서 배치해볼래요','소재 샘플 받고 싶어']);
+    return R('인테리어 스타일별 소파 추천이에요.\n\n· **모던·미니멀** → 사티, 보눔OP\n· **클래식·고급** → 레지나\n· **내추럴·북유럽** → 바드, 카포네, 비하르\n· **럭셔리·로우** → 케렌시아, 스탠\n· **캐주얼·패밀리** → 에브리데이, 홀리데이\n\n원하시면 **인테리어 이미지**로 분위기를 미리 확인해 보실 수 있어요.',['🎨 인테리어 이미지 만들어줘','소재 샘플 받고 싶어']);
 
 
   // ── 추천 (신규) ──
   if(t.includes('추천'))
-    return R('고객님의 공간과 생활 패턴에 따라 추천이 달라져요.\n\n· **1인 가구** → 사티 1인, 바드\n· **패밀리** → 카포네그랑, 홀리데이\n· **반려동물** → 루소 패브릭 + 카포네\n· **럭셔리 로우** → 케렌시아, 비하르\n\n**Alloso Studio**에서 공간 사이즈를 입력하면 AI가 맞춤 추천해 드려요.',['3D 스튜디오에서 배치해볼래요','반려동물 추천 소재는?','가격대가 궁금해요']);
+    return R('고객님의 공간과 생활 패턴에 따라 추천이 달라져요.\n\n· **1인 가구** → 사티 1인, 바드\n· **패밀리** → 카포네그랑, 홀리데이\n· **반려동물** → 루소 패브릭 + 카포네\n· **럭셔리 로우** → 케렌시아, 비하르\n\n원하시면 **인테리어 이미지**로 분위기까지 미리 보여드릴 수 있어요.',['🎨 인테리어 이미지 만들어줘','반려동물 추천 소재는?','가격대가 궁금해요']);
 
   // ── 비교 (신규) ──
   if(t.includes('비교'))
@@ -2547,7 +2297,7 @@ function getDemoReply(text){
   if(t.includes('상담 예약')||t.includes('인테리어 상담')||t.includes('상담 받'))
     return R('알로소 매장에서 **3D 공간 플래너 상담**을 받으실 수 있어요. 네이버 플레이스에서 가까운 매장을 검색 후 예약하시면, 현장에서 전문 상담사의 공간 큐레이팅 상담을 받으실 수 있습니다.',['매장 위치 알려줘','방문 시 뭘 준비해야 해?']);
   if(t.includes('방문 상담')||t.includes('준비'))
-    return R('방문 상담 시 아래 정보를 준비해 주시면 좋아요.\n\n① **공간 사진 또는 도면**\n② 원하는 소파 사이즈 (대략적인 길이)\n③ 선호하는 디자인/컬러\n\n현장에서 보다 구체적인 제안을 도와드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('방문 상담 시 아래 정보를 준비해 주시면 좋아요.\n\n① **공간 사진 또는 도면**\n② 원하는 소파 사이즈 (대략적인 길이)\n③ 선호하는 디자인/컬러\n\n현장에서 보다 구체적인 제안을 도와드려요.',['매장 어디 있어?','🎨 인테리어 이미지 만들어줘']);
 
   // ── 배송·납기 ──
   if(t.includes('배송 기간')||t.includes('배송 소요')||t.includes('납기')||t.includes('얼마나 걸'))
@@ -2585,7 +2335,7 @@ function getDemoReply(text){
 
   // ── 반려동물 ──
   if(t.includes('반려동물')||t.includes('고양이')||t.includes('강아지')||t.includes('펫')||t.includes('애완'))
-    return R('반려동물 가정엔 직조감이 작은 **루소 패브릭**을 추천해요. **노르딕 패브릭**(Aquaclean 워터프루프)도 좋은 선택이에요.',['소재 샘플 받을 수 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('반려동물 가정엔 직조감이 작은 **루소 패브릭**을 추천해요. **노르딕 패브릭**(Aquaclean 워터프루프)도 좋은 선택이에요.',['소재 샘플 받을 수 있어?','🎨 인테리어 이미지 만들어줘']);
 
   // ── 가죽 vs 패브릭 ──
   if((t.includes('가죽')||t.includes('레더'))&&(t.includes('패브릭')||t.includes('원단')||t.includes('비교')||t.includes('차이')||t.includes('vs')||t.includes('뭐가')))
@@ -2613,11 +2363,11 @@ function getDemoReply(text){
 
   // ── 가격 ──
   if(t.includes('가격')||t.includes('얼마'))
-    return R('소비자가 기준 에센셜 패브릭 **50만원대~**, 하이엔드 레더 대형은 **2,000만원대**까지. 정확한 견적은 쇼룸에서 안내드려요.',['할인이나 프로모션은?','결제 방법은?','3D 스튜디오에서 배치해볼래요']);
+    return R('소비자가 기준 에센셜 패브릭 **50만원대~**, 하이엔드 레더 대형은 **2,000만원대**까지. 정확한 견적은 쇼룸에서 안내드려요.',['할인이나 프로모션은?','결제 방법은?','🎨 인테리어 이미지 만들어줘']);
 
   // ── 좌형/우형 (신규) ──
   if(t.includes('좌형')||t.includes('우형')||t.includes('좌/우')||t.includes('방향'))
-    return R('소파 좌형과 우형은 **정면에서 바라보았을 때** 오픈 부분의 위치예요.\n· **좌형**: 오픈 부분이 왼쪽\n· **우형**: 오픈 부분이 오른쪽\n\n공간 구조에 맞게 선택해 주세요.',['매장에서 직접 보고 싶어','3D 스튜디오에서 배치해볼래요']);
+    return R('소파 좌형과 우형은 **정면에서 바라보았을 때** 오픈 부분의 위치예요.\n· **좌형**: 오픈 부분이 왼쪽\n· **우형**: 오픈 부분이 오른쪽\n\n공간 구조에 맞게 선택해 주세요.',['매장에서 직접 보고 싶어','🎨 인테리어 이미지 만들어줘']);
 
   // ── 조립 (신규) ──
   if(t.includes('조립')||t.includes('분리')||t.includes('분해'))
@@ -2633,7 +2383,7 @@ function getDemoReply(text){
 
   // ── 사이즈·높이 (신규) ──
   if(t.includes('사이즈')||t.includes('높이'))
-    return R('소파 폭은 거실 폭의 **60~70%** 이하가 이상적이에요. 소파 앞 통행 공간은 최소 **45cm** 확보해 주세요.\n\n**Alloso Studio**에서 정확한 배치 시뮬레이션이 가능해요.',['3D 스튜디오에서 배치해볼래요','추천 소파 알려줘']);
+    return R('소파 폭은 거실 폭의 **60~70%** 이하가 이상적이에요. 소파 앞 통행 공간은 최소 **45cm** 확보해 주세요.\n\n거실에 놓이는 모습이 궁금하시면 **인테리어 이미지**로 만들어 드려요.',['🎨 인테리어 이미지 만들어줘','추천 소파 알려줘']);
 
   // ── 전시 (신규) ──
   if(t.includes('전시')||t.includes('실물')||t.includes('직접 보'))
@@ -2649,19 +2399,19 @@ function getDemoReply(text){
 
   // ── 소파 시리즈 ──
   if(t.includes('사티')&&(t.includes('레지나')||t.includes('비교')||t.includes('차이')))
-    return R('**사티**는 모던 미니멀 감성의 날렵한 프레임. **레지나**는 아치형 다리와 클래식한 실루엣으로 정제된 고급스러움이 강점이에요.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
+    return R('**사티**는 모던 미니멀 감성의 날렵한 프레임. **레지나**는 아치형 다리와 클래식한 실루엣으로 정제된 고급스러움이 강점이에요.',['🎨 인테리어 이미지 만들어줘','가격대 알려줘']);
   if(t.includes('엘머'))
-    return R('**엘머**는 패밀리 컴포트형 소파로, 마마(2인)와 파파(2.5인) 사이즈가 있어요.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
+    return R('**엘머**는 패밀리 컴포트형 소파로, 마마(2인)와 파파(2.5인) 사이즈가 있어요.',['🎨 인테리어 이미지 만들어줘','가격대 알려줘']);
   if(t.includes('밀로'))
-    return R('**밀로**는 프리미엄 모듈형 소파로, 1인과 와이드 1인 사이즈. 오토만과 조합하면 다양한 레이아웃 가능.',['3D 스튜디오에서 배치해볼래요','모듈 소파 비교해줘']);
+    return R('**밀로**는 프리미엄 모듈형 소파로, 1인과 와이드 1인 사이즈. 오토만과 조합하면 다양한 레이아웃 가능.',['🎨 인테리어 이미지 만들어줘','모듈 소파 비교해줘']);
   if(t.includes('케렌시아'))
-    return R('**케렌시아**는 로우 모듈형 소파로, 사선 디자인이 특징. 가죽 마감재도 선택 가능(오프라인 매장 전용). 소비자가 110만원대.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('**케렌시아**는 로우 모듈형 소파로, 사선 디자인이 특징. 가죽 마감재도 선택 가능(오프라인 매장 전용). 소비자가 110만원대.',['매장 어디 있어?','🎨 인테리어 이미지 만들어줘']);
   if(t.includes('딱딱')||t.includes('하드'))
-    return R('탄성감이 있고 하부를 잡아주는 소파를 찾으시면 **케렌시아**와 **카포네** 시리즈를 추천드려요.',['매장 어디 있어?','3D 스튜디오에서 배치해볼래요']);
+    return R('탄성감이 있고 하부를 잡아주는 소파를 찾으시면 **케렌시아**와 **카포네** 시리즈를 추천드려요.',['매장 어디 있어?','🎨 인테리어 이미지 만들어줘']);
   if(t.includes('리클라이너')||t.includes('전동'))
-    return R('**사티모션**이 전동 리클라이너 소파예요. 등받이·레그레스트 자유 조절. 소비자가 **249만원대**.',['3D 스튜디오에서 배치해볼래요','가격대 알려줘']);
+    return R('**사티모션**이 전동 리클라이너 소파예요. 등받이·레그레스트 자유 조절. 소비자가 **249만원대**.',['🎨 인테리어 이미지 만들어줘','가격대 알려줘']);
   if(t.includes('모듈'))
-    return R('모듈형 소파는 **보눔FU, 케렌시아, 비하르, 클렉트** 등이 있어요. 공간에 맞게 섹션을 자유 조합 가능.',['3D 스튜디오에서 배치해볼래요','이사할 때 유리한 소파는?']);
+    return R('모듈형 소파는 **보눔FU, 케렌시아, 비하르, 클렉트** 등이 있어요. 공간에 맞게 섹션을 자유 조합 가능.',['🎨 인테리어 이미지 만들어줘','이사할 때 유리한 소파는?']);
   if(t.includes('로봇청소기')||t.includes('청소기'))
     return R('로봇청소기 15cm 기준, **카포네·레지나·베카·보눔 오픈 베이스·클렉트·밀로·스탠** 총 7개 시리즈 사용 가능.',[]);
   if(t.includes('냄새'))
@@ -2691,359 +2441,20 @@ function getDemoReply(text){
   if(t.includes('퍼시스')||t.includes('alloso')||t.includes('알로소'))
     return R('Alloso는 **퍼시스그룹**의 하이엔드 소파 브랜드예요. 일룸·시디즈·퍼시스 등 국내 대표 가구 브랜드를 보유한 그룹이에요.',['추천 소파 알려줘','매장 어디 있어?']);
 
-  // ── 3D 스튜디오 연결 (딥링크) ──
-  if(t.includes('스튜디오')||t.includes('3d')||t.includes('배치'))
-    return R('**Alloso Studio**에서 소파를 3D로 배치해 볼 수 있어요.\n바닥·벽 색상, 마감재 시뮬레이션까지 가능해요.\n\n[STUDIO_LINK]',['추천 소파 알려줘','매장 상담 예약하고 싶어']);
+  // ── 인테리어 이미지 생성 트리거 ──
+  if(t.includes('스튜디오')||t.includes('3d')||t.includes('배치')||t.includes('시뮬레이션')||t.includes('비주얼')||t.includes('이미지'))
+    return R('🎨 **인테리어 이미지 생성** 기능이 있어요.\n원하는 시리즈와 컬러를 말씀해 주시면, 실제 거실에 놓인 모습을 약 20초 만에 만들어 드려요.\n\n예: "사티 인테리어 보여줘", "케렌시아 모빅으로 꾸며줘", "넓은 거실에 보눔 어울려?"',['🎨 사티 인테리어 보여줘','추천 소파 알려줘','매장 상담 예약하고 싶어']);
 
   // ── fallback (고도화) ──
   const origText = text.trim();
   if(origText.length > 15){
     // 긴 질문인데 매칭 안 됨 → 상담 안내
-    return R('좋은 질문이에요! 말씀하신 내용은 고객님의 상황에 따라 답변이 달라질 수 있어서, **전문 상담사 상담**을 추천드려요.\n\n· 📞 고객센터 **1577-1641** (평일 09:30~17:30)\n· 🏛️ 가까운 **매장 방문 상담** 예약\n· 💻 **Alloso Studio**에서 먼저 공간 시뮬레이션\n\n아래 자주 묻는 질문도 확인해 보세요.',['추천 소파 알려줘','매장 상담 예약하고 싶어','3D 스튜디오에서 배치해볼래요']);
+    return R('좋은 질문이에요! 말씀하신 내용은 고객님의 상황에 따라 답변이 달라질 수 있어서, **전문 상담사 상담**을 추천드려요.\n\n· 📞 고객센터 **1577-1641** (평일 09:30~17:30)\n· 🏛️ 가까운 **매장 방문 상담** 예약\n· 🎨 챗봇에서 **인테리어 이미지** 미리 만들어 보기\n\n아래 자주 묻는 질문도 확인해 보세요.',['추천 소파 알려줘','매장 상담 예약하고 싶어','🎨 인테리어 이미지 만들어줘']);
   }
-  return R('무엇이든 편하게 물어보세요. 아래 질문을 눌러보셔도 좋아요.\n\n소파 추천 · 소재 비교 · 배송/취소 · 매장 위치 · 가격 · AS 등\n다양한 주제에 대해 안내해 드릴 수 있어요.',['추천 소파 알려줘','배송 기간이 궁금해요','할인이나 프로모션 있어?','3D 스튜디오에서 배치해볼래요']);
+  return R('무엇이든 편하게 물어보세요. 아래 질문을 눌러보셔도 좋아요.\n\n소파 추천 · 소재 비교 · 배송/취소 · 매장 위치 · 가격 · AS 등\n다양한 주제에 대해 안내해 드릴 수 있어요.',['추천 소파 알려줘','배송 기간이 궁금해요','할인이나 프로모션 있어?','🎨 인테리어 이미지 만들어줘']);
 }
 
 
-// ════════════════════════════════════
-// STUDIO ENGINE
-// ════════════════════════════════════
-let studioStep = 0;
-let studioRoom = {w:0, d:0}; // cm
-let studioSofa = null;
-let studioSofaX = 0; // canvas px offset
-let isDragging = false;
-let dragStartX = 0;
-
-// Sofa catalog for studio (width in cm)
-const STUDIO_SOFAS = [
-  {id:'sati',    name:'SATI',     w:[220,260,310], d:100, price:'57만~',  tag:'모던·미니멀'},
-  {id:'regina',  name:'REGINA',   w:[220,270,307], d:105, price:'219만~', tag:'클래식·고급'},
-  {id:'bonum',   name:'BONUM',    w:[232,270,320], d:108, price:'64만~',  tag:'모던·모듈'},
-  {id:'vard',    name:'VARD',     w:[180,220,260], d: 90, price:'16만~',  tag:'스칸디·컴팩트'},
-  {id:'bihar',   name:'BIHAR',    w:[216,288,360], d:105, price:'15만~',  tag:'로우·모던'},
-  {id:'querencia',name:'QUERENCIA',w:[205,260,315],d:110, price:'110만~', tag:'럭셔리·모듈'},
-  {id:'capone',  name:'CAPONE',   w:[220,260,314], d:100, price:'54만~',  tag:'쿠션백·내추럴'},
-  {id:'stan',    name:'STAN',     w:[258,340,478], d:120, price:'프리미엄',tag:'대형·럭셔리'},
-];
-
-function openStudio(){
-  studioStep = 0;
-  studioRoom = {w:0, d:0};
-  studioSofa = null;
-  document.getElementById('roomW').value = '';
-  document.getElementById('roomD').value = '';
-  document.getElementById('roomPyung').value = '';
-  showSP(0);
-  document.getElementById('studioPanel').classList.add('open');
-}
-
-function closeStudio(){
-  document.getElementById('studioPanel').classList.remove('open');
-}
-
-function startFlowFromStudio(){
-  closeStudio();
-  if (typeof openChat === 'function') {
-    openChat();
-    setTimeout(()=>{ if(typeof sendMessage==='function') sendMessage('지금 3D 스튜디오에서 본 공간에 어울리는 소파를 추천해주세요'); }, 300);
-  }
-}
-
-function pyungToSize(){
-  const p = parseFloat(document.getElementById('roomPyung').value);
-  if(!p) return;
-  // Rough conversion: 1평 ≈ 3.3㎡, living room ~55% of total
-  const sqm = p * 3.3 * 0.55;
-  const side = Math.sqrt(sqm) * 100; // cm
-  document.getElementById('roomW').value = Math.round(side * 1.25);
-  document.getElementById('roomD').value = Math.round(side * 0.95);
-}
-
-function showSP(step){
-  studioStep = step;
-  const labels = ['STEP 1','STEP 2','STEP 3','완료'];
-  document.getElementById('spPhaseLabel').textContent = labels[step];
-  // Step indicators
-  for(let i=0;i<4;i++){
-    const el = document.getElementById('st'+i);
-    if(!el) continue;
-    el.className = 'sp-step' + (i < step ? ' done' : i===step ? ' active' : '');
-  }
-  // Show/hide screens
-  for(let i=0;i<4;i++){
-    const sc = document.getElementById('sp'+i);
-    if(sc) sc.className = 'sp-phase-screen' + (i===step ? ' active' : '');
-  }
-  // CTA nav
-  const prev = document.getElementById('spPrev');
-  const next = document.getElementById('spNext');
-  const cta = document.getElementById('spCta');
-  if(step === 0){ cta.style.display='none'; }
-  else if(step === 3){ cta.style.display='none'; }
-  else {
-    cta.style.display='flex';
-    prev.style.display = step > 1 ? 'block' : 'none';
-    next.textContent = step === 2 ? '완료 ✓' : '다음 →';
-  }
-}
-
-function goToSP(step){
-  if(step === 1){
-    let w = parseFloat(document.getElementById('roomW').value);
-    let d = parseFloat(document.getElementById('roomD').value);
-    if(!w || !d){
-      const p = parseFloat(document.getElementById('roomPyung').value);
-      if(p){ pyungToSize(); w=parseFloat(document.getElementById('roomW').value); d=parseFloat(document.getElementById('roomD').value); }
-    }
-    if(!w || !d){ 
-      document.getElementById('roomW').style.borderColor='#C04040';
-      document.getElementById('roomD').style.borderColor='#C04040';
-      setTimeout(()=>{ document.getElementById('roomW').style.borderColor=''; document.getElementById('roomD').style.borderColor=''; },1500);
-      return; 
-    }
-    studioRoom = {w, d};
-    buildSofaGrid();
-    showSP(1);
-    setTimeout(drawCanvas, 100);
-  }
-}
-
-function spNav(dir){
-  const next = studioStep + dir;
-  if(next < 0 || next > 3) return;
-  if(next === 2) buildRecommendations();
-  if(next === 3) buildFinalSummary();
-  showSP(next);
-  if(next === 1) setTimeout(drawCanvas, 100);
-}
-
-// ─── CANVAS FLOOR PLAN ───
-function drawCanvas(){
-  const canvas = document.getElementById('roomCanvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const CW = canvas.width, CH = canvas.height;
-  const {w, d} = studioRoom;
-  if(!w || !d) return;
-
-  // Scale to fit canvas with margin
-  const margin = 24;
-  const scaleX = (CW - margin*2) / w;
-  const scaleY = (CH - margin*2) / d;
-  const scale = Math.min(scaleX, scaleY);
-  const roomPxW = w * scale;
-  const roomPxD = d * scale;
-  const ox = (CW - roomPxW) / 2;
-  const oy = (CH - roomPxD) / 2;
-
-  ctx.clearRect(0, 0, CW, CH);
-
-  // Room fill
-  ctx.fillStyle = '#DDD5C0';
-  ctx.fillRect(ox, oy, roomPxW, roomPxD);
-
-  // Room border
-  ctx.strokeStyle = '#A09888';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(ox, oy, roomPxW, roomPxD);
-
-  // Grid lines (subtle)
-  ctx.strokeStyle = 'rgba(160,152,136,.15)';
-  ctx.lineWidth = 0.5;
-  const gridStep = 100 * scale;
-  for(let x=ox+gridStep; x<ox+roomPxW; x+=gridStep){
-    ctx.beginPath(); ctx.moveTo(x, oy); ctx.lineTo(x, oy+roomPxD); ctx.stroke();
-  }
-  for(let y=oy+gridStep; y<oy+roomPxD; y+=gridStep){
-    ctx.beginPath(); ctx.moveTo(ox, y); ctx.lineTo(ox+roomPxW, y); ctx.stroke();
-  }
-
-  // Dimension labels
-  ctx.fillStyle = '#8A8070';
-  ctx.font = '9px Josefin Sans, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(w + ' cm', ox + roomPxW/2, oy - 7);
-  ctx.save(); ctx.translate(ox - 8, oy + roomPxD/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText(d + ' cm', 0, 0); ctx.restore();
-
-  // Sofa
-  if(studioSofa){
-    const sw = studioSofa.w * scale;
-    const sd = studioSofa.d * scale;
-    // Clamp x position
-    studioSofaX = Math.max(0, Math.min(studioSofaX, roomPxW - sw));
-    const sx = ox + studioSofaX;
-    const sy = oy + roomPxD - sd - 8;
-
-    // Clearance zone (45cm walkway)
-    const clearance = 45 * scale;
-    ctx.fillStyle = 'rgba(74,138,96,.12)';
-    ctx.strokeStyle = 'rgba(74,138,96,.4)';
-    ctx.setLineDash([4,3]);
-    ctx.lineWidth = 1;
-    ctx.fillRect(sx, sy - clearance, sw, clearance);
-    ctx.strokeRect(sx, sy - clearance, sw, clearance);
-    ctx.setLineDash([]);
-
-    // Sofa body
-    ctx.fillStyle = 'rgba(42,72,112,.2)';
-    ctx.fillRect(sx, sy, sw, sd);
-    ctx.strokeStyle = 'rgba(42,72,112,.6)';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(sx, sy, sw, sd);
-
-    // Sofa back
-    ctx.fillStyle = 'rgba(42,72,112,.35)';
-    ctx.fillRect(sx, sy, sw, sd * 0.3);
-
-    // Armrests
-    ctx.fillStyle = 'rgba(42,72,112,.3)';
-    ctx.fillRect(sx, sy, sw*0.08, sd);
-    ctx.fillRect(sx + sw - sw*0.08, sy, sw*0.08, sd);
-
-    // Label
-    ctx.fillStyle = '#1A2E42';
-    ctx.font = 'bold 9px Josefin Sans, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(studioSofa.name, sx + sw/2, sy + sd/2 + 3);
-    ctx.font = '8px Josefin Sans, sans-serif';
-    ctx.fillStyle = '#3A5A90';
-    ctx.fillText(studioSofa.w + 'cm', sx + sw/2, sy + sd/2 + 14);
-  }
-
-  // Store scale/offset for drag
-  canvas._scale = scale;
-  canvas._ox = ox;
-  canvas._roomPxW = roomPxW;
-}
-
-// Drag to reposition sofa
-(function setupCanvasDrag(){
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const canvas = document.getElementById('roomCanvas');
-    if(!canvas) return;
-    let dragStartClientX = 0;
-    let dragStartSofaX = 0;
-    canvas.addEventListener('mousedown', e=>{
-      if(!studioSofa) return;
-      isDragging=true; dragStartClientX=e.clientX; dragStartSofaX=studioSofaX;
-    });
-    canvas.addEventListener('touchstart', e=>{
-      if(!studioSofa) return;
-      isDragging=true; dragStartClientX=e.touches[0].clientX; dragStartSofaX=studioSofaX;
-    }, {passive:true});
-    const onMove = (cx)=>{
-      if(!isDragging) return;
-      const dx = cx - dragStartClientX;
-      studioSofaX = dragStartSofaX + dx;
-      drawCanvas();
-    };
-    canvas.addEventListener('mousemove', e=>onMove(e.clientX));
-    canvas.addEventListener('touchmove', e=>onMove(e.touches[0].clientX), {passive:true});
-    const endDrag = ()=>{ isDragging=false; };
-    canvas.addEventListener('mouseup', endDrag);
-    canvas.addEventListener('touchend', endDrag);
-  });
-})();
-
-function buildSofaGrid(){
-  const grid = document.getElementById('spSofaGrid');
-  if(!grid) return;
-  const {w} = studioRoom;
-  grid.innerHTML = STUDIO_SOFAS.map(s=>{
-    const maxW = Math.max(...s.w);
-    const minW = Math.min(...s.w);
-    const fits = minW <= w * 0.72; // 72% rule
-    const tight = !fits && minW <= w * 0.82;
-    const cls = fits ? 'sofa-pick fit' : tight ? 'sofa-pick' : 'sofa-pick nofit';
-    const badge = fits ? '<div class="sp-fit-badge fit-ok">✓ 적합</div>' : 
-                  tight ? '<div class="sp-fit-badge fit-tight">△ 다소 꽉참</div>' : '';
-    const disabled = !fits && !tight ? 'onclick="return false"' : `onclick="pickStudioSofa('${s.id}')"`;
-    return `<div class="${cls}" id="sp_${s.id}" ${disabled}>
-      <div class="sp-name">${s.name}</div>
-      <div class="sp-dim">${minW}–${maxW} cm</div>
-      <div class="sp-price">${s.price}</div>
-      ${badge}
-    </div>`;
-  }).join('');
-}
-
-function pickStudioSofa(id){
-  studioSofa = STUDIO_SOFAS.find(s=>s.id===id);
-  if(!studioSofa) return;
-  // Pick the best fitting width
-  const bestW = studioSofa.w.filter(w=> w <= studioRoom.w * 0.72).pop() || studioSofa.w[0];
-  studioSofa = {...studioSofa, w: bestW};
-  studioSofaX = 20; // default position
-  // Highlight selected
-  document.querySelectorAll('.sofa-pick').forEach(el=>el.classList.remove('sel'));
-  const el = document.getElementById('sp_'+id);
-  if(el) el.classList.add('sel');
-  // Update info
-  const info = document.getElementById('spSofaInfo');
-  if(info) info.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 12px;font-size:10.5px;color:var(--text2);">
-    <strong style="color:var(--accent);">${studioSofa.name}</strong> ${bestW}cm 기준 배치<br>
-    <span style="color:var(--muted);">드래그로 위치를 조정할 수 있어요</span>
-  </div>`;
-  drawCanvas();
-}
-
-function buildRecommendations(){
-  const {w, d} = studioRoom;
-  const recs = STUDIO_SOFAS
-    .filter(s => Math.min(...s.w) <= w * 0.72)
-    .map(s=>{
-      const bestW = s.w.filter(sw=> sw <= w * 0.72).pop() || s.w[0];
-      let score = 0;
-      // Prefer width ~65% of room
-      const ratio = bestW / w;
-      if(ratio >= 0.58 && ratio <= 0.68) score += 3;
-      else if(ratio >= 0.5 && ratio <= 0.72) score += 2;
-      else score += 1;
-      // Depth vs room depth
-      if(s.d <= d * 0.35) score += 2;
-      // Match selected sofa
-      if(studioSofa && s.id === studioSofa.id) score += 2;
-      return {...s, score, bestW};
-    })
-    .sort((a,b)=>b.score - a.score)
-    .slice(0, 3);
-
-  document.getElementById('recTitle').textContent = `${w}×${d}cm 공간에 맞는 소파`;
-  document.getElementById('recSub').textContent = `${recs.length}개 시리즈가 공간에 적합해요`;
-
-  const reasons = [
-    '거실 폭의 64%로 이상적인 배치 비율이에요',
-    '깊이감이 적절해 동선 확보가 여유로워요',
-    '시리즈 중 공간 활용도가 가장 높아요',
-  ];
-  const list = document.getElementById('recList');
-  if(!list) return;
-  list.innerHTML = recs.map((s,i)=>`
-    <div class="rec-card" style="animation-delay:${i*0.1}s">
-      <div class="rec-rank">${i+1}</div>
-      <div class="rec-body">
-        <div class="rec-name">${s.name}</div>
-        <div class="rec-why">${s.bestW}cm — ${reasons[i]}</div>
-        <div class="rec-price">${s.price}</div>
-      </div>
-      <div class="rec-cta" onclick="window.open('https://www.alloso.co.kr','_blank')">보러가기</div>
-    </div>
-
-`).join('');
-}
-
-function buildFinalSummary(){
-  const {w, d} = studioRoom;
-  const sofaName = studioSofa ? studioSofa.name : '—';
-  const sofaW = studioSofa ? studioSofa.w : '—';
-  document.getElementById('spFinalSummary').innerHTML = 
-    `거실 <strong>${w} × ${d} cm</strong><br>
-     추천 소파 <strong>${sofaName} ${sofaW}cm</strong><br><br>
-     거실 폭 대비 소파 비율 <strong>${studioSofa ? Math.round(studioSofa.w/w*100) : '—'}%</strong><br>
-     전면 동선 확보 <strong>${studioSofa ? Math.max(0, d - studioSofa.d - 30) : '—'} cm</strong>`;
-}
 
 </script>
 </body>
