@@ -146,14 +146,15 @@ async function listFolder(env, folder) {
   return objects.filter(o => /\.(png|jpe?g|webp)$/i.test(o.key));
 }
 
-function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredMaterial }) {
+function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredMaterial, preferredSize }) {
   let score = 0;
   if (name.includes(preferredAngle)) score += 50;
   else if (name.includes('측면')) score += 30;
   else if (name.includes('정면')) score += 20;
   else if (name.includes('부감')) score += 10;
   if (preferredColor && name.includes(preferredColor)) score += 100;
-  if (preferredMaterial && name.includes(preferredMaterial)) score += 20;
+  if (preferredSize && name.includes(preferredSize)) score += 80;
+  if (preferredMaterial && name.includes(preferredMaterial)) score += 40;
   return score;
 }
 
@@ -323,12 +324,15 @@ export async function onRequestPost(context) {
       const seriesKo = resolved.info.ko;
       const folder = resolved.folder;
       const spaceSize = body.spaceSize || 'narrow';
+      const tableColorInput = body.tableColor || null;
 
-      // 1. 소파 레퍼런스 자동 탐색
+      // 1. 소파 레퍼런스 자동 탐색 — manifest의 default_* 활용
       stage = 'list_sofa_folder';
       const sofaPick = await findBestReference(env, folder, {
         preferredColor: seriesPreferredColor,
         preferredAngle: '측면',
+        preferredMaterial: body.material || resolved.info?.default_material || null,
+        preferredSize: body.size || resolved.info?.default_size || null,
       });
       let sofaBase64 = null;
       let sofaRef = null;
@@ -371,6 +375,7 @@ export async function onRequestPost(context) {
         stage = 'list_table_folder';
         const tablePick = await findBestReference(env, pairedTable.folder, {
           preferredAngle: '측면',
+          preferredColor: tableColorInput,
         });
         if (tablePick) {
           // 너무 큰 파일은 스킵 (CPU 시간 초과 방지) — 10MB 이상이면 텍스트 묘사로만
@@ -392,23 +397,30 @@ export async function onRequestPost(context) {
         ? 'a spacious Korean modern living room with high ceilings, large windows, soft natural light, warm oak floor, minimalist styling'
         : 'a cozy Korean modern living room with soft natural light, warm wood floor, minimalist styling');
 
+      // 테이블 컬러 영문 설명 (있으면 프롬프트에 명시)
+      const tableColorDescEn = tableColorInput
+        ? (manifest.colors?.[tableColorInput]?.desc_en || tableColorInput)
+        : null;
+
       let tableText = '';
       if (pairedTable) {
         const placement = tableMeta?.placement ||
           (tableMeta?.reason === 'explicit_pair' ? 'integrated with the sofa modules' : 'beside the sofa');
+        const colorPart = tableColorDescEn ? ` in ${tableColorDescEn} tone` : '';
         if (tableBase64) {
-          tableText = ` Place the ${pairedTable.ko} table ${placement} as a complementary set.`;
+          tableText = ` Place the ${pairedTable.ko} table${colorPart} ${placement} as a complementary set, matching the second reference image.`;
         } else {
-          tableText = ` Include an alloso ${pairedTable.ko} ${pairedTable.en} side/coffee table ${placement} to complete the set.`;
+          tableText = ` Include an alloso ${pairedTable.ko} ${pairedTable.en} side/coffee table${colorPart} ${placement} to complete the set.`;
         }
       }
 
       const fusionPrompt = [
-        `Place this exact ${seriesKo} sofa in ${scene}.`,
-        `Preserve the sofa's exact form, proportions, and ${workingColorDescEn} upholstery color.`,
+        `Place this exact ${seriesKo} sofa from the reference image into ${scene}.`,
+        `CRITICAL — preserve the sofa's exact silhouette, number of modules, cushion configuration, leg structure, and proportions identically to the reference. Do NOT redesign, simplify, restyle, or modify any structural element of the sofa.`,
+        `The upholstery color must remain ${workingColorDescEn} as in the reference.`,
         tableText,
-        `Photorealistic editorial photography, magazine-quality, soft natural daylight, shallow depth of field.`,
-        `The sofa must remain the visual anchor of the composition.`,
+        `Photorealistic editorial interior photography, magazine quality, soft natural daylight, shallow depth of field, slight film grain.`,
+        `The sofa must be the visual anchor and its structure must be IDENTICAL to the reference image.`,
       ].filter(Boolean).join(' ');
 
       let resultBase64 = null;
@@ -446,6 +458,9 @@ export async function onRequestPost(context) {
         color: resolvedColor,
         colorAutoSelected,
         spaceSize,
+        tableColor: tableColorInput,
+        sofaSelectedSize: body.size || resolved.info?.default_size || null,
+        sofaSelectedMaterial: body.material || resolved.info?.default_material || null,
         provider,
         warning,
         sofaReferenceUsed: sofaRef,
@@ -453,6 +468,7 @@ export async function onRequestPost(context) {
         sofaSize: sofaPick?.size || 0,
         tablePaired: tableMeta?.name || null,
         tableReferenceUsed: tableRef,
+        tablePickedFilename: tableBase64 ? (tableRef?.split('/').pop() || null) : null,
         tableSelectionReason: tableMeta?.reason || null,
         tableSize,
         tableSkippedReason: (pairedTable && !tableBase64 && tableSize > 10 * 1024 * 1024)
