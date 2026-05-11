@@ -141,14 +141,9 @@ function getVariantMention(manifest, seriesName) {
 async function listFolder(env, folder) {
   if (!env.PRODUCTS) return [];
   const prefix = `products/${folder}/`;
-  const allObjects = [];
-  let cursor;
-  do {
-    const result = await env.PRODUCTS.list({ prefix, cursor, limit: 1000 });
-    allObjects.push(...(result.objects || []));
-    cursor = result.truncated ? result.cursor : null;
-  } while (cursor);
-  return allObjects.filter(o => /\.(png|jpe?g|webp)$/i.test(o.key));
+  const result = await env.PRODUCTS.list({ prefix, limit: 100 });
+  const objects = result.objects || [];
+  return objects.filter(o => /\.(png|jpe?g|webp)$/i.test(o.key));
 }
 
 function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredMaterial }) {
@@ -168,20 +163,28 @@ async function findBestReference(env, folder, opts = {}) {
   const scored = files.map(f => ({
     key: f.key,
     name: f.key.split('/').pop(),
+    size: f.size || 0,
     score: scoreFile(f.key, opts),
   }));
   scored.sort((a, b) => b.score - a.score);
   return scored[0];
 }
 
+// 청크 단위 base64 변환 (O(n) — 큰 이미지도 CPU 시간 내에 처리)
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
 async function fetchR2AsBase64(env, key) {
   const obj = await env.PRODUCTS.get(key);
   if (!obj) return null;
   const buf = await obj.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary);
+  return bytesToBase64(new Uint8Array(buf));
 }
 
 function keyToPublicUrl(manifest, key) {
@@ -249,11 +252,14 @@ async function callFlux(env, prompt) {
 // ────────────────────────────────────────────────────────────────────
 export async function onRequestPost(context) {
   const { request, env } = context;
+  let stage = 'init';
   try {
+    stage = 'parse_body';
     const body = await request.json();
     const { mode = 'direct', series, color, scenePrompt, includeTable = true } = body;
-    if (!series) return json({ error: 'series is required' }, 400);
+    if (!series) return json({ error: 'series is required', stage }, 400);
 
+    stage = 'load_manifest';
     const manifest = await loadManifest();
 
     // ── RESOLVE MODE ─────────────────────────────────────────────
@@ -319,6 +325,7 @@ export async function onRequestPost(context) {
       const spaceSize = body.spaceSize || 'narrow';
 
       // 1. 소파 레퍼런스 자동 탐색
+      stage = 'list_sofa_folder';
       const sofaPick = await findBestReference(env, folder, {
         preferredColor: seriesPreferredColor,
         preferredAngle: '측면',
@@ -329,9 +336,9 @@ export async function onRequestPost(context) {
       let colorAutoSelected = false;
 
       if (sofaPick) {
+        stage = 'fetch_sofa_bytes';
         sofaBase64 = await fetchR2AsBase64(env, sofaPick.key);
         sofaRef = keyToPublicUrl(manifest, sofaPick.key);
-        // 자동 선택된 컬러 추출 (메타데이터용)
         if (!finalColor && manifest.colors) {
           for (const cName of Object.keys(manifest.colors)) {
             if (sofaPick.name.includes(cName)) {
@@ -348,6 +355,7 @@ export async function onRequestPost(context) {
         resolvedColor || 'natural';
 
       // 2. 테이블 페어링
+      stage = 'select_table';
       let pairedTable = null;
       let tableMeta = null;
       if (includeTable) {
@@ -358,17 +366,28 @@ export async function onRequestPost(context) {
       // 3. 테이블 레퍼런스 자동 탐색
       let tableBase64 = null;
       let tableRef = null;
+      let tableSize = 0;
       if (pairedTable && pairedTable.folder) {
+        stage = 'list_table_folder';
         const tablePick = await findBestReference(env, pairedTable.folder, {
           preferredAngle: '측면',
         });
         if (tablePick) {
-          tableBase64 = await fetchR2AsBase64(env, tablePick.key);
-          tableRef = keyToPublicUrl(manifest, tablePick.key);
+          // 너무 큰 파일은 스킵 (CPU 시간 초과 방지) — 10MB 이상이면 텍스트 묘사로만
+          if (tablePick.size && tablePick.size > 10 * 1024 * 1024) {
+            tableSize = tablePick.size;
+            // base64 변환 skip
+          } else {
+            stage = 'fetch_table_bytes';
+            tableBase64 = await fetchR2AsBase64(env, tablePick.key);
+            tableRef = keyToPublicUrl(manifest, tablePick.key);
+            tableSize = tablePick.size || 0;
+          }
         }
       }
 
       // 4. 프롬프트 구성
+      stage = 'build_prompt';
       const scene = scenePrompt || (spaceSize === 'wide'
         ? 'a spacious Korean modern living room with high ceilings, large windows, soft natural light, warm oak floor, minimalist styling'
         : 'a cozy Korean modern living room with soft natural light, warm wood floor, minimalist styling');
@@ -398,6 +417,7 @@ export async function onRequestPost(context) {
 
       if (sofaBase64) {
         try {
+          stage = 'call_gemini';
           const refs = [sofaBase64];
           if (tableBase64) refs.push(tableBase64);
           resultBase64 = await callGemini(env, refs, fusionPrompt);
@@ -411,11 +431,12 @@ export async function onRequestPost(context) {
 
       if (!resultBase64) {
         try {
+          stage = 'call_flux';
           const fluxPrompt = `A ${seriesKo} sofa with ${workingColorDescEn}, in ${scene}.${tableText} Editorial interior photography, photorealistic.`;
           resultBase64 = await callFlux(env, fluxPrompt);
           if (resultBase64) provider = 'flux';
         } catch (e) {
-          return json({ error: 'All image providers failed', detail: e.message, warning }, 500);
+          return json({ error: 'All image providers failed', detail: e.message, warning, stage }, 500);
         }
       }
 
@@ -429,9 +450,13 @@ export async function onRequestPost(context) {
         warning,
         sofaReferenceUsed: sofaRef,
         sofaPickedFilename: sofaPick?.name || null,
+        sofaSize: sofaPick?.size || 0,
         tablePaired: tableMeta?.name || null,
         tableReferenceUsed: tableRef,
         tableSelectionReason: tableMeta?.reason || null,
+        tableSize,
+        tableSkippedReason: (pairedTable && !tableBase64 && tableSize > 10 * 1024 * 1024)
+          ? `Image too large (${(tableSize / 1024 / 1024).toFixed(1)}MB > 10MB)` : null,
         variantMention: variantMention?.message || null,
         image: `data:image/png;base64,${resultBase64}`,
       });
@@ -439,7 +464,7 @@ export async function onRequestPost(context) {
 
     return json({ error: `unknown mode: ${mode}` }, 400);
   } catch (e) {
-    return json({ error: e.message, stack: e.stack }, 500);
+    return json({ error: e.message, stage, stack: (e.stack || '').slice(0, 500) }, 500);
   }
 }
 
