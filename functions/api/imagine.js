@@ -20,16 +20,24 @@ const ANGLES = ['정면', '측면', '부감'];
 const CACHE_TTL = 3600;
 const CACHE_KEY = 'https://internal.alma/manifest-series-v4';
 
-// ─── Scene Library (B안 — 6 무드별 인테리어 톤) ───
-// 알로소 Pinterest 보드 (Timeless People · Find Your Inspiration) 시각 언어 기반
+// ─── Scene Library — 6 무드 + 공간 타입별 추가 scene ───
+// 알로소 Pinterest 보드 + 매장 시공 레퍼런스 시각 언어 기반
 const SCENE_LIBRARY = {
+  // ── 거주 공간용 6 무드 ──
   minimal: "Korean editorial minimalist apartment, white walls, pale wide-plank oak floor, single full-height grid window with diffused afternoon light, one large white ceramic vase with a single dried branch, art books stacked casually on floor, gallery-like restraint emphasizing negative space",
   natural: "Sun-drenched living room with herringbone oak floor, warm cream walls, vintage wooden ladder draped with linen throw, large fiddle leaf fig in unglazed terracotta pot, mid-afternoon golden light through tall windows, small ceramic vessels on low wood console",
   luxe_dark: "Moody European loft with deep charcoal walls, dark walnut wide-plank floor, dramatic glass-block window admitting cool blue-hour light, single tall brass arc floor lamp, framed black-and-white photography, one warm focal spot illuminating the furniture",
   family: "Warm Korean modern family living room, wide oak floor with handwoven natural fiber rug, soft late-afternoon sun, low pale-wood coffee table with stacked art books and ceramic tea cups, layered cushions and chunky knit throw casually placed, single trailing pothos plant, hanji paper lamp casting warm light",
   scandi: "Copenhagen apartment with white-washed wide plank floor, warm white painted walls, sheer linen curtains diffusing soft overcast Nordic daylight, single mid-century Danish three-legged wooden stool, tall ceramic floor vase holding a dried pampas branch, monochrome line-drawing art print leaning against wall",
   classic: "Italian Liberty-era apartment with herringbone parquet floor and one section painted in deep terracotta orange, white walls with subtle crown molding, full-height grid windows, vintage Italian glass coffee table on chrome legs, warm golden hour light from west-facing windows, oversized abstract art print leaning against wall, single sculptural ceramic object",
-  // 무드 미지정 시 폴백 (공간 크기로만 분기)
+
+  // ── 상업·호스피탈리티 공간 (B2B context) ──
+  hotel_lounge: "luxurious double-height hotel lobby lounge with ceiling clearly visible at 4+ meters, floor-to-ceiling glass curtain walls revealing sophisticated city skyline through reflective tower facades, polished Carrara marble floor with subtle elevated marble platform sections, geometric color-blocked carpet rug in muted earth tones (terracotta, cream, charcoal-brown), single sculptural wooden art installation as focal point, sophisticated mix of marble + dark walnut paneling + cream and tan leather upholstery, Aalto-style designer floor lamp with white perforated shade, ambient indirect lighting from architectural coves, late-afternoon natural daylight streaming through the glass walls, professional yet warm five-star hospitality atmosphere — feels expansive, never cramped",
+  cafe: "modern Korean specialty cafe interior with high ceilings (3.5+ meters), warm wide-plank oak floors, large floor-to-ceiling windows admitting natural daylight, exposed concrete ceiling, mix of lounge seating and bar counter visible, ceramic pottery accents on shelves, single statement pendant light suspended from ceiling, contemporary minimalist hospitality styling",
+  office_lounge: "executive office reception lounge with double-height ceiling (4+ meters), full-height glass partitions, polished concrete floor with geometric area rug, abstract art piece on feature wall, large window with cityscape view, professional yet warm corporate atmosphere, custom millwork wood paneling, ambient cove lighting, contemporary elegance",
+  gallery: "contemporary white-box gallery space with high white walls, polished concrete floor, dramatic 4-meter ceiling with track lighting, large abstract canvas on feature wall, minimalist furniture arrangement positioned almost as if part of an art installation, soft north-facing daylight, sculptural curated atmosphere",
+
+  // ── 폴백 (무드 미지정 시 공간 크기로 분기) ──
   _wide: "spacious editorial Korean apartment, white walls, wide pale oak plank floor, full-height grid windows admitting soft natural daylight, ceramic objects, single statement plant in terracotta pot, generous negative space, magazine-quality composition",
   _narrow: "intimate Korean modern living room, wide oak plank floor, white walls with subtle warmth, soft natural daylight from side window, ceramic vase with a few stems, art book stack on floor, refined editorial styling",
 };
