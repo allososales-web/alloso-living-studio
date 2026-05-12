@@ -18,7 +18,7 @@
 const MANIFEST_URL = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/manifest-series.json';
 const ANGLES = ['정면', '측면', '부감'];
 const CACHE_TTL = 3600;
-const CACHE_KEY = 'https://internal.alma/manifest-series-v7';
+const CACHE_KEY = 'https://internal.alma/manifest-series-v8';
 
 // ─── Scene Library — 6 무드 + 공간 타입별 추가 scene ───
 // 알로소 Pinterest 보드 + 매장 시공 레퍼런스 시각 언어 기반
