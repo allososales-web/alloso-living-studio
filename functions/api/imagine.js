@@ -309,6 +309,88 @@ export async function onRequestPost(context) {
     stage = 'load_manifest';
     const manifest = await loadManifest();
 
+    // ── SWAP_MATERIAL MODE ─────────────────────────────────────────
+    // 매장 영업 도구: 업로드된 사진의 가구 소재·컬러를 자연어 지시대로 변환
+    if (mode === 'swap_material') {
+      stage = 'swap_validate';
+      const sourceImage = body.sourceImage;
+      const instruction = (body.instruction || '').trim();
+      if (!sourceImage) return json({ error: 'sourceImage (base64 data URL) required' }, 400);
+      if (!instruction) return json({ error: 'instruction (변환 목표) required' }, 400);
+
+      // data URL prefix 제거
+      const base64 = sourceImage.replace(/^data:image\/[a-z0-9+]+;base64,/i, '');
+      if (base64.length > 14 * 1024 * 1024) {
+        return json({ error: '이미지가 너무 큽니다 (10MB 이하 권장)' }, 400);
+      }
+
+      // 알로소 컬러·소재 키워드 정규화 (있으면 prompt에 풍부한 묘사 추가)
+      stage = 'swap_enrich';
+      let enrichment = '';
+      const lower = instruction.toLowerCase();
+      // 컬러 매핑 (manifest의 COLOR_DESC_MAP을 참조할 수도 있지만 일단 일반 매핑)
+      const colorHints = {
+        '온드': 'warm cream-beige leather with subtle natural grain, soft pearl ivory tone',
+        '마쉬': 'rich warm tan leather with golden-brown undertones',
+        '노체': 'deep dark walnut leather with rich brown depth',
+        '카도마리노': 'deep forest green leather with subtle olive undertones',
+        '쉘': 'soft warm cream fabric, off-white with subtle warmth',
+        '클라우드': 'pale soft cloud-grey fabric, cool light grey',
+        '모빅': 'deep charcoal grey, almost black with subtle warmth',
+        '파우더': 'soft powdery beige, pale dusty pink-cream',
+        '버터옐로우': 'warm soft butter-yellow, pale creamy yellow',
+        '조이풀옐로우': 'cheerful golden mustard yellow, warm saturated tone',
+        '블루베이': 'soft dusty pale blue with subtle grey undertone',
+        '샤모아': 'warm chamois beige, soft tan',
+      };
+      for (const [k, v] of Object.entries(colorHints)) {
+        if (lower.includes(k.toLowerCase()) || instruction.includes(k)) {
+          enrichment += ` (${k} = ${v})`;
+        }
+      }
+      // 소재 키워드
+      const matHints = {
+        '부클레': 'boucle weave fabric with textured nubby surface',
+        '가죽': 'smooth leather upholstery with subtle grain',
+        '패브릭': 'woven fabric upholstery',
+        '아크레': 'fine premium fabric with smooth weave',
+      };
+      for (const [k, v] of Object.entries(matHints)) {
+        if (instruction.includes(k)) enrichment += ` (${k} = ${v})`;
+      }
+
+      stage = 'swap_gemini';
+      const swapPrompt = [
+        `You are editing a photograph of furniture. Change ONLY the upholstery material and/or color of the furniture in this image based on the user's instruction:`,
+        `"${instruction}"${enrichment}`,
+        `STRICT PRESERVATION RULES:`,
+        `1. Keep the EXACT same furniture shape, silhouette, proportions, and dimensions.`,
+        `2. Keep the SAME number and arrangement of cushions and pillows.`,
+        `3. Keep the SAME camera angle, perspective, and framing.`,
+        `4. Keep the SAME lighting direction, intensity, and color temperature.`,
+        `5. Keep the SAME background, walls, floor, side tables, lamps, plants, and ALL surrounding elements completely unchanged.`,
+        `6. Keep the SAME shadows and reflections, only adjust them subtly to match the new material's reflectivity if needed.`,
+        `ONLY change: the surface material and/or color of the main upholstered furniture (sofa, chair, etc).`,
+        `Maintain photorealistic quality and resolution matching the original photograph. Output a single photorealistic edited image.`,
+      ].join(' ');
+
+      let resultBase64;
+      try {
+        resultBase64 = await callGemini(env, [base64], swapPrompt);
+        if (!resultBase64) throw new Error('Gemini returned no image data');
+      } catch (e) {
+        return json({ error: 'Material swap failed', detail: e.message, stage }, 500);
+      }
+
+      return json({
+        mode: 'swap_material',
+        target: instruction,
+        enrichment: enrichment.trim() || null,
+        provider: 'gemini',
+        image: `data:image/png;base64,${resultBase64}`,
+      });
+    }
+
     // ── BUNDLE MODE ─────────────────────────────────────────────
     // 한 장면에 여러 제품을 합성. 번들/세트 제안용
     if (mode === 'bundle') {
