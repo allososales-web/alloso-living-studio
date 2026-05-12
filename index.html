@@ -722,20 +722,55 @@ body{
   flex-shrink:0;padding:8px 14px 12px;background:var(--surface);
   border-top:1px solid var(--border);
 }
+/* ── 사진 업로드 미리보기 (swap_material 용) ── */
+.chat-attach-preview{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 10px;
+  margin-bottom:8px;
+  position:relative;
+}
+.chat-attach-preview img{
+  width:54px;height:54px;
+  object-fit:cover;border-radius:4px;
+  background:var(--bg2);
+  flex-shrink:0;
+}
+.chat-attach-info{flex:1;min-width:0;}
+.chat-attach-label{font-size:11.5px;color:var(--accent);font-weight:500;margin-bottom:2px;}
+.chat-attach-hint{font-size:10.5px;color:var(--muted);line-height:1.4;}
+.chat-attach-x{
+  width:24px;height:24px;border:none;background:transparent;
+  font-size:18px;color:var(--muted);cursor:pointer;
+  border-radius:50%;line-height:1;
+  flex-shrink:0;
+}
+.chat-attach-x:hover{background:rgba(0,0,0,0.06);color:var(--accent);}
 .chat-input-row{
   display:flex;gap:7px;align-items:flex-end;
   background:var(--card2);border:1.5px solid var(--border);border-radius:20px;
-  padding:6px 7px 6px 14px;transition:border-color .2s;
+  padding:6px 7px 6px 7px;transition:border-color .2s;
 }
 .chat-input-row:focus-within{border-color:var(--gold);}
+.chat-upload{
+  width:32px;height:32px;border-radius:50%;background:transparent;border:none;
+  color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .18s;
+}
+.chat-upload:hover{background:rgba(0,0,0,0.05);color:var(--gold);}
+.chat-upload.has-image{color:var(--gold);background:rgba(217,184,121,0.1);}
 .chat-ta{
   flex:1;background:transparent;border:none;outline:none;resize:none;
   font-family:'Noto Sans KR',sans-serif;font-size:12.5px;font-weight:300;
   color:var(--accent);max-height:90px;line-height:1.5;
+  padding:6px 4px;
 }
 .chat-ta::placeholder{color:var(--muted);}
 .chat-send{
-  width:30px;height:30px;border-radius:50%;background:var(--accent);border:none;
+  width:32px;height:32px;border-radius:50%;background:var(--accent);border:none;
   color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;transition:all .18s;
 }
@@ -1526,7 +1561,19 @@ body.sb-mobile-open .sidebar-backdrop{display:block;opacity:1;}
     <div class="chat-chips" id="chatChips"></div>
     <!-- INPUT -->
     <div class="chat-input-wrap">
+      <div class="chat-attach-preview" id="chatAttachPreview" style="display:none;">
+        <img id="chatAttachImg" alt="첨부 이미지">
+        <div class="chat-attach-info">
+          <div class="chat-attach-label">이미지 첨부됨</div>
+          <div class="chat-attach-hint">바꿀 소재·컬러를 입력해 주세요 (예: "온드로 바꿔줘")</div>
+        </div>
+        <button class="chat-attach-x" onclick="clearAttachment()" aria-label="첨부 제거">×</button>
+      </div>
       <div class="chat-input-row">
+        <input type="file" id="chatFileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event)">
+        <button class="chat-upload" id="chatUpload" onclick="document.getElementById('chatFileInput').click()" title="사진 업로드" aria-label="사진 업로드">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
         <textarea id="chatTa" class="chat-ta" placeholder="소파에 대해 자유롭게 물어보세요" rows="1" onkeydown="onChatKey(event)" oninput="autoResize(this)"></textarea>
         <button class="chat-send" id="chatSend" onclick="sendChat()">↑</button>
       </div>
@@ -3233,10 +3280,157 @@ function autoResize(ta){
   ta.style.height = Math.min(ta.scrollHeight, 90)+'px';
 }
 
+// ══ Photo Upload + Material Swap (매장 영업 도구) ══
+let attachedImageData = null; // 첨부된 이미지 base64 (data URL 포함)
+let attachedImageName = null;
+
+function handleFileSelect(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('이미지 파일만 업로드 가능해요 (jpg, png, webp 등)');
+    e.target.value = '';
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert('이미지 크기는 10MB 이하만 가능해요. 사진을 줄여서 다시 시도해 주세요.');
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    attachedImageData = ev.target.result;
+    attachedImageName = file.name;
+    showAttachmentPreview(attachedImageData);
+  };
+  reader.onerror = function(){
+    alert('이미지를 읽을 수 없어요. 다른 파일로 시도해 주세요.');
+    e.target.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function showAttachmentPreview(dataUrl){
+  document.getElementById('chatAttachImg').src = dataUrl;
+  document.getElementById('chatAttachPreview').style.display = 'flex';
+  document.getElementById('chatUpload').classList.add('has-image');
+  // 입력창 포커스 + 안내 placeholder
+  const ta = document.getElementById('chatTa');
+  if (ta && !ta.value) ta.placeholder = '예: "온드로 바꿔줘" / "부클레 위브 클라우드로"';
+  ta.focus();
+}
+
+function clearAttachment(){
+  attachedImageData = null;
+  attachedImageName = null;
+  document.getElementById('chatAttachPreview').style.display = 'none';
+  document.getElementById('chatUpload').classList.remove('has-image');
+  const input = document.getElementById('chatFileInput');
+  if (input) input.value = '';
+  const ta = document.getElementById('chatTa');
+  if (ta) ta.placeholder = '소파에 대해 자유롭게 물어보세요';
+}
+
+// 이미지 첨부 시 swap_material 모드로 직행 (Claude 우회)
+async function executeImageSwap(sourceDataUrl, userInstruction){
+  if (chatLoading) return;
+  chatLoading = true;
+  const msgs = document.getElementById('chatMsgs');
+
+  // 사용자 메시지 — 첨부 이미지 썸네일 포함
+  const userRow = document.createElement('div');
+  userRow.className = 'msg-row user';
+  userRow.innerHTML = `
+    <div>
+      <div class="msg-bubble user" style="padding:6px;">
+        <img src="${sourceDataUrl}" style="max-width:200px;border-radius:5px;display:block;">
+        ${userInstruction ? `<div style="padding:8px 6px 4px;">${escHtml(userInstruction)}</div>` : ''}
+      </div>
+      <div class="msg-time">${nowTime()}</div>
+    </div>`;
+  msgs.appendChild(userRow);
+  scrollMsgs();
+
+  // 봇 로딩 메시지 (placeholder)
+  const loadingId = 'swap-' + Date.now();
+  const botRow = document.createElement('div');
+  botRow.className = 'msg-row bot';
+  botRow.innerHTML = `
+    <div class="msg-av">A</div>
+    <div>
+      <div class="msg-bubble bot" id="${loadingId}">
+        <div class="imagine-loading">
+          <div class="imagine-spinner"></div>
+          <div class="imagine-msg">이미지 분석 중<span class="sub">${escHtml(userInstruction.slice(0, 40) || '소재 변환')} · 약 20초</span></div>
+        </div>
+      </div>
+      <div class="msg-time">${nowTime()}</div>
+    </div>`;
+  msgs.appendChild(botRow);
+  scrollMsgs();
+
+  try {
+    const res = await fetch('/api/imagine', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode: 'swap_material',
+        sourceImage: sourceDataUrl,
+        instruction: userInstruction,
+      }),
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`HTTP ${res.status}: ${txt.slice(0,120)}`);
+    }
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!data.image) throw new Error('이미지 응답이 비어있어요');
+
+    const target = data.target || userInstruction || '변환 결과';
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) {
+      loadingEl.innerHTML = `
+        <div style="line-height:1.5;margin-bottom:8px;">"${escHtml(target)}" 으로 변환해드렸어요.</div>
+        <div class="imagine-box">
+          <img class="imagine-result" src="${data.image}" alt="변환 결과">
+          <div class="imagine-meta">
+            <span>변환: ${escHtml(target)}</span>
+            <span><span class="tag">swap</span><span class="tag">gemini</span></span>
+          </div>
+          <div class="bundle-hint">매장 영업 활용 가능. 다른 컬러로 다시 시도하려면 이미지를 새로 첨부해 주세요.</div>
+        </div>`;
+    }
+    scrollMsgs();
+  } catch(e) {
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) {
+      loadingEl.innerHTML = `<div class="imagine-error">변환 실패 (${escHtml(e.message.slice(0,100))})</div>`;
+    }
+  } finally {
+    chatLoading = false;
+  }
+}
+
 function sendChat(){
   const ta = document.getElementById('chatTa');
   const text = ta.value.trim();
-  if(!text || chatLoading) return;
+  // 이미지 첨부 시: 텍스트가 있어야 변환 (변환 목표 필요)
+  if (attachedImageData) {
+    if (!text) {
+      alert('변환할 소재·컬러를 입력해 주세요 (예: "온드로 바꿔줘")');
+      return;
+    }
+    const sourceData = attachedImageData;
+    const instruction = text;
+    clearAttachment();
+    ta.value = ''; ta.style.height = 'auto';
+    hideChips();
+    executeImageSwap(sourceData, instruction);
+    return;
+  }
+  // 일반 텍스트 채팅
+  if (!text || chatLoading) return;
   ta.value=''; ta.style.height='auto';
   hideChips();
   sendMessage(text);
