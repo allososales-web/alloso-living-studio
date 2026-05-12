@@ -24,7 +24,7 @@ const CACHE_KEY = 'https://internal.alma/manifest-series-v4';
 // 알로소 Pinterest 보드 + 매장 시공 레퍼런스 시각 언어 기반
 const SCENE_LIBRARY = {
   // ── 거주 공간용 6 무드 ──
-  minimal: "Korean editorial minimalist apartment, white walls, pale wide-plank oak floor, single full-height grid window with diffused afternoon light, one large white ceramic vase with a single dried branch, art books stacked casually on floor, gallery-like restraint emphasizing negative space",
+  minimal: "Sophisticated Korean modern minimalist apartment with high ceiling featuring subtle recessed cove lighting strip, large floor-to-ceiling windows with sheer linen curtains diffusing soft overcast natural daylight from outside, polished concrete or warm beige limestone floor section meeting a plush warm beige wool low-pile carpet, ONE single low minimalist white cube coffee table with a small ceramic mushroom-shaped table lamp and one round ceramic object on top, a small open hardcover art book casually placed on the carpet edge, single tall vertical thin black-framed art piece or sculptural lamp on white wall, dramatic tonal contrast between dark charcoal furniture and light warm architectural backdrop, atmosphere of quiet sophistication and lived-in editorial calm, very moody but bright",
   natural: "Sun-drenched living room with herringbone oak floor, warm cream walls, vintage wooden ladder draped with linen throw, large fiddle leaf fig in unglazed terracotta pot, mid-afternoon golden light through tall windows, small ceramic vessels on low wood console",
   luxe_dark: "Moody European loft with deep charcoal walls, dark walnut wide-plank floor, dramatic glass-block window admitting cool blue-hour light, single tall brass arc floor lamp, framed black-and-white photography, one warm focal spot illuminating the furniture",
   family: "Warm Korean modern family living room, wide oak floor with handwoven natural fiber rug, soft late-afternoon sun, low pale-wood coffee table with stacked art books and ceramic tea cups, layered cushions and chunky knit throw casually placed, single trailing pothos plant, hanji paper lamp casting warm light",
@@ -44,6 +44,23 @@ const SCENE_LIBRARY = {
   _wide: "spacious editorial Korean apartment, white walls, wide pale oak plank floor, full-height grid windows admitting soft natural daylight, ceramic objects, single statement plant in terracotta pot, generous negative space, magazine-quality composition",
   _narrow: "intimate Korean modern living room, wide oak plank floor, white walls with subtle warmth, soft natural daylight from side window, ceramic vase with a few stems, art book stack on floor, refined editorial styling",
 };
+
+// ──── PHOTOREAL DIRECTIVE — Gemini 출력을 CGI/렌더 → 실사 매거진 사진 톤으로 강제 ────
+// 모든 BUNDLE/IMAGINE 프롬프트에 일관 적용
+const PHOTOREAL_DIRECTIVE = [
+  '═══ PHOTOGRAPHIC STYLE (CRITICAL) ═══',
+  'This must look like a REAL photograph, NOT a 3D render, NOT CGI, NOT AI art.',
+  'Captured on Hasselblad H6D medium format camera with 80mm lens. Natural daylight photography only — no studio lighting setup.',
+  'Editorial photography aesthetic of Apartamento, Cereal, Kinfolk, Cabana, or Vogue Living magazines — Korean lifestyle shoot.',
+  'Subtle Portra 400 / Ektar 100 film stock characteristics: gentle film grain texture, slightly desaturated muted earthy tones, film-like color depth with warm shadow rendition.',
+  'Shallow depth of field with creamy bokeh on background elements, sharp focus on hero furniture and foreground objects.',
+  'LIVED-IN STYLING (essential for realism): a single casually placed magazine or open hardcover book on the table or floor, ONE slightly creased throw pillow showing use, ONE ceramic or sculptural object with visible artisan imperfection, soft asymmetry in object placement, NOT perfectly staged or showroom-polished.',
+  'IMPERFECT NATURAL LIGHTING: window light with gentle directional falloff, soft warm shadows in corners, light pools and dim areas — never flat or evenly studio-lit. Visible light gradient across the floor.',
+  'REAL-WORLD DETAILS: faint dust motes catching in light beam, gentle natural wear on materials, organic textile creases, possibly a single trailing plant tendril or stem, slight floor reflections.',
+  'COLOR GRADE: muted earthy palette, slight film-like desaturation, warm shadow tones, NOT oversaturated. Photographic color rendition, not digital pop.',
+  'STRICTLY AVOID: 3D-rendered appearance, perfect CGI cleanliness, symmetric staging, oversaturated colors, plastic-looking surfaces, illustrative quality, AI-art smoothness, evenly lit showroom flat look.',
+  'AIM FOR: a believable lifestyle magazine photograph that could be from a real Korean apartment editorial shoot — quietly sophisticated, intentionally imperfect, atmospheric, slightly moody.',
+].join(' ');
 
 // ────────────────────────────────────────────────────────────────────
 // Manifest loader (edge cached)
@@ -517,7 +534,7 @@ export async function onRequestPost(context) {
         `Layout guidance: ${placementText}.`,
         `CRITICAL preservation — each piece must remain visually IDENTICAL to its reference image: exact silhouette, structure, proportions, color, and material. Do NOT redesign, simplify, scale, or alter any piece. If a reference shows a chair, keep it a chair (NOT a sofa). If a pouf (small leather cube), keep it as a small floor cube (NOT a sofa). If a sofa, keep it a sofa with the same module count and form. Each reference number (1, 2, 3...) maps to a specific piece in the order listed above.`,
         `The composition should look like a deliberately curated alloso showroom or hospitality grouping — a complete furniture set/bundle. All ${refs.length} pieces must be clearly visible, identifiable, and positioned naturally as if a professional designer staged them together.`,
-        `Style: photorealistic editorial interior photography, magazine quality, soft natural daylight, shallow depth of field, slight film grain, professional staging.`,
+        PHOTOREAL_DIRECTIVE,
       ].join(' ');
 
       // Gemini 호출 (다중 레퍼런스)
@@ -748,7 +765,7 @@ export async function onRequestPost(context) {
         `CRITICAL — preserve the exact silhouette, structure, proportions, and form factor of the ${categoryTerm} from the reference image. Do NOT redesign, simplify, restyle, scale up, or modify it into a different furniture type. If the reference is a chair, keep it a chair. If the reference is a pouf/ottoman, keep it a pouf (small cube-shaped). If the reference is a sofa, keep it a sofa.`,
         `The upholstery color must remain ${workingColorDescEn} as in the reference.`,
         tableText,
-        `Photorealistic editorial interior photography, magazine quality, soft natural daylight, shallow depth of field, slight film grain.`,
+        PHOTOREAL_DIRECTIVE,
         isAnchor
           ? `The ${categoryTerm} must be a clear focal point and its form must be IDENTICAL to the reference image.`
           : `The composition must preserve the reference exactly.`,
