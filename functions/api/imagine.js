@@ -397,6 +397,20 @@ export async function onRequestPost(context) {
         ? 'a spacious Korean modern living room with high ceilings, large windows, soft natural light, warm oak floor, minimalist styling'
         : 'a cozy Korean modern living room with soft natural light, warm wood floor, minimalist styling');
 
+      // 카테고리 기반 가구 용어 — 시리즈가 sofa가 아닌 경우에도 정확히 묘사
+      const categoryTerm = (function(cat){
+        switch (cat) {
+          case 'lounge_chair': return 'lounge chair';
+          case 'chair': return 'armchair';
+          case 'pouf':
+          case 'stool': return 'leather pouf (a small cube-shaped ottoman, NOT a sofa)';
+          case 'daybed': return 'daybed';
+          case 'table': return 'table';
+          default: return 'sofa';
+        }
+      })(resolved.info?.category);
+      const isAnchor = !['table'].includes(resolved.info?.category);
+
       // 테이블 컬러 영문 설명 (있으면 프롬프트에 명시)
       const tableColorDescEn = tableColorInput
         ? (manifest.colors?.[tableColorInput]?.desc_en || tableColorInput)
@@ -405,7 +419,7 @@ export async function onRequestPost(context) {
       let tableText = '';
       if (pairedTable) {
         const placement = tableMeta?.placement ||
-          (tableMeta?.reason === 'explicit_pair' ? 'integrated with the sofa modules' : 'beside the sofa');
+          (tableMeta?.reason === 'explicit_pair' ? 'integrated with the modules' : `beside the ${categoryTerm}`);
         const colorPart = tableColorDescEn ? ` in ${tableColorDescEn} tone` : '';
         if (tableBase64) {
           tableText = ` Place the ${pairedTable.ko} table${colorPart} ${placement} as a complementary set, matching the second reference image.`;
@@ -415,12 +429,14 @@ export async function onRequestPost(context) {
       }
 
       const fusionPrompt = [
-        `Place this exact ${seriesKo} sofa from the reference image into ${scene}.`,
-        `CRITICAL — preserve the sofa's exact silhouette, number of modules, cushion configuration, leg structure, and proportions identically to the reference. Do NOT redesign, simplify, restyle, or modify any structural element of the sofa.`,
+        `Place this exact ${seriesKo} ${categoryTerm} from the reference image into ${scene}.`,
+        `CRITICAL — preserve the exact silhouette, structure, proportions, and form factor of the ${categoryTerm} from the reference image. Do NOT redesign, simplify, restyle, scale up, or modify it into a different furniture type. If the reference is a chair, keep it a chair. If the reference is a pouf/ottoman, keep it a pouf (small cube-shaped). If the reference is a sofa, keep it a sofa.`,
         `The upholstery color must remain ${workingColorDescEn} as in the reference.`,
         tableText,
         `Photorealistic editorial interior photography, magazine quality, soft natural daylight, shallow depth of field, slight film grain.`,
-        `The sofa must be the visual anchor and its structure must be IDENTICAL to the reference image.`,
+        isAnchor
+          ? `The ${categoryTerm} must be a clear focal point and its form must be IDENTICAL to the reference image.`
+          : `The composition must preserve the reference exactly.`,
       ].filter(Boolean).join(' ');
 
       let resultBase64 = null;
