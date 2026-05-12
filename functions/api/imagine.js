@@ -180,6 +180,22 @@ function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredM
   return score;
 }
 
+function resolveSize(requestedSize, seriesInfo) {
+  if (!requestedSize) return seriesInfo?.default_size || null;
+  // 1) 정확 매치
+  if (seriesInfo?.available_sizes?.includes(requestedSize)) return requestedSize;
+  // 2) alias 매치
+  const aliases = seriesInfo?.size_aliases || {};
+  if (aliases[requestedSize]) return aliases[requestedSize];
+  // 3) 부분 매치 (포함관계)
+  const sizes = seriesInfo?.available_sizes || [];
+  for (const s of sizes) {
+    if (requestedSize.includes(s) || s.includes(requestedSize)) return s;
+  }
+  // 4) 폴백
+  return requestedSize;
+}
+
 async function findBestReference(env, folder, opts = {}) {
   const files = await listFolder(env, folder);
   if (files.length === 0) return null;
@@ -308,11 +324,15 @@ export async function onRequestPost(context) {
           warnings.push(`${item.series}: 해석 실패 또는 단종/브랜드 그룹`);
           continue;
         }
+        // 사이즈 alias 자동 해석 (예: "코너 라운지" → "와이드 코너")
+        const resolvedSize = resolveSize(item.size, itemResolved.info);
+        const sizeSubstituted = item.size && resolvedSize !== item.size;
+
         const pick = await findBestReference(env, itemResolved.folder, {
           preferredColor: item.color || itemResolved.info?.default_color,
           preferredAngle: '측면',
           preferredMaterial: item.material || itemResolved.info?.default_material,
-          preferredSize: item.size || itemResolved.info?.default_size,
+          preferredSize: resolvedSize,
         });
         if (!pick) {
           warnings.push(`${item.series}: 레퍼런스 파일 없음 (folder=${itemResolved.folder})`);
@@ -323,9 +343,9 @@ export async function onRequestPost(context) {
           warnings.push(`${item.series}: R2 객체 가져오기 실패`);
           continue;
         }
-        const size = obj.size || 0;
-        if (size > 10 * 1024 * 1024) {
-          warnings.push(`${item.series}: 이미지 너무 큼 (${(size / 1024 / 1024).toFixed(1)}MB)`);
+        const sizeObj = obj.size || 0;
+        if (sizeObj > 10 * 1024 * 1024) {
+          warnings.push(`${item.series}: 이미지 너무 큼 (${(sizeObj / 1024 / 1024).toFixed(1)}MB)`);
           continue;
         }
         const buf = await obj.arrayBuffer();
@@ -335,9 +355,15 @@ export async function onRequestPost(context) {
           seriesKo: itemResolved.info.ko,
           seriesEn: itemResolved.info.en,
           colorKo: item.color || itemResolved.info?.default_color || '',
-          sizeKo: item.size || itemResolved.info?.default_size || '',
+          sizeKo: resolvedSize || '',
+          requestedSizeKo: item.size || '',
+          sizeSubstituted,
+          materialKo: item.material || itemResolved.info?.default_material || '',
           category: itemResolved.info?.category || 'sofa',
+          features: itemResolved.info?.features || [],
+          code: itemResolved.info?.code || '',
           filename: pick.name,
+          thumbnailUrl: keyToPublicUrl(manifest, pick.key),
         });
       }
 
@@ -410,13 +436,38 @@ export async function onRequestPost(context) {
         spaceSize,
         mood: moodKey || null,
         itemsCount: refs.length,
-        items: refs.map(r => ({
-          series: r.seriesKo,
-          color: r.colorKo,
-          size: r.sizeKo,
-          category: r.category,
-          filename: r.filename,
-        })),
+        items: refs.map(r => {
+          // 카테고리별 이미지 내 대략적 좌표 (호버 마커 표시용)
+          const placement = (function(cat, idx, total){
+            // 카테고리별 기본 좌표 (이미지 내 백분율)
+            const presets = {
+              sofa: { x: 42, y: 58 },
+              lounge_chair: { x: 76, y: 62 },
+              chair: { x: 76, y: 62 },
+              pouf: { x: 62, y: 82 },
+              stool: { x: 62, y: 82 },
+              table: { x: 48, y: 72 },
+              daybed: { x: 28, y: 55 },
+            };
+            const base = presets[cat] || { x: 50 + (idx-total/2)*15, y: 65 };
+            return { x: base.x + '%', y: base.y + '%' };
+          })(r.category, refs.indexOf(r), refs.length);
+          return {
+            series: r.seriesKo,
+            seriesEn: r.seriesEn,
+            color: r.colorKo,
+            size: r.sizeKo,
+            requestedSize: r.requestedSizeKo,
+            sizeSubstituted: r.sizeSubstituted || false,
+            material: r.materialKo,
+            category: r.category,
+            features: r.features.slice(0, 2),
+            code: r.code,
+            filename: r.filename,
+            thumbnailUrl: r.thumbnailUrl,
+            placement,
+          };
+        }),
         warnings,
         provider: 'gemini',
         image: `data:image/png;base64,${resultBase64}`,
