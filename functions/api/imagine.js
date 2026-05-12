@@ -18,7 +18,21 @@
 const MANIFEST_URL = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/manifest-series.json';
 const ANGLES = ['정면', '측면', '부감'];
 const CACHE_TTL = 3600;
-const CACHE_KEY = 'https://internal.alma/manifest-series-v3';
+const CACHE_KEY = 'https://internal.alma/manifest-series-v4';
+
+// ─── Scene Library (B안 — 6 무드별 인테리어 톤) ───
+// 알로소 Pinterest 보드 (Timeless People · Find Your Inspiration) 시각 언어 기반
+const SCENE_LIBRARY = {
+  minimal: "Korean editorial minimalist apartment, white walls, pale wide-plank oak floor, single full-height grid window with diffused afternoon light, one large white ceramic vase with a single dried branch, art books stacked casually on floor, gallery-like restraint emphasizing negative space",
+  natural: "Sun-drenched living room with herringbone oak floor, warm cream walls, vintage wooden ladder draped with linen throw, large fiddle leaf fig in unglazed terracotta pot, mid-afternoon golden light through tall windows, small ceramic vessels on low wood console",
+  luxe_dark: "Moody European loft with deep charcoal walls, dark walnut wide-plank floor, dramatic glass-block window admitting cool blue-hour light, single tall brass arc floor lamp, framed black-and-white photography, one warm focal spot illuminating the furniture",
+  family: "Warm Korean modern family living room, wide oak floor with handwoven natural fiber rug, soft late-afternoon sun, low pale-wood coffee table with stacked art books and ceramic tea cups, layered cushions and chunky knit throw casually placed, single trailing pothos plant, hanji paper lamp casting warm light",
+  scandi: "Copenhagen apartment with white-washed wide plank floor, warm white painted walls, sheer linen curtains diffusing soft overcast Nordic daylight, single mid-century Danish three-legged wooden stool, tall ceramic floor vase holding a dried pampas branch, monochrome line-drawing art print leaning against wall",
+  classic: "Italian Liberty-era apartment with herringbone parquet floor and one section painted in deep terracotta orange, white walls with subtle crown molding, full-height grid windows, vintage Italian glass coffee table on chrome legs, warm golden hour light from west-facing windows, oversized abstract art print leaning against wall, single sculptural ceramic object",
+  // 무드 미지정 시 폴백 (공간 크기로만 분기)
+  _wide: "spacious editorial Korean apartment, white walls, wide pale oak plank floor, full-height grid windows admitting soft natural daylight, ceramic objects, single statement plant in terracotta pot, generous negative space, magazine-quality composition",
+  _narrow: "intimate Korean modern living room, wide oak plank floor, white walls with subtle warmth, soft natural daylight from side window, ceramic vase with a few stems, art book stack on floor, refined editorial styling",
+};
 
 // ────────────────────────────────────────────────────────────────────
 // Manifest loader (edge cached)
@@ -257,11 +271,151 @@ export async function onRequestPost(context) {
   try {
     stage = 'parse_body';
     const body = await request.json();
-    const { mode = 'direct', series, color, scenePrompt, includeTable = true } = body;
-    if (!series) return json({ error: 'series is required', stage }, 400);
+    const { mode = 'direct', series, color, scenePrompt, mood, includeTable = true } = body;
 
     stage = 'load_manifest';
     const manifest = await loadManifest();
+
+    // ── BUNDLE MODE ─────────────────────────────────────────────
+    // 한 장면에 여러 제품을 합성. 번들/세트 제안용
+    if (mode === 'bundle') {
+      stage = 'bundle_validate';
+      const items = Array.isArray(body.items) ? body.items : [];
+      if (items.length === 0) return json({ error: 'items array required for bundle mode' }, 400);
+      if (items.length > 5) return json({ error: 'max 5 items per bundle', count: items.length }, 400);
+
+      const spaceSize = body.spaceSize || 'wide';
+      const moodKey = body.mood;
+      const customScene = body.scenePrompt;
+
+      // 각 아이템 레퍼런스 fetch
+      stage = 'bundle_fetch_refs';
+      const refs = [];
+      const warnings = [];
+
+      for (const item of items) {
+        if (!item?.series) { warnings.push('item without series skipped'); continue; }
+        const itemResolved = resolveSeries(item.series, manifest);
+        if (!itemResolved || itemResolved.category === 'discontinued' || itemResolved.is_brand_group) {
+          warnings.push(`${item.series}: 해석 실패 또는 단종/브랜드 그룹`);
+          continue;
+        }
+        const pick = await findBestReference(env, itemResolved.folder, {
+          preferredColor: item.color || itemResolved.info?.default_color,
+          preferredAngle: '측면',
+          preferredMaterial: item.material || itemResolved.info?.default_material,
+          preferredSize: item.size || itemResolved.info?.default_size,
+        });
+        if (!pick) {
+          warnings.push(`${item.series}: 레퍼런스 파일 없음 (folder=${itemResolved.folder})`);
+          continue;
+        }
+        const obj = await env.PRODUCTS.get(pick.key);
+        if (!obj) {
+          warnings.push(`${item.series}: R2 객체 가져오기 실패`);
+          continue;
+        }
+        const size = obj.size || 0;
+        if (size > 10 * 1024 * 1024) {
+          warnings.push(`${item.series}: 이미지 너무 큼 (${(size / 1024 / 1024).toFixed(1)}MB)`);
+          continue;
+        }
+        const buf = await obj.arrayBuffer();
+        const base64 = bytesToBase64(new Uint8Array(buf));
+        refs.push({
+          base64,
+          seriesKo: itemResolved.info.ko,
+          seriesEn: itemResolved.info.en,
+          colorKo: item.color || itemResolved.info?.default_color || '',
+          sizeKo: item.size || itemResolved.info?.default_size || '',
+          category: itemResolved.info?.category || 'sofa',
+          filename: pick.name,
+        });
+      }
+
+      if (refs.length === 0) {
+        return json({ error: 'No valid references could be loaded', warnings, stage }, 500);
+      }
+
+      // 카테고리별 분류
+      stage = 'bundle_compose_prompt';
+      const sofas = refs.filter(r => r.category === 'sofa');
+      const chairs = refs.filter(r => r.category === 'lounge_chair' || r.category === 'chair');
+      const poufs = refs.filter(r => r.category === 'pouf' || r.category === 'stool');
+      const tables = refs.filter(r => r.category === 'table');
+      const daybeds = refs.filter(r => r.category === 'daybed');
+
+      // Scene 선택
+      const scene = customScene
+        || (moodKey && SCENE_LIBRARY[moodKey])
+        || SCENE_LIBRARY[spaceSize === 'wide' ? '_wide' : '_narrow'];
+
+      // 카테고리별 영문 용어
+      const termFor = (cat) => {
+        switch (cat) {
+          case 'lounge_chair': return 'lounge chair';
+          case 'chair': return 'armchair';
+          case 'pouf': case 'stool': return 'small leather cube-shaped pouf/ottoman (NOT a sofa)';
+          case 'daybed': return 'daybed';
+          case 'table': return 'coffee table';
+          default: return 'sofa';
+        }
+      };
+
+      // 제품 리스트 (참조 이미지 순서대로)
+      const productList = refs.map((r, i) => {
+        const sizeText = r.sizeKo ? `${r.sizeKo} ` : '';
+        return `(reference image ${i + 1}) the alloso ${r.seriesKo} ${sizeText}${termFor(r.category)} in ${r.colorKo} color`;
+      }).join('; ');
+
+      // 배치 가이드
+      const placement = [];
+      if (sofas.length) placement.push(`anchor the largest sofa as the primary visual element at the center or rear of the space`);
+      if (chairs.length) placement.push(`angle the lounge chair as an accent piece at one side, facing the sofa to create a conversational grouping`);
+      if (poufs.length) placement.push(`place the small leather pouf flexibly near the sofa as additional informal seating — keep it as a small floor cube, not a large sofa`);
+      if (tables.length) placement.push(`place the coffee table in front of the main sofa as the central piece`);
+      if (daybeds.length) placement.push(`place the daybed against a wall or in a window alcove`);
+      const placementText = placement.length > 0 ? placement.join('; ') : 'arrange the pieces naturally to form a curated grouping';
+
+      const bundlePrompt = [
+        `Create a single photorealistic editorial interior photograph showing ${refs.length} distinct alloso furniture pieces composed together as ONE curated grouping in ONE room.`,
+        `Products to include in this order from reference images: ${productList}.`,
+        `Setting: ${scene}.`,
+        `Layout guidance: ${placementText}.`,
+        `CRITICAL preservation — each piece must remain visually IDENTICAL to its reference image: exact silhouette, structure, proportions, color, and material. Do NOT redesign, simplify, scale, or alter any piece. If a reference shows a chair, keep it a chair (NOT a sofa). If a pouf (small leather cube), keep it as a small floor cube (NOT a sofa). If a sofa, keep it a sofa with the same module count and form. Each reference number (1, 2, 3...) maps to a specific piece in the order listed above.`,
+        `The composition should look like a deliberately curated alloso showroom or hospitality grouping — a complete furniture set/bundle. All ${refs.length} pieces must be clearly visible, identifiable, and positioned naturally as if a professional designer staged them together.`,
+        `Style: photorealistic editorial interior photography, magazine quality, soft natural daylight, shallow depth of field, slight film grain, professional staging.`,
+      ].join(' ');
+
+      // Gemini 호출 (다중 레퍼런스)
+      stage = 'bundle_gemini';
+      let resultBase64;
+      try {
+        resultBase64 = await callGemini(env, refs.map(r => r.base64), bundlePrompt);
+        if (!resultBase64) throw new Error('Gemini returned no image data');
+      } catch (e) {
+        return json({ error: 'Bundle generation failed', detail: e.message, warnings, stage }, 500);
+      }
+
+      return json({
+        mode: 'bundle',
+        spaceSize,
+        mood: moodKey || null,
+        itemsCount: refs.length,
+        items: refs.map(r => ({
+          series: r.seriesKo,
+          color: r.colorKo,
+          size: r.sizeKo,
+          category: r.category,
+          filename: r.filename,
+        })),
+        warnings,
+        provider: 'gemini',
+        image: `data:image/png;base64,${resultBase64}`,
+      });
+    }
+
+    if (!series) return json({ error: 'series is required', stage }, 400);
 
     // ── RESOLVE MODE ─────────────────────────────────────────────
     if (mode === 'resolve') {
@@ -393,9 +547,10 @@ export async function onRequestPost(context) {
 
       // 4. 프롬프트 구성
       stage = 'build_prompt';
-      const scene = scenePrompt || (spaceSize === 'wide'
-        ? 'a spacious Korean modern living room with high ceilings, large windows, soft natural light, warm oak floor, minimalist styling'
-        : 'a cozy Korean modern living room with soft natural light, warm wood floor, minimalist styling');
+      // Scene 선택 우선순위: 1) scenePrompt 직접 지정, 2) mood → SCENE_LIBRARY[mood], 3) spaceSize 폴백
+      const scene = scenePrompt
+        || (mood && SCENE_LIBRARY[mood])
+        || SCENE_LIBRARY[spaceSize === 'wide' ? '_wide' : '_narrow'];
 
       // 카테고리 기반 가구 용어 — 시리즈가 sofa가 아닌 경우에도 정확히 묘사
       const categoryTerm = (function(cat){
@@ -474,6 +629,7 @@ export async function onRequestPost(context) {
         color: resolvedColor,
         colorAutoSelected,
         spaceSize,
+        mood: mood || null,
         tableColor: tableColorInput,
         sofaSelectedSize: body.size || resolved.info?.default_size || null,
         sofaSelectedMaterial: body.material || resolved.info?.default_material || null,
