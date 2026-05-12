@@ -3394,6 +3394,22 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
     const headerMsg = isSeriesSwap
       ? `${escHtml(data.target_series)} 시리즈로 변경해드렸어요.${Array.isArray(data.target_color) ? ` 컬러: ${escHtml(data.target_color.join(', '))}` : ' 컬러는 원본 유지.'}`
       : `"${escHtml(target)}" 으로 변환해드렸어요.`;
+    // 칩/시리즈 reference 정보 (정확도 디버깅용)
+    let refInfo = '';
+    if (data.chip) {
+      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(217,184,121,0.04);">
+        ✓ 컬러 reference 사용: <strong>${escHtml(data.chip.colorKo)}</strong> (코드 ${escHtml(data.chip.code)} · ${escHtml(data.chip.article)} 아티클)
+      </div>`;
+    } else if (isSeriesSwap && data.ref_used) {
+      const refName = data.ref_used.split('/').pop().replace(/\.[^.]+$/, '');
+      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(217,184,121,0.04);">
+        ✓ 시리즈 reference: <strong>${escHtml(refName)}</strong>
+      </div>`;
+    } else if (!isSeriesSwap) {
+      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(255,200,200,0.08);">
+        ⚠ 컬러 칩 reference 없음 — 텍스트 묘사로 추론 (정확도 제한). manifest에 code가 등록되지 않은 컬러일 수 있어요.
+      </div>`;
+    }
     const hintMsg = isSeriesSwap
       ? '매장 영업 활용 가능. 다른 시리즈로 다시 시도하려면 이미지를 새로 첨부해 주세요.'
       : '매장 영업 활용 가능. 다른 컬러로 다시 시도하려면 이미지를 새로 첨부해 주세요.';
@@ -3407,6 +3423,7 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
             <span>${modeLabel}: ${escHtml(isSeriesSwap ? data.target_series : target)}</span>
             <span><span class="tag">${modeTag}</span><span class="tag">gemini</span></span>
           </div>
+          ${refInfo}
           <div class="bundle-hint">${hintMsg}</div>
         </div>`;
     }
