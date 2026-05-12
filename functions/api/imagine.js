@@ -18,7 +18,7 @@
 const MANIFEST_URL = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/manifest-series.json';
 const ANGLES = ['정면', '측면', '부감'];
 const CACHE_TTL = 3600;
-const CACHE_KEY = 'https://internal.alma/manifest-series-v4';
+const CACHE_KEY = 'https://internal.alma/manifest-series-v7';
 
 // ─── Scene Library — 6 무드 + 공간 타입별 추가 scene ───
 // 알로소 Pinterest 보드 + 매장 시공 레퍼런스 시각 언어 기반
@@ -396,13 +396,46 @@ export async function onRequestPost(context) {
         if (instruction.includes(k)) enrichment += ` (${k} = ${v})`;
       }
 
+      // ── 컬러 칩 이미지 자동 fetch (시각 reference) ──
+      stage = 'swap_chip_fetch';
+      const TEXTURES_BASE = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/textures/alloso-textures-512/';
+      let chipBase64 = null;
+      let chipMeta = null;
+      const matchedColorKo = matchedColors[0]; // 첫 매칭 컬러 우선
+      if (matchedColorKo && manifest.colors?.[matchedColorKo]?.code) {
+        const code = manifest.colors[matchedColorKo].code;
+        const article = manifest.colors[matchedColorKo].article || '';
+        try {
+          const chipRes = await fetch(`${TEXTURES_BASE}${code}.jpg`);
+          if (chipRes.ok) {
+            const buf = await chipRes.arrayBuffer();
+            const bytes = new Uint8Array(buf);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+            chipBase64 = btoa(binary);
+            chipMeta = { code, article, colorKo: matchedColorKo };
+          }
+        } catch (e) {
+          // 칩 fetch 실패 — 텍스트 묘사로 fallback
+        }
+      }
+
       stage = 'swap_gemini';
+      // 칩 이미지 유무에 따라 프롬프트 분기
+      const refImages = chipBase64 ? [base64, chipBase64] : [base64];
+      const chipReference = chipBase64
+        ? `IMAGE 2 (color reference swatch): This is the exact Alloso "${chipMeta.colorKo}" color swatch (${chipMeta.article} article, ERP code ${chipMeta.code}). The upholstery in IMAGE 1 must be recolored to match this swatch's color, tone, and material texture EXACTLY.`
+        : '';
+
       const swapPrompt = [
         `═══ PHOTO RETOUCH TASK — NOT a furniture regeneration ═══`,
-        `You are performing a precise color/material recolor edit on this photograph.`,
+        chipBase64
+          ? `You are performing a precise material/color recolor edit. IMAGE 1 is the source photograph. IMAGE 2 is the exact color swatch to match.`
+          : `You are performing a precise color/material recolor edit on this photograph.`,
         `User's instruction: "${instruction}"${enrichment}`,
-        `THIS IS A SURFACE RECOLOR ONLY. Treat this as Photoshop "Replace Color" on the upholstery surface — the underlying furniture geometry must remain pixel-identical.`,
-        `MUST REMAIN ABSOLUTELY IDENTICAL TO THE ORIGINAL IMAGE (do NOT change these even by 1 pixel):`,
+        chipReference,
+        `THIS IS A SURFACE RECOLOR ONLY. Treat this as Photoshop "Replace Color" on the upholstery surface — the underlying furniture geometry must remain pixel-identical to IMAGE 1.`,
+        `MUST REMAIN ABSOLUTELY IDENTICAL TO IMAGE 1 (do NOT change these even by 1 pixel):`,
         `1. The EXACT furniture silhouette, shape, geometry, dimensions, proportions, contours.`,
         `2. The EXACT number of cushions, their individual shape, their position, their arrangement, their creases and folds.`,
         `3. The EXACT armrest design, leg/base design, frame structure, stitching pattern.`,
@@ -410,15 +443,17 @@ export async function onRequestPost(context) {
         `5. The EXACT lighting direction, intensity, color temperature, shadows, highlights, and reflections.`,
         `6. The EXACT background, walls, floor, side tables, lamps, decorative objects, plants — every other element must be untouched.`,
         `7. The EXACT image resolution and photographic quality of the original.`,
-        `ONLY CHANGE: the surface color and/or material texture of the main upholstered fabric/leather areas of the furniture. Adjust shadow tones subtly to match the new material's reflectivity, but do not change shadow shape or position.`,
-        `Target appearance for the upholstery surface: ${instruction}${enrichment ? ' — refer to the color enrichment notes above for accuracy' : ''}.`,
-        `If the user names a specific Alloso color (e.g. 모빅, 카도마리노), match that exact color description STRICTLY. Do not approximate or shift toward similar colors.`,
-        `Output a single photorealistic image that looks like a Photoshop color-replace edit of the original — same room, same furniture geometry, same lighting, only the upholstery surface re-colored.`,
-      ].join(' ');
+        `ONLY CHANGE: the surface color and/or material texture of the main upholstered fabric/leather areas of the furniture in IMAGE 1.`,
+        chipBase64
+          ? `Match IMAGE 2's color and material texture EXACTLY. Sample the swatch carefully — match its hue, saturation, value, warmth, and surface texture precisely. Do not approximate.`
+          : `Target appearance for the upholstery: ${instruction}${enrichment ? ' — refer to the color enrichment notes above for accuracy' : ''}. Match the specified Alloso color STRICTLY.`,
+        `Adjust shadow tones subtly to match the new material's reflectivity, but do not change shadow shape or position.`,
+        `Output a single photorealistic image that looks like a Photoshop color-replace edit of IMAGE 1 — same room, same furniture geometry, same lighting, only the upholstery surface re-colored to match the target.`,
+      ].filter(Boolean).join(' ');
 
       let resultBase64;
       try {
-        resultBase64 = await callGemini(env, [base64], swapPrompt);
+        resultBase64 = await callGemini(env, refImages, swapPrompt);
         if (!resultBase64) throw new Error('Gemini returned no image data');
       } catch (e) {
         return json({ error: 'Material swap failed', detail: e.message, stage }, 500);
@@ -428,6 +463,7 @@ export async function onRequestPost(context) {
         mode: 'swap_material',
         target: instruction,
         enrichment: enrichment.trim() || null,
+        chip: chipMeta,  // 사용된 칩 정보 (디버깅용)
         provider: 'gemini',
         image: `data:image/png;base64,${resultBase64}`,
       });
