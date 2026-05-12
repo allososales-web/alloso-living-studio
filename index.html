@@ -863,61 +863,220 @@ body{
 .curated-desc{font-size:10.5px;color:var(--text2);line-height:1.5;margin-bottom:5px;}
 .curated-cta{font-size:10px;color:var(--gold);font-weight:400;letter-spacing:.04em;cursor:pointer;display:inline-block;padding:4px 8px;border:1px solid rgba(139,115,85,.3);border-radius:3px;background:rgba(139,115,85,.04);transition:all .15s;}
 .curated-cta:hover{background:rgba(139,115,85,.12);}
-/* ── Bundle: 인터랙티브 마커 + 제품 카드 ── */
+/* ══ Sidebar (Model B) ══ */
+:root{
+  --sidebar-w: 248px;
+}
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;
+  width:var(--sidebar-w);
+  background:var(--bg);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  z-index:60;
+  transition:transform .25s ease;
+  overflow:hidden;
+}
+.sb-header{padding:14px 14px 10px;display:flex;align-items:center;justify-content:space-between;}
+.sb-brand{font-family:'Josefin Sans',sans-serif;font-size:11.5px;letter-spacing:.42em;color:var(--accent);}
+.sb-toggle{
+  width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;cursor:pointer;
+  color:var(--muted);border-radius:4px;
+  transition:background .15s;
+}
+.sb-toggle:hover{background:rgba(0,0,0,0.04);color:var(--accent);}
+.sb-new-chat{
+  margin:4px 12px 14px;
+  padding:10px 14px;
+  background:var(--accent);color:var(--bg);
+  border:none;border-radius:5px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:12px;letter-spacing:.04em;font-weight:500;
+  transition:transform .12s,box-shadow .12s;
+}
+.sb-new-chat:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.12);}
+.sb-nav{padding:0 8px 14px;}
+.sb-nav-item{
+  padding:9px 11px;
+  border-radius:4px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--accent);
+  transition:background .15s;
+  margin-bottom:1px;
+}
+.sb-nav-item:hover{background:rgba(0,0,0,0.04);}
+.sb-nav-icon{font-size:13px;width:18px;text-align:center;}
+.sb-nav-label{letter-spacing:.02em;}
+.sb-divider{height:1px;background:var(--border);margin:0 12px;}
+.sb-moodboard-section{flex:1;display:flex;flex-direction:column;padding-top:14px;min-height:0;}
+.sb-section-title{
+  font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--muted);
+  padding:0 14px 8px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.sb-mb-count{font-size:9.5px;color:var(--muted);letter-spacing:0;}
+.sb-moodboard-list{
+  flex:1;overflow-y:auto;
+  padding:0 8px 8px;
+}
+.sb-moodboard-list::-webkit-scrollbar{width:4px;}
+.sb-moodboard-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.sb-moodboard-empty{
+  padding:24px 14px;
+  font-size:10.5px;color:var(--muted);
+  text-align:center;line-height:1.6;
+  border:1px dashed var(--border);border-radius:4px;
+  margin:0 4px;
+}
+.sb-mb-item{
+  padding:8px;
+  border-radius:4px;cursor:pointer;
+  display:flex;gap:8px;align-items:center;
+  margin-bottom:3px;
+  transition:background .15s;
+  position:relative;
+}
+.sb-mb-item:hover{background:rgba(0,0,0,0.04);}
+.sb-mb-thumb{
+  width:44px;height:44px;
+  border-radius:3px;
+  background:var(--bg2);
+  background-size:cover;background-position:center;
+  flex-shrink:0;
+}
+.sb-mb-info{flex:1;min-width:0;}
+.sb-mb-title{font-size:11px;color:var(--accent);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-mb-sub{font-size:9.5px;color:var(--muted);letter-spacing:.02em;}
+.sb-mb-remove{
+  position:absolute;top:5px;right:5px;
+  width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  color:var(--muted);font-size:13px;line-height:1;
+  opacity:0;transition:opacity .15s,background .15s;
+  cursor:pointer;
+}
+.sb-mb-item:hover .sb-mb-remove{opacity:1;}
+.sb-mb-remove:hover{background:rgba(0,0,0,0.08);color:var(--accent);}
+.sb-footer{
+  padding:10px 14px 14px;
+  border-top:1px solid var(--border);
+  font-size:9.5px;color:var(--muted);
+  line-height:1.7;
+}
+.sb-footer-line a{color:var(--muted);text-decoration:none;}
+.sb-footer-line a:hover{color:var(--accent);}
+
+/* shell shifts right for desktop */
+body{padding-left:var(--sidebar-w);transition:padding-left .25s;}
+body.sb-collapsed{padding-left:0;}
+body.sb-collapsed .sidebar{transform:translateX(-100%);}
+
+/* Backdrop (mobile only) */
+.sidebar-backdrop{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.5);
+  z-index:55;
+  display:none;
+  opacity:0;transition:opacity .25s;
+}
+body.sb-mobile-open .sidebar-backdrop{display:block;opacity:1;}
+
+/* Mobile hamburger */
+.mobile-hamburger{
+  position:fixed;top:14px;left:14px;
+  width:38px;height:38px;
+  border:none;background:var(--card);
+  border:1px solid var(--border);
+  border-radius:50%;
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--accent);
+  z-index:50;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Bookmark button on bundle result */
+.bundle-bookmark{
+  position:absolute;top:10px;right:10px;
+  width:34px;height:34px;
+  border:none;background:rgba(255,255,255,0.92);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--accent);
+  z-index:3;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  transition:transform .15s,background .15s;
+}
+.bundle-bookmark:hover{transform:scale(1.08);background:rgba(255,255,255,1);}
+.bundle-bookmark.saved{background:var(--gold);color:#fff;}
+.bundle-bookmark.saved:hover{background:var(--accent);}
+
+/* Moodboard full-view modal */
+.mb-modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.7);
+  z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s;
+}
+.mb-modal-overlay.open{opacity:1;pointer-events:auto;}
+.mb-modal{
+  max-width:760px;width:100%;max-height:90vh;
+  background:var(--bg);border-radius:8px;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.mb-modal-header{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.mb-modal-title{font-family:'Josefin Sans',sans-serif;font-size:11.5px;letter-spacing:.32em;color:var(--accent);}
+.mb-modal-close{
+  width:30px;height:30px;border:none;background:transparent;
+  font-size:22px;color:var(--muted);cursor:pointer;line-height:1;
+}
+.mb-modal-body{padding:18px;overflow-y:auto;flex:1;}
+.mb-modal-img{width:100%;border-radius:4px;display:block;}
+
+@media (max-width: 1024px) {
+  body{padding-left:0;}
+  .sidebar{
+    transform:translateX(-100%);
+    z-index:100;
+    box-shadow:0 0 40px rgba(0,0,0,0.3);
+  }
+  body.sb-mobile-open .sidebar{transform:translateX(0);}
+  body.sb-collapsed .sidebar{transform:translateX(-100%);}
+  .mobile-hamburger{display:flex;}
+  /* 모바일에서 햄버거 영역만큼 헤더 우측으로 */
+  .hdr-left{padding-left:42px;}
+}
+@media (min-width: 1025px) {
+  .sidebar-backdrop{display:none !important;}
+  .mobile-hamburger{display:none !important;}
+}
+/* ── Bundle: 결과 이미지 + 제품 카드 (클릭 가능) ── */
 .bundle-image-wrap{position:relative;line-height:0;}
 .bundle-image-wrap .imagine-result{display:block;width:100%;border-radius:4px;}
-.alloso-markers-layer{position:absolute;inset:0;pointer-events:none;}
-.alloso-marker{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;z-index:5;}
-.marker-dot{
-  width:13px;height:13px;
-  background:rgba(255,255,255,0.96);
-  border:2px solid var(--gold);
-  border-radius:50%;
-  box-shadow:0 0 0 4px rgba(0,0,0,0.18),0 2px 6px rgba(0,0,0,0.25);
-  transition:transform .18s;
-  animation:markerPulse 2.4s ease-in-out infinite;
-}
-@keyframes markerPulse{
-  0%,100%{box-shadow:0 0 0 4px rgba(0,0,0,0.18),0 2px 6px rgba(0,0,0,0.25),0 0 0 0 rgba(217,184,121,0);}
-  50%{box-shadow:0 0 0 4px rgba(0,0,0,0.18),0 2px 6px rgba(0,0,0,0.25),0 0 0 8px rgba(217,184,121,0.2);}
-}
-.alloso-marker:hover .marker-dot{transform:scale(1.35);animation:none;}
-.marker-tooltip{
-  position:absolute;bottom:calc(100% + 14px);left:50%;
-  transform:translateX(-50%);
-  width:230px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:11px;
-  display:none;
-  z-index:10;
-  box-shadow:0 8px 24px rgba(0,0,0,0.25);
-}
-.marker-tooltip::after{
-  content:'';position:absolute;top:100%;left:50%;
-  transform:translateX(-50%);
-  border:6px solid transparent;border-top-color:var(--card);
-}
-.alloso-marker:hover .marker-tooltip{display:block;}
-.tt-thumb{width:100%;aspect-ratio:1.4;background:var(--bg2);border-radius:4px;overflow:hidden;margin-bottom:7px;}
-.tt-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
-.tt-en{font-family:'Josefin Sans',sans-serif;font-size:10.5px;letter-spacing:.18em;color:var(--gold);margin-bottom:2px;}
-.tt-name{font-size:12px;color:var(--accent);font-weight:500;margin-bottom:3px;line-height:1.4;}
-.tt-spec{font-size:10.5px;color:var(--muted);margin-bottom:5px;}
-.tt-feat{font-size:10px;color:var(--text2);line-height:1.45;margin-bottom:1px;}
-.tt-note{font-size:9.5px;color:var(--gold);background:rgba(217,184,121,0.08);padding:3px 6px;border-radius:3px;margin-top:5px;line-height:1.4;}
-.tt-brand{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.3em;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);text-align:right;}
-/* 하단 제품 카드 리스트 */
+/* 하단 제품 카드 리스트 — 클릭 시 알로소 상세 페이지 */
 .bundle-products-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
-.bundle-prod-card{display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--card2);border-radius:4px;position:relative;}
+.bundle-prod-card{display:flex;gap:10px;align-items:center;padding:9px 10px;background:var(--card2);border:1px solid transparent;border-radius:4px;position:relative;text-decoration:none;color:inherit;transition:all .15s;cursor:pointer;}
+.bundle-prod-card:hover{background:rgba(217,184,121,0.06);border-color:rgba(217,184,121,0.3);}
 .bp-thumb{width:48px;height:48px;border-radius:3px;overflow:hidden;background:var(--bg2);flex-shrink:0;}
 .bp-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .bp-info{flex:1;min-width:0;}
 .bp-en{font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.16em;color:var(--gold);margin-bottom:1px;}
 .bp-name{font-size:12px;color:var(--accent);font-weight:500;margin-bottom:2px;}
 .bp-spec{font-size:10.5px;color:var(--muted);}
-.bp-tag{position:absolute;top:6px;right:8px;font-family:'Josefin Sans',sans-serif;font-size:8.5px;letter-spacing:.22em;color:var(--gold);background:rgba(217,184,121,0.08);padding:2px 6px;border-radius:2px;}
+.bp-note{font-size:9.5px;color:var(--gold);background:rgba(217,184,121,0.08);padding:2px 6px;border-radius:3px;margin-top:3px;display:inline-block;line-height:1.3;}
+.bp-tag{position:absolute;top:9px;right:10px;font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.22em;color:var(--gold);background:rgba(217,184,121,0.08);padding:3px 7px;border-radius:2px;}
+.bundle-prod-card:hover .bp-tag{background:rgba(217,184,121,0.18);}
+.bundle-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);line-height:1.5;}
 /* ── Imagine Box (AI 이미지 생성) ── */
 .imagine-box{margin:10px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card);}
 .imagine-loading{padding:32px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;}
@@ -1111,6 +1270,61 @@ body{
 </style>
 </head>
 <body>
+
+<!-- ══ Sidebar (Model B — Pinterest 보드 컨셉) ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">ALLOSO</div>
+    <button class="sb-toggle" onclick="toggleSidebar()" aria-label="사이드바 접기">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+  </div>
+
+  <button class="sb-new-chat" onclick="newChat()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>새 대화</span>
+  </button>
+
+  <nav class="sb-nav">
+    <div class="sb-nav-item" onclick="openChat('mood')">
+      <span class="sb-nav-icon">🎨</span>
+      <span class="sb-nav-label">알로소 팔레트</span>
+    </div>
+    <div class="sb-nav-item" onclick="sbAskCatalog()">
+      <span class="sb-nav-icon">📑</span>
+      <span class="sb-nav-label">시리즈 카탈로그</span>
+    </div>
+    <div class="sb-nav-item" onclick="sbAskStores()">
+      <span class="sb-nav-icon">🏠</span>
+      <span class="sb-nav-label">매장 안내</span>
+    </div>
+    <div class="sb-nav-item" onclick="sbAskCareGuide()">
+      <span class="sb-nav-icon">📖</span>
+      <span class="sb-nav-label">소재 가이드</span>
+    </div>
+  </nav>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-moodboard-section">
+    <div class="sb-section-title">
+      <span>♥ 저장한 무드보드</span>
+      <span class="sb-mb-count" id="sbMoodboardCount"></span>
+    </div>
+    <div class="sb-moodboard-list" id="sbMoodboardList"></div>
+  </div>
+
+  <div class="sb-footer">
+    <div class="sb-footer-line">고객센터 1577-1641</div>
+    <div class="sb-footer-line"><a href="https://alloso.co.kr" target="_blank" rel="noopener">alloso.co.kr ↗</a></div>
+  </div>
+</aside>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+<button class="mobile-hamburger" id="mobileHamburger" onclick="toggleSidebar()" aria-label="메뉴 열기">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
 <div class="shell" id="shell">
   <div class="hdr" id="hdr">
     <div class="hdr-left">
@@ -1768,6 +1982,15 @@ const CHAT_SYSTEM = `당신은 알로소(Alloso) 디지털 어시스턴트입니
 - table (페일리, 바인, 레이어, 케렌시아 테이블) → 커피 테이블
 - daybed (바드 데이베드) → 벽면·창가
 
+[1인/단일 사이즈 변형 — 시각적으로 single armchair로 처리]
+같은 시리즈여도 사이즈가 "1인", "단일", "하이백 1인", "1인 와이드", "1인 라운지"면 multi-seat sofa가 아닌 **single armchair**로 합성. 매니페스트의 category가 sofa로 되어있어도 사이즈 슬롯에서 단일 좌석 변형이면 imagine.js가 자동으로 armchair 프롬프트 사용.
+
+예시:
+- "케렌시아 1인" → category=sofa지만 size=1인 → armchair 처리 (모듈 라운지처럼 키우지 않음)
+- "사티 1인" → armchair
+- "뚜따 하이백 1인" → 이미 lounge_chair 카테고리, single armchair
+- "케렌시아 둥지형" (3인 모듈 라운지) → 멀티 시트 sofa, 메인 앵커
+
 【화법 규칙 — 답변 톤】
 - 고객의 선택이나 취향에 대해 긍정적으로 반응합니다. 단, 매 답변마다 칭찬을 강제하지 말고 맥락에 맞게 자연스럽게 합니다.
 - 알로소 제품에 대해 절대 부정적으로 말하지 않습니다. 예: "무거워 보일 수 있어요" (X) → "깊이감을 줄 수 있어요" (O). 모든 컬러·소재·시리즈는 각각의 장점이 있다는 톤을 유지합니다.
@@ -2307,6 +2530,189 @@ const MOOD_CURATIONS = {
   },
 };
 
+// ══ Sidebar + 무드보드 (Model B) ══
+const MOODBOARD_KEY = 'alloso_moodboard_v1';
+const SIDEBAR_KEY = 'alloso_sidebar_collapsed';
+
+function getMoodboard(){
+  try { return JSON.parse(localStorage.getItem(MOODBOARD_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function saveMoodboard(items){
+  try { localStorage.setItem(MOODBOARD_KEY, JSON.stringify(items)); }
+  catch(e){ console.warn('localStorage write failed', e); }
+}
+function addToMoodboard(payload){
+  const items = getMoodboard();
+  const id = 'mb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+  items.unshift({ ...payload, id, savedAt: Date.now() });
+  if (items.length > 30) items.length = 30;
+  saveMoodboard(items);
+  renderMoodboardSidebar();
+  return id;
+}
+function removeFromMoodboard(id){
+  const items = getMoodboard().filter(i => i.id !== id);
+  saveMoodboard(items);
+  renderMoodboardSidebar();
+}
+function renderMoodboardSidebar(){
+  const list = document.getElementById('sbMoodboardList');
+  const count = document.getElementById('sbMoodboardCount');
+  if (!list) return;
+  const items = getMoodboard();
+  if (count) count.textContent = items.length ? items.length + '개' : '';
+  if (items.length === 0) {
+    list.innerHTML = `<div class="sb-moodboard-empty">마음에 드는 조합을<br>♥ 저장해 보관해보세요</div>`;
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const titleText = item.type === 'bundle'
+      ? `${item.itemsCount || (item.items?.length || 0)}가지 조합`
+      : (item.series || '인테리어') + (item.color ? ' · ' + item.color : '');
+    const subText = [item.mood, item.spaceSize].filter(Boolean).join(' · ') || '저장';
+    const thumb = item.image ? `style="background-image:url('${item.image.replace(/'/g, "\\'")}');"` : '';
+    return `
+      <div class="sb-mb-item" onclick="openMoodboardItem('${item.id}')">
+        <div class="sb-mb-thumb" ${thumb}></div>
+        <div class="sb-mb-info">
+          <div class="sb-mb-title">${escHtml(titleText)}</div>
+          <div class="sb-mb-sub">${escHtml(subText)}</div>
+        </div>
+        <span class="sb-mb-remove" onclick="event.stopPropagation();removeFromMoodboard('${item.id}')" title="삭제">×</span>
+      </div>`;
+  }).join('');
+}
+
+function openMoodboardItem(id){
+  const item = getMoodboard().find(i => i.id === id);
+  if (!item) return;
+  showMoodboardModal(item);
+}
+
+function showMoodboardModal(item){
+  let modal = document.getElementById('mbModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'mbModal';
+    modal.className = 'mb-modal-overlay';
+    modal.onclick = function(e){ if (e.target === modal) closeMoodboardModal(); };
+    document.body.appendChild(modal);
+  }
+  const titleText = item.type === 'bundle'
+    ? `${item.itemsCount || (item.items?.length || 0)}가지 알로소 제품 조합`
+    : (item.series || 'ALLOSO') + (item.color ? ' · ' + item.color : '');
+  const productsHtml = (item.items || []).map(it => {
+    const url = it.productPageUrl || `https://alloso.co.kr/search?q=${encodeURIComponent(it.series||'')}`;
+    return `
+      <a class="bundle-prod-card" href="${escHtml(url)}" target="_blank" rel="noopener">
+        ${it.thumbnailUrl ? `<div class="bp-thumb"><img src="${escHtml(it.thumbnailUrl)}" onerror="this.style.opacity='0.3'"></div>` : '<div class="bp-thumb"></div>'}
+        <div class="bp-info">
+          <div class="bp-en">${escHtml(it.seriesEn || '')}</div>
+          <div class="bp-name">${escHtml(it.series || '')}${it.size ? ' · ' + escHtml(it.size) : ''}</div>
+          <div class="bp-spec">${escHtml(it.material || '')}${it.color ? ' · ' + escHtml(it.color) : ''}</div>
+        </div>
+        <span class="bp-tag">ALLOSO ↗</span>
+      </a>`;
+  }).join('');
+  const savedAtStr = item.savedAt ? new Date(item.savedAt).toLocaleDateString('ko-KR') : '';
+  modal.innerHTML = `
+    <div class="mb-modal">
+      <div class="mb-modal-header">
+        <div class="mb-modal-title">${escHtml(titleText)}</div>
+        <button class="mb-modal-close" onclick="closeMoodboardModal()">×</button>
+      </div>
+      <div class="mb-modal-body">
+        ${item.image ? `<img class="mb-modal-img" src="${item.image}" alt="저장된 인테리어">` : ''}
+        <div style="margin-top:12px;font-size:10.5px;color:var(--muted);letter-spacing:.02em;">
+          ${[item.mood, item.spaceSize, savedAtStr ? '저장: ' + savedAtStr : ''].filter(Boolean).join(' · ')}
+        </div>
+        ${productsHtml ? `<div class="bundle-products-list" style="margin-top:14px;">${productsHtml}</div>` : ''}
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="removeFromMoodboard('${item.id}');closeMoodboardModal();" style="padding:8px 14px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:3px;cursor:pointer;font-size:11px;">무드보드에서 삭제</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>{ modal.classList.add('open'); }, 10);
+}
+function closeMoodboardModal(){
+  const modal = document.getElementById('mbModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function toggleSidebar(){
+  if (window.innerWidth < 1025) {
+    document.body.classList.toggle('sb-mobile-open');
+  } else {
+    document.body.classList.toggle('sb-collapsed');
+    try { localStorage.setItem(SIDEBAR_KEY, document.body.classList.contains('sb-collapsed') ? '1' : '0'); } catch(e){}
+  }
+}
+
+function newChat(){
+  // 모바일이면 사이드바 닫기
+  if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
+  // 현재 채팅 클리어 + 자유 모드로
+  try { chatHistory = []; } catch(e){}
+  const msgs = document.getElementById('chatMsgs');
+  if (msgs) msgs.innerHTML = '';
+  chatOpenMode = 'free';
+  // 채팅이 열려있으면 환영 메시지 새로 그리기
+  const panel = document.getElementById('chatPanel');
+  if (panel && panel.classList.contains('open')) {
+    renderFreeWelcome();
+  } else {
+    openChat('free');
+  }
+}
+
+function sbAskCatalog(){
+  if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
+  openChat('free');
+  setTimeout(()=> sendMessage('알로소 시리즈 전체 카탈로그 보여줘'), 250);
+}
+function sbAskStores(){
+  if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
+  openChat('free');
+  setTimeout(()=> sendMessage('알로소 매장 어디 있어?'), 250);
+}
+function sbAskCareGuide(){
+  if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
+  openChat('free');
+  setTimeout(()=> sendMessage('소재 관리 가이드 알려줘'), 250);
+}
+
+// 번들 결과 북마크
+function bookmarkBundle(elId, btnEl){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (btnEl.classList.contains('saved')) return; // 이미 저장됨
+  let data;
+  try { data = JSON.parse(el.dataset.bundleData || '{}'); }
+  catch(e){ return; }
+  const img = el.querySelector('.imagine-result');
+  const imageSrc = img ? img.src : '';
+  addToMoodboard({
+    type: 'bundle',
+    image: imageSrc,
+    items: data.items || [],
+    itemsCount: data.itemsCount,
+    mood: data.mood,
+    spaceSize: data.spaceSize,
+  });
+  btnEl.classList.add('saved');
+  btnEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+  btnEl.title = '저장됨';
+}
+
+// 페이지 로드 시 사이드바 상태 복원 + 무드보드 렌더
+document.addEventListener('DOMContentLoaded', function(){
+  try {
+    if (localStorage.getItem(SIDEBAR_KEY) === '1') document.body.classList.add('sb-collapsed');
+  } catch(e){}
+  renderMoodboardSidebar();
+});
+
 let chatOpenMode = 'free'; // 'free' (자유 진입) | 'mood' (알로소 팔레트 진입)
 
 function openChat(mode){
@@ -2682,54 +3088,45 @@ async function generateBundleImage(id, items, space, mood){
     const warningsHtml = (data.warnings && data.warnings.length)
       ? `<div class="imagine-warning">${data.warnings.map(w => escHtml(w)).join('<br>')}</div>` : '';
 
-    // 이미지 위 알로소 제품 마커 (호버 시 툴팁)
-    const markersHtml = (data.items || []).map((item, idx) => {
-      const pos = item.placement || { x: '50%', y: '60%' };
-      const substituteNote = item.sizeSubstituted && item.requestedSize
-        ? `<div class="tt-note">요청: "${escHtml(item.requestedSize)}" → 실제: ${escHtml(item.size)}</div>` : '';
-      const featuresHtml = (item.features || []).map(f => `<div class="tt-feat">· ${escHtml(f)}</div>`).join('');
-      return `
-        <div class="alloso-marker" style="left:${pos.x};top:${pos.y};" data-idx="${idx}">
-          <div class="marker-dot"></div>
-          <div class="marker-tooltip">
-            ${item.thumbnailUrl ? `<div class="tt-thumb"><img src="${escHtml(item.thumbnailUrl)}" alt="${escHtml(item.series)}" onerror="this.style.display='none'"></div>` : ''}
-            <div class="tt-info">
-              <div class="tt-en">${escHtml(item.seriesEn || '')}</div>
-              <div class="tt-name">${escHtml(item.series)}${item.size ? ' · ' + escHtml(item.size) : ''}</div>
-              <div class="tt-spec">${escHtml(item.material || '')}${item.color ? ' · ' + escHtml(item.color) : ''}</div>
-              ${featuresHtml}
-              ${substituteNote}
-              <div class="tt-brand">ALLOSO</div>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
-
-    // 하단 제품 카드 리스트
+    // 하단 제품 카드 리스트 — 클릭 시 알로소 제품 페이지로 이동
     const productCardsHtml = (data.items || []).map(item => {
+      const url = item.productPageUrl || `https://alloso.co.kr/?q=${encodeURIComponent(item.series)}`;
+      const subNote = item.sizeSubstituted && item.requestedSize
+        ? `<div class="bp-note">요청 "${escHtml(item.requestedSize)}" → ${escHtml(item.size)}</div>` : '';
       return `
-        <div class="bundle-prod-card">
+        <a class="bundle-prod-card" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer">
           ${item.thumbnailUrl ? `<div class="bp-thumb"><img src="${escHtml(item.thumbnailUrl)}" alt="${escHtml(item.series)}" onerror="this.style.opacity='0.3'"></div>` : '<div class="bp-thumb"></div>'}
           <div class="bp-info">
             <div class="bp-en">${escHtml(item.seriesEn || '')}</div>
             <div class="bp-name">${escHtml(item.series)}${item.size ? ' · ' + escHtml(item.size) : ''}</div>
             <div class="bp-spec">${escHtml(item.material || '')}${item.color ? ' · ' + escHtml(item.color) : ''}</div>
+            ${subNote}
           </div>
-          <span class="bp-tag">ALLOSO</span>
-        </div>`;
+          <span class="bp-tag">ALLOSO ↗</span>
+        </a>`;
     }).join('');
 
     el.innerHTML = `
       <div class="bundle-image-wrap">
         <img class="imagine-result" src="${data.image}" alt="번들 인테리어 (${data.itemsCount}가지 제품)">
-        <div class="alloso-markers-layer">${markersHtml}</div>
+        <button class="bundle-bookmark" onclick="bookmarkBundle('${id}', this)" title="무드보드에 저장" aria-label="저장">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
       </div>
       <div class="imagine-meta">
         <span>${data.itemsCount}가지 알로소 제품</span>
         <span>${moodTag}${provider ? `<span class="tag">${provider}</span>` : ''}</span>
       </div>
       <div class="bundle-products-list">${productCardsHtml}</div>
+      <div class="bundle-hint">↑ 제품 카드 클릭 시 알로소 페이지 · ♥ 클릭 시 무드보드에 저장</div>
       ${warningsHtml}`;
+    // 북마크 시 활용할 데이터 저장
+    el.dataset.bundleData = JSON.stringify({
+      items: data.items || [],
+      itemsCount: data.itemsCount,
+      mood: data.mood,
+      spaceSize: data.spaceSize,
+    });
     scrollMsgs();
   } catch (e) {
     el.innerHTML = `<div class="imagine-error">번들 이미지 생성 실패 (${escHtml(e.message.slice(0, 80))}).</div>`;
