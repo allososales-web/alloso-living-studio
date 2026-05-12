@@ -396,6 +396,97 @@ export async function onRequestPost(context) {
         if (instruction.includes(k)) enrichment += ` (${k} = ${v})`;
       }
 
+      // ── 시리즈 매칭 (시리즈 swap 분기) ──
+      stage = 'swap_series_detect';
+      let targetSeries = null;
+      let targetSeriesFolder = null;
+      const seriesEntries = Object.entries(manifest.series || {});
+      // 긴 시리즈명 우선 매칭 ("사티 큐브 스위블" 먼저, "사티" 나중)
+      seriesEntries.sort((a, b) => b[0].length - a[0].length);
+      for (const [seriesKo, seriesData] of seriesEntries) {
+        if (!seriesData || typeof seriesData !== 'object') continue;
+        // 다양한 표기 가능: 공백 유무 / 영문명
+        const cands = [seriesKo, seriesKo.replace(/\s/g, ''), seriesData.en || ''];
+        for (const cand of cands) {
+          if (cand && cand.length >= 2 && instruction.includes(cand)) {
+            targetSeries = seriesKo;
+            targetSeriesFolder = seriesData.folder;
+            break;
+          }
+        }
+        if (targetSeries) break;
+      }
+
+      // === 시리즈 swap 분기: 사용자 사진 + 타겟 시리즈 누끼를 Gemini로 합성 ===
+      if (targetSeries && targetSeriesFolder && env.PRODUCTS) {
+        stage = 'swap_series_fetch';
+        const refColor = matchedColors[0] || null; // 새 컬러 명시 있으면 우선, 없으면 default
+        const seriesPick = await findBestReference(env, `products/${targetSeriesFolder}/`, {
+          preferredColor: refColor,
+          preferredAngle: '측면',
+        });
+
+        if (!seriesPick) {
+          return json({
+            error: `타겟 시리즈 "${targetSeries}" 폴더에서 누끼를 찾을 수 없어요`,
+            folder: `products/${targetSeriesFolder}/`,
+            stage,
+          }, 404);
+        }
+
+        stage = 'swap_series_b64';
+        const seriesBase64 = await fetchR2AsBase64(env, seriesPick.key);
+        if (!seriesBase64) {
+          return json({ error: 'R2 fetch 실패', key: seriesPick.key, stage }, 500);
+        }
+
+        // 컬러 명시 유무에 따라 prompt 분기
+        const colorClause = matchedColors.length > 0
+          ? `Change BOTH the furniture shape (to match IMAGE 2's ${targetSeries}) AND the upholstery color (to: ${matchedColors.join(', ')}${enrichment})`
+          : `Keep the EXACT original color/material of the existing furniture in IMAGE 1 (do not change the color). Only change the furniture SHAPE/STYLE to match IMAGE 2's ${targetSeries}.`;
+
+        stage = 'swap_series_gemini';
+        const seriesSwapPrompt = [
+          `═══ PRODUCT REPLACEMENT TASK — Alloso furniture swap ═══`,
+          `IMAGE 1 = source photograph showing existing furniture in a room context.`,
+          `IMAGE 2 = reference cutout of Alloso ${targetSeries} (the target product to place into the room).`,
+          `Task: Replace the main upholstered furniture in IMAGE 1 with the Alloso ${targetSeries} shown in IMAGE 2.`,
+          ``,
+          `MUST PRESERVE from IMAGE 1 (do not change):`,
+          `- The room, walls, floor, lighting, all surrounding objects (lamps, tables, plants, decor).`,
+          `- The camera angle, perspective, framing, crop, resolution.`,
+          `- The natural light direction, intensity, color temperature, shadows on surrounding elements.`,
+          `- The general placement zone and approximate scale where the furniture sits.`,
+          ``,
+          `MUST CHANGE: the furniture itself — replace it with the EXACT silhouette, shape, proportions, cushion arrangement, armrest design, and leg/base structure of IMAGE 2's ${targetSeries}.`,
+          ``,
+          `COLOR HANDLING: ${colorClause}.`,
+          ``,
+          `The new furniture must look like it actually exists in IMAGE 1's room — match the perspective, scale, and lighting of that room. The replacement should look natural and photorealistic, as if the Alloso ${targetSeries} was originally photographed in that exact room.`,
+          ``,
+          PHOTOREAL_DIRECTIVE,
+          ``,
+          `Output: a single photorealistic image showing the Alloso ${targetSeries} placed naturally in IMAGE 1's room context.`,
+        ].filter(Boolean).join(' ');
+
+        let resultBase64;
+        try {
+          resultBase64 = await callGemini(env, [base64, seriesBase64], seriesSwapPrompt);
+          if (!resultBase64) throw new Error('Gemini returned no image data');
+        } catch (e) {
+          return json({ error: 'Series swap failed', detail: e.message, stage }, 500);
+        }
+
+        return json({
+          mode: 'swap_series',
+          target_series: targetSeries,
+          target_color: matchedColors.length > 0 ? matchedColors : 'preserved from IMAGE 1',
+          ref_used: seriesPick.key,
+          provider: 'gemini',
+          image: `data:image/png;base64,${resultBase64}`,
+        });
+      }
+
       // ── 컬러 칩 이미지 자동 fetch (시각 reference) ──
       stage = 'swap_chip_fetch';
       const TEXTURES_BASE = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/textures/alloso-textures-512/';
