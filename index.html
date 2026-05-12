@@ -1290,7 +1290,7 @@ function renderWelcome(){
       </div>
       <div class="home-oq-divider">또는</div>
       <div class="home-oq-links">
-        <button class="home-oq-link" onclick="homeAsk('인테리어 이미지로 보여줘')">🎨 인테리어 시각화</button>
+        <button class="home-oq-link" onclick="openChat('mood')">🎨 알로소 팔레트</button>
         <button class="home-oq-link" onclick="openFAQ()">자주 묻는 질문</button>
         <button class="home-oq-link" onclick="openCare()">소재 관리 가이드</button>
       </div>
@@ -2307,9 +2307,18 @@ const MOOD_CURATIONS = {
   },
 };
 
-function openChat(){
-  if(!document.getElementById('chatMsgs').children.length){
+let chatOpenMode = 'free'; // 'free' (자유 진입) | 'mood' (알로소 팔레트 진입)
+
+function openChat(mode){
+  // 빈 채팅에 모드 적용. 이미 대화중이면 모드 변경 무시 (기존 채팅 보존)
+  const msgsEl = document.getElementById('chatMsgs');
+  const isEmpty = !msgsEl.children.length;
+  if (isEmpty) {
+    chatOpenMode = (mode === 'mood') ? 'mood' : 'free';
     initChatWelcome();
+  } else if (mode === 'mood') {
+    // 이미 대화 중인데 팔레트 모드 요청 → 무드 카드를 신규 메시지로 삽입
+    appendMoodEntryAsMessage();
   }
   openOverlay('chatPanel');
   chatUnread = 0;
@@ -2318,9 +2327,78 @@ function openChat(){
 }
 
 function initChatWelcome(){
-  renderMoodEntry();
-  // Phase 1 후속: 무드 카드 썸네일을 R2 자동 탐색으로 실 제품 사진 채움
-  setTimeout(loadMoodThumbnails, 60);
+  if (chatOpenMode === 'mood') {
+    renderMoodEntry();
+    setTimeout(loadMoodThumbnails, 60);
+  } else {
+    renderFreeWelcome();
+  }
+}
+
+// 자유 진입 환영 — 무드 카드 없음
+function renderFreeWelcome(){
+  const msgs = document.getElementById('chatMsgs');
+  msgs.innerHTML = '';
+  appendBotMsg('소파·인테리어, 무엇이든 자유롭게 물어보세요. 분위기별 큐레이션을 원하시면 홈의 **🎨 알로소 팔레트**에서 시작하실 수 있어요.');
+  // 후속 칩 — 자주 묻는 진입점
+  const chips = document.getElementById('chatChips');
+  if (chips) {
+    chips.innerHTML = `
+      <div class="chat-chip" onclick="sendChip(this,'추천 소파 알려줘')">추천 소파 알려줘</div>
+      <div class="chat-chip" onclick="sendChip(this,'반려동물에 좋은 소재는?')">반려동물에 좋은 소재는?</div>
+      <div class="chat-chip" onclick="sendChip(this,'매장 어디 있어?')">매장 어디 있어?</div>`;
+    chips.className = 'chat-chips';
+  }
+}
+
+// 무드 진입 중 사용자가 자유 입력 시작하면 mode를 free로 전환 (혼선 방지)
+function ensureFreeMode(){
+  if (chatOpenMode === 'mood') chatOpenMode = 'free';
+}
+
+// 이미 대화중인 챗에 무드 진입 카드를 한 번 더 삽입할 때 사용
+function appendMoodEntryAsMessage(){
+  const msgs = document.getElementById('chatMsgs');
+  const moods = Object.entries(MOOD_CURATIONS);
+  const cards = moods.map(([key, m]) => `
+    <div class="mood-card" data-key="${key}" onclick="selectMood('${key}')">
+      <div class="mood-thumb ${key}" id="mood-thumb-extra-${key}"></div>
+      <div class="mood-label">${m.title}</div>
+    </div>
+  `).join('');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-row bot';
+  wrap.innerHTML = `
+    <div>
+      <div class="msg-bubble bot">
+        <div class="mood-entry" style="padding:6px 2px;">
+          <div class="mood-prompt" style="font-size:13px;margin-bottom:12px;">어떤 분위기의 거실이 가깝나요?</div>
+          <div class="mood-grid">${cards}</div>
+        </div>
+      </div>
+      <div class="msg-time">${nowTime()}</div>
+    </div>`;
+  msgs.appendChild(wrap);
+  scrollMsgs();
+  // 썸네일 자동 탐색 (id에 -extra- 붙음)
+  setTimeout(function(){
+    for (const [key, m] of Object.entries(MOOD_CURATIONS)) {
+      const primary = m.series[0];
+      if (!primary) continue;
+      fetch('/api/imagine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'direct', series: primary.name, color: primary.color }),
+      }).then(r => r.ok ? r.json() : null).then(data => {
+        if (!data) return;
+        const url = data.urls?.['측면'] || data.urls?.['정면'] || data.urls?.['부감'];
+        if (url) {
+          const el = document.getElementById('mood-thumb-extra-' + key);
+          if (el) { el.style.backgroundImage = `url("${url}")`; el.style.backgroundColor = 'transparent'; }
+        }
+      }).catch(()=>{});
+    }
+  }, 80);
 }
 
 function renderMoodEntry(){
