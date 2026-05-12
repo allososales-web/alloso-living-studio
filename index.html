@@ -863,6 +863,123 @@ body{
 .curated-desc{font-size:10.5px;color:var(--text2);line-height:1.5;margin-bottom:5px;}
 .curated-cta{font-size:10px;color:var(--gold);font-weight:400;letter-spacing:.04em;cursor:pointer;display:inline-block;padding:4px 8px;border:1px solid rgba(139,115,85,.3);border-radius:3px;background:rgba(139,115,85,.04);transition:all .15s;}
 .curated-cta:hover{background:rgba(139,115,85,.12);}
+/* ══ Context Panel (우측 시각 자료 패널) ══ */
+.context-panel{
+  position:fixed;top:0;right:0;bottom:0;
+  width:0;
+  background:var(--bg);
+  border-left:1px solid var(--border);
+  z-index:55;
+  overflow:hidden;
+  transition:width .28s ease;
+  display:flex;flex-direction:column;
+}
+body.cp-open .context-panel{ width: min(480px, 42vw); }
+@media (min-width: 1025px){
+  body.cp-open .shell{ margin-right: min(480px, 42vw); transition: margin-right .28s ease; }
+}
+.cp-header{
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-shrink:0;
+}
+.cp-title{font-family:'Josefin Sans',sans-serif;font-size:11.5px;letter-spacing:.32em;color:var(--accent);}
+.cp-close{
+  width:28px;height:28px;border:none;background:transparent;
+  font-size:22px;color:var(--muted);cursor:pointer;line-height:1;
+  border-radius:50%;
+}
+.cp-close:hover{background:rgba(0,0,0,0.04);color:var(--accent);}
+.cp-body{flex:1;overflow-y:auto;padding:18px;}
+.cp-body::-webkit-scrollbar{width:4px;}
+.cp-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* Stores 패널 */
+.cp-stores-regions{
+  display:flex;gap:6px;overflow-x:auto;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:14px;
+}
+.cp-region-tab{
+  padding:6px 12px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  font-size:11px;
+  cursor:pointer;
+  white-space:nowrap;
+  color:var(--accent);
+  background:transparent;
+  transition:all .15s;
+}
+.cp-region-tab:hover{border-color:var(--gold);}
+.cp-region-tab.active{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+.cp-store-card{
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:5px;
+  margin-bottom:8px;
+  background:var(--card2);
+  display:flex;gap:11px;align-items:flex-start;
+}
+.cp-store-icon{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(217,184,121,0.12);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:15px;
+}
+.cp-store-info{flex:1;min-width:0;}
+.cp-store-type{font-size:9.5px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:3px;}
+.cp-store-name{font-size:13px;color:var(--accent);margin-bottom:2px;font-weight:500;}
+.cp-store-addr{font-size:11px;color:var(--muted);margin-bottom:7px;}
+.cp-store-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.cp-store-btn{
+  font-size:10.5px;
+  padding:4px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  text-decoration:none;
+  color:var(--muted);
+  transition:all .15s;
+  background:transparent;
+  cursor:pointer;
+}
+.cp-store-btn:hover{border-color:var(--gold);color:var(--gold);}
+.cp-foot-hint{font-size:10px;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:.02em;line-height:1.6;}
+
+/* Catalog 패널 */
+.cp-catalog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.cp-cat-card{cursor:pointer;transition:transform .15s;}
+.cp-cat-card:hover{transform:translateY(-2px);}
+.cp-cat-img{
+  aspect-ratio:1.2;
+  background:var(--bg2);
+  background-size:cover;background-position:center;
+  border-radius:4px;
+  margin-bottom:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:10px;letter-spacing:.18em;
+}
+.cp-cat-en{font-family:'Josefin Sans',sans-serif;font-size:13px;letter-spacing:.06em;color:var(--accent);margin-bottom:1px;}
+.cp-cat-ko{font-size:11px;color:var(--muted);}
+.cp-cat-type{font-size:9.5px;color:var(--gold);margin-top:2px;letter-spacing:.05em;}
+
+/* Care 패널 */
+.cp-care-grid{display:flex;flex-direction:column;gap:10px;}
+.cp-care-card{
+  padding:14px;border:1px solid var(--border);border-radius:5px;
+  background:var(--card2);cursor:pointer;transition:all .15s;
+}
+.cp-care-card:hover{border-color:var(--gold);background:rgba(217,184,121,0.04);}
+.cp-care-icon{font-size:22px;margin-bottom:8px;}
+.cp-care-title{font-size:13px;color:var(--accent);font-weight:500;margin-bottom:4px;}
+.cp-care-desc{font-size:11px;color:var(--muted);line-height:1.55;}
+
+/* 모바일 — 컨텍스트 패널 풀스크린 */
+@media (max-width: 768px) {
+  body.cp-open .context-panel{ width:100vw; z-index:120; }
+}
 /* ══ Sidebar (Model B) ══ */
 :root{
   --sidebar-w: 248px;
@@ -1207,59 +1324,74 @@ body.sb-mobile-open .sidebar-backdrop{display:block;opacity:1;}
 .tc.sel.life  .tc-badge{background:var(--f-accent);}
 
 /* ══════════════════════════════════════
-   DESKTOP RESPONSIVE  ≥769px
+   DESKTOP RESPONSIVE  ≥769px (deprecated phone-mockup rules removed)
    ══════════════════════════════════════ */
+
+/* ══ Desktop / Tablet (769px+) — 풀와이드 어플 모드 ══ */
 @media (min-width: 769px) {
   body {
-    padding: 24px 16px;
-    align-items: center;
+    display: block;
+    align-items: initial;
+    justify-content: initial;
+    background: var(--surface);
+    min-height: 100vh;
   }
   .shell {
-    width: min(820px, calc(100vw - 48px));
-    height: min(900px, calc(100vh - 48px));
-    border-radius: 16px;
+    width: 100%;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
   }
-  /* Header — slightly more spacious */
+  /* Header — 풀와이드, 콘텐츠는 가운데 정렬 */
   .hdr {
-    padding: 14px 26px 12px;
+    padding-left: max(28px, calc((100% - 1100px) / 2));
+    padding-right: max(28px, calc((100% - 1100px) / 2));
+    padding-top: 14px;
+    padding-bottom: 12px;
   }
-  /* Chat messages — content max 720px, centered with breathing space */
+  /* Chat messages — 풀와이드 영역, 콘텐츠 가운데 정렬 */
   .chat-msgs {
-    padding-left: max(20px, calc((100% - 720px) / 2));
-    padding-right: max(20px, calc((100% - 720px) / 2));
+    padding-left: max(28px, calc((100% - 1100px) / 2));
+    padding-right: max(28px, calc((100% - 1100px) / 2));
     padding-top: 22px;
   }
-  /* Chat input — same content alignment as messages */
+  /* Chat input — 같은 정렬 */
   .chat-input-wrap {
-    padding-left: max(20px, calc((100% - 720px) / 2));
-    padding-right: max(20px, calc((100% - 720px) / 2));
+    padding-left: max(28px, calc((100% - 1100px) / 2));
+    padding-right: max(28px, calc((100% - 1100px) / 2));
   }
-  /* Welcome screen — more breathing on desktop */
+  /* 메시지 버블 — 가독성 위주 max */
+  .msg-bubble {
+    max-width: 720px;
+    font-size: 13.5px;
+  }
+  /* 홈 hero 영역 */
   .home-oq {
-    padding-top: 56px;
-    padding-bottom: 40px;
+    padding-top: 64px;
+    padding-bottom: 48px;
+    padding-left: max(28px, calc((100% - 900px) / 2));
+    padding-right: max(28px, calc((100% - 900px) / 2));
   }
   .home-oq-q {
-    font-size: 30px;
+    font-size: 32px;
   }
-  /* Overlay panel headers (Care/FAQ/Chat) — more horizontal padding */
+  /* Overlay panel (Care/FAQ/Chat) header — 동일 정렬 */
   .op-hdr {
-    padding-left: 26px;
-    padding-right: 26px;
+    padding-left: max(28px, calc((100% - 1100px) / 2));
+    padding-right: max(28px, calc((100% - 1100px) / 2));
   }
-  /* Overlay panel body — center content, allow wider */
+  /* Overlay panel body */
   .op-body .op-inner {
-    max-width: 720px;
+    max-width: 1100px;
     margin: 0 auto;
-  }
-  /* Bubbles can be a bit larger on desktop */
-  .msg-bubble {
-    max-width: 78%;
-    font-size: 13.5px;
+    padding-left: max(28px, calc((100% - 1100px) / 2));
+    padding-right: max(28px, calc((100% - 1100px) / 2));
   }
 }
 
-/* Tablet adjustments — keep mobile shell but allow it to be slightly larger */
+/* Tablet 변형 사양 제거 — 769px+ 풀와이드 규칙 적용됨 */
 @media (min-width: 481px) and (max-width: 768px) {
   .shell {
     width: min(440px, calc(100vw - 24px));
@@ -1324,6 +1456,15 @@ body.sb-mobile-open .sidebar-backdrop{display:block;opacity:1;}
 <button class="mobile-hamburger" id="mobileHamburger" onclick="toggleSidebar()" aria-label="메뉴 열기">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
+
+<!-- ══ Context Panel (우측 시각 자료 패널) ══ -->
+<aside class="context-panel" id="contextPanel" aria-hidden="true">
+  <div class="cp-header">
+    <div class="cp-title" id="cpTitle">ALLOSO</div>
+    <button class="cp-close" onclick="closeContextPanel()" aria-label="닫기">×</button>
+  </div>
+  <div class="cp-body" id="cpBody"></div>
+</aside>
 
 <div class="shell" id="shell">
   <div class="hdr" id="hdr">
@@ -2666,20 +2807,186 @@ function newChat(){
   }
 }
 
+// ══ 컨텍스트 패널 — 매장 데이터 (정식 명칭만, CHAT_SYSTEM과 동일 소스) ══
+const ALLOSO_STORES = [
+  {region:'서울', name:'청담 로드샵', type:'road', address:'서울 강남구 청담동', placeQuery:'알로소 청담'},
+  {region:'서울', name:'성수 로드샵', type:'road', address:'서울 성동구 성수동', placeQuery:'알로소 성수'},
+  {region:'서울', name:'노원 로드샵', type:'road', address:'서울 노원구 상계동', placeQuery:'알로소 노원'},
+  {region:'서울', name:'아이파크몰 (용산)', type:'dept', address:'서울 용산구', placeQuery:'알로소 아이파크몰'},
+  {region:'서울', name:'신세계백화점', type:'dept', address:'서울', placeQuery:'알로소 신세계'},
+  {region:'서울', name:'롯데백화점', type:'dept', address:'서울', placeQuery:'알로소 롯데백화점'},
+  {region:'서울', name:'갤러리아백화점', type:'dept', address:'서울', placeQuery:'알로소 갤러리아'},
+  {region:'서울', name:'더현대서울', type:'dept', address:'서울 영등포구', placeQuery:'알로소 더현대서울'},
+  {region:'경기', name:'스타필드 하남', type:'starfield', address:'경기 하남시 미사대로', placeQuery:'알로소 스타필드 하남'},
+  {region:'경기', name:'스타필드 고양', type:'starfield', address:'경기 고양시 덕양구', placeQuery:'알로소 스타필드 고양'},
+  {region:'경기', name:'스타필드 수원', type:'starfield', address:'경기 수원시 권선구', placeQuery:'알로소 스타필드 수원'},
+  {region:'경기', name:'기흥 로드샵', type:'road', address:'경기 용인시 기흥구', placeQuery:'알로소 기흥'},
+  {region:'대전', name:'대전 로드샵', type:'road', address:'대전', placeQuery:'알로소 대전'},
+  {region:'대구', name:'대구 로드샵', type:'road', address:'대구', placeQuery:'알로소 대구'},
+  {region:'부산', name:'메종동부산', type:'dept', address:'부산', placeQuery:'알로소 메종동부산'},
+];
+const STORE_TYPE_LABEL = {road:'ROAD SHOP', starfield:'STARFIELD', dept:'DEPARTMENT'};
+const STORE_TYPE_ICON = {road:'🏠', starfield:'🏬', dept:'🏛️'};
+
+function openContextPanel(type){
+  document.body.classList.add('cp-open');
+  document.getElementById('contextPanel').setAttribute('aria-hidden','false');
+  const title = document.getElementById('cpTitle');
+  const body = document.getElementById('cpBody');
+  if (type === 'stores'){
+    title.textContent = 'ALLOSO STORES';
+    body.innerHTML = renderStoresPanel('all');
+  } else if (type === 'catalog'){
+    title.textContent = 'SERIES CATALOG';
+    body.innerHTML = renderCatalogPanel();
+    setTimeout(loadCatalogThumbs, 80);
+  } else if (type === 'care'){
+    title.textContent = 'MATERIAL GUIDE';
+    body.innerHTML = renderCarePanel();
+  }
+  if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
+}
+
+function closeContextPanel(){
+  document.body.classList.remove('cp-open');
+  const panel = document.getElementById('contextPanel');
+  if (panel) panel.setAttribute('aria-hidden','true');
+}
+
+function renderStoresPanel(region){
+  const regions = ['서울','경기','대전','대구','부산'];
+  const filtered = region === 'all' ? ALLOSO_STORES : ALLOSO_STORES.filter(s => s.region === region);
+  const tabs = `
+    <div class="cp-stores-regions">
+      <button class="cp-region-tab ${region==='all'?'active':''}" onclick="filterStores('all')">전체 ${ALLOSO_STORES.length}</button>
+      ${regions.map(r => {
+        const count = ALLOSO_STORES.filter(s => s.region === r).length;
+        return `<button class="cp-region-tab ${region===r?'active':''}" onclick="filterStores('${r}')">${r} ${count}</button>`;
+      }).join('')}
+    </div>`;
+  const stores = filtered.map(s => {
+    const placeUrl = `https://map.naver.com/p/search/${encodeURIComponent(s.placeQuery)}`;
+    return `
+      <div class="cp-store-card">
+        <div class="cp-store-icon">${STORE_TYPE_ICON[s.type]||'📍'}</div>
+        <div class="cp-store-info">
+          <div class="cp-store-type">${STORE_TYPE_LABEL[s.type]||''}</div>
+          <div class="cp-store-name">${escHtml(s.name)}</div>
+          <div class="cp-store-addr">${escHtml(s.address)}</div>
+          <div class="cp-store-actions">
+            <a class="cp-store-btn" href="${placeUrl}" target="_blank" rel="noopener">네이버 지도 ↗</a>
+            <a class="cp-store-btn" href="tel:1577-1641">☎ 1577-1641</a>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  return `${tabs}
+    <div style="font-size:10px;color:var(--muted);margin-bottom:12px;letter-spacing:.02em;line-height:1.5;">
+      매장 카드를 클릭하면 네이버 지도에서 정확한 위치·운영시간을 확인할 수 있어요
+    </div>
+    ${stores}
+    <div class="cp-foot-hint">고객센터 1577-1641 · 평일 09:30~17:30</div>`;
+}
+function filterStores(region){
+  const body = document.getElementById('cpBody');
+  if (body) body.innerHTML = renderStoresPanel(region);
+}
+
+const CATALOG_SERIES = [
+  {ko:'사티', en:'SATI', folder:'sati', type:'모던 미니멀'},
+  {ko:'사티모션', en:'SATI MOTION', folder:'sati motion', type:'리클라이너'},
+  {ko:'밀로', en:'MILO', folder:'milo', type:'로우 모듈'},
+  {ko:'케렌시아', en:'QUERENCIA', folder:'querencia', type:'둥지형 모듈'},
+  {ko:'레지나', en:'REGINA', folder:'regina', type:'클래식'},
+  {ko:'보눔 FU', en:'BONUM FU', folder:'bonum fu', type:'모듈형'},
+  {ko:'보눔 OP', en:'BONUM OP', folder:'bonum op', type:'오픈암'},
+  {ko:'카포네', en:'CAPONE', folder:'capone', type:'쿠션백'},
+  {ko:'카포네 그랑', en:'CAPONE GRAND', folder:'capone grand', type:'섹셔널'},
+  {ko:'바드', en:'VARD', folder:'vard', type:'스칸디'},
+  {ko:'스탠', en:'STANN', folder:'stann', type:'대형 프리미엄'},
+  {ko:'비하르', en:'BEHAR', folder:'behar', type:'로우'},
+  {ko:'에브리데이', en:'EVERYDAY', folder:'everyday', type:'캐주얼'},
+  {ko:'홀리데이', en:'HOLIDAY', folder:'holiday', type:'가족'},
+  {ko:'뚜따', en:'TUTTA', folder:'tutta', type:'하이백 1인'},
+  {ko:'모브', en:'MOB', folder:'more', type:'가죽 푸프'},
+];
+
+function renderCatalogPanel(){
+  const cards = CATALOG_SERIES.map(s => {
+    const safeKey = s.folder.replace(/\s/g,'-');
+    return `
+      <div class="cp-cat-card" onclick="askAboutSeries('${s.ko}')">
+        <div class="cp-cat-img" id="cat-thumb-${safeKey}">${s.en}</div>
+        <div class="cp-cat-en">${s.en}.</div>
+        <div class="cp-cat-ko">${s.ko}</div>
+        <div class="cp-cat-type">${s.type}</div>
+      </div>`;
+  }).join('');
+  return `<div class="cp-catalog-grid">${cards}</div>
+    <div class="cp-foot-hint" style="margin-top:14px;">시리즈 카드를 클릭하면 상세 안내를 받아보실 수 있어요</div>`;
+}
+
+async function loadCatalogThumbs(){
+  // 각 시리즈의 R2 누끼 가져오기 (병렬)
+  await Promise.all(CATALOG_SERIES.map(async (s) => {
+    try {
+      const res = await fetch('/api/imagine', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({mode:'resolve', series:s.ko})
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const url = data.urls?.['측면'] || data.urls?.['정면'] || data.urls?.['부감'];
+      if (url) {
+        const safeKey = s.folder.replace(/\s/g,'-');
+        const el = document.getElementById('cat-thumb-'+safeKey);
+        if (el) { el.style.backgroundImage = `url('${url}')`; el.textContent = ''; }
+      }
+    } catch(e){}
+  }));
+}
+
+function askAboutSeries(seriesKo){
+  closeContextPanel();
+  openChat('free');
+  setTimeout(()=> sendMessage(seriesKo + ' 시리즈 알려줘'), 250);
+}
+
+function renderCarePanel(){
+  const items = [
+    {icon:'🪶', title:'프리미엄 패브릭', desc:'아크레/부클레/스칼렛 — 진공 청소, 마른 천으로 닦기. 무리한 표백·세탁 X', q:'프리미엄 패브릭 관리법 알려줘'},
+    {icon:'💧', title:'이지 케어 패브릭', desc:'노르딕/솔라 (Aquaclean 워터프루프) — 물걸레 가능, 음료·음식 흘려도 OK', q:'이지 케어 패브릭 관리법 알려줘'},
+    {icon:'🧴', title:'프리미엄 레더', desc:'드리밍 헤비/베지탄/단테 — 가죽 클리너, 정기 컨디셔너, 직사광선 회피', q:'프리미엄 레더 관리법 알려줘'},
+    {icon:'🪵', title:'우드 (천연 마감)', desc:'마른 천으로 닦기, 습도 40-60% 유지, 직사광선·열기구 회피', q:'우드 부품 관리법 알려줘'},
+    {icon:'🐶', title:'반려동물 가정', desc:'이지 케어 패브릭(노르딕) 또는 다크 톤 권장. 정기 청소 가능', q:'반려동물이 있는데 어떤 소재가 좋아?'},
+  ];
+  return '<div class="cp-care-grid">' + items.map(it => `
+    <div class="cp-care-card" onclick="askCareGuide('${it.q}')">
+      <div class="cp-care-icon">${it.icon}</div>
+      <div class="cp-care-title">${it.title}</div>
+      <div class="cp-care-desc">${it.desc}</div>
+    </div>`).join('') + '</div>' +
+    `<div class="cp-foot-hint" style="margin-top:14px;">카드 클릭 시 챗봇이 더 자세한 관리법을 안내합니다</div>`;
+}
+
+function askCareGuide(q){
+  closeContextPanel();
+  openChat('free');
+  setTimeout(()=> sendMessage(q), 250);
+}
+
 function sbAskCatalog(){
   if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
-  openChat('free');
-  setTimeout(()=> sendMessage('알로소 시리즈 전체 카탈로그 보여줘'), 250);
+  openContextPanel('catalog');
 }
 function sbAskStores(){
   if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
-  openChat('free');
-  setTimeout(()=> sendMessage('알로소 매장 어디 있어?'), 250);
+  openContextPanel('stores');
 }
 function sbAskCareGuide(){
   if (window.innerWidth < 1025) document.body.classList.remove('sb-mobile-open');
-  openChat('free');
-  setTimeout(()=> sendMessage('소재 관리 가이드 알려줘'), 250);
+  openContextPanel('care');
 }
 
 // 번들 결과 북마크
