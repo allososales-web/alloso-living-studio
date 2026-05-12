@@ -341,37 +341,56 @@ export async function onRequestPost(context) {
         return json({ error: '이미지가 너무 큽니다 (10MB 이하 권장)' }, 400);
       }
 
-      // 알로소 컬러·소재 키워드 정규화 (있으면 prompt에 풍부한 묘사 추가)
+      // 알로소 컬러·소재 키워드 정규화 (manifest.colors의 desc_en을 단일 소스로 사용)
       stage = 'swap_enrich';
       let enrichment = '';
-      const lower = instruction.toLowerCase();
-      // 컬러 매핑 — 알로소 공식 컬러 데이터 기준 정확하게
-      const colorHints = {
-        '온드': 'soft pearl ivory leather, warm cream-beige with subtle natural grain — NOT pure white',
-        '마쉬': 'rich warm tan leather with golden-brown undertones',
-        '노체': 'deep dark walnut brown leather with rich saturated brown depth',
-        '카도마리노': 'deep forest green leather with subtle olive undertones — NOT wine, NOT red',
-        '쉘': 'soft warm cream fabric, off-white with subtle warmth — NOT pure white',
-        '클라우드': 'pale soft cloud-grey fabric, cool light grey',
-        '모빅': 'JET TRUE BLACK leather, deep pure black, near-pure carbon black with very subtle natural leather grain — STRICTLY NOT grey, NOT charcoal, NOT dark brown. This is a saturated true black like a black leather jacket.',
-        '파우더': 'soft powdery beige, pale dusty pink-cream',
-        '버터옐로우': 'warm soft butter-yellow, pale creamy yellow',
-        '조이풀옐로우': 'cheerful golden mustard yellow, warm saturated tone',
-        '블루베이': 'soft dusty pale blue with subtle grey undertone',
-        '샤모아': 'warm chamois beige, soft tan',
-        '단테': 'rich dark leather (Alloso 단테 article — hi-end leather grade)',
-      };
-      for (const [k, v] of Object.entries(colorHints)) {
-        if (lower.includes(k.toLowerCase()) || instruction.includes(k)) {
-          enrichment += ` (${k} = ${v})`;
+      const matchedColors = [];
+
+      // manifest.colors 에서 lookup 빌드 — 키, EN, 모든 synonyms를 normalized form으로 매핑
+      const colorLookup = {}; // normalizedKey → {originalKo, desc_en, en}
+      const normalize = (s) => (s || '').toLowerCase().replace(/[\s\-_]/g, '');
+      for (const [colorKo, colorData] of Object.entries(manifest.colors || {})) {
+        if (!colorData || typeof colorData !== 'object') continue;
+        const desc = colorData.desc_en;
+        if (!desc) continue;
+        const en = colorData.en || '';
+        // 메인 키
+        colorLookup[normalize(colorKo)] = { originalKo: colorKo, desc_en: desc, en };
+        // 영문명
+        if (en) colorLookup[normalize(en)] = { originalKo: colorKo, desc_en: desc, en };
+        // synonyms
+        for (const syn of (colorData.synonyms || [])) {
+          colorLookup[normalize(syn)] = { originalKo: colorKo, desc_en: desc, en };
         }
       }
-      // 소재 키워드
+
+      // instruction을 normalized form으로도 분석 (스페이스/하이픈 무시 매칭)
+      const normInstruction = normalize(instruction);
+      // 컬러 키를 길이 내림차순으로 정렬 후 매칭 (긴 키 우선 — "카도 마리노"가 "마리"보다 먼저)
+      const sortedKeys = Object.keys(colorLookup).sort((a, b) => b.length - a.length);
+      const seen = new Set();
+      for (const normKey of sortedKeys) {
+        if (normKey.length < 2) continue;
+        if (normInstruction.includes(normKey)) {
+          const entry = colorLookup[normKey];
+          if (seen.has(entry.originalKo)) continue;
+          seen.add(entry.originalKo);
+          enrichment += ` (${entry.originalKo} / ${entry.en} = ${entry.desc_en})`;
+          matchedColors.push(entry.originalKo);
+        }
+      }
+
+      // 소재 키워드 (manifest articles 활용 + 일반 키워드)
       const matHints = {
-        '부클레': 'boucle weave fabric with textured nubby surface',
+        '부클레': 'boucle weave fabric with textured nubby looped surface',
         '가죽': 'smooth leather upholstery with subtle natural grain',
+        '레더': 'smooth leather upholstery with subtle natural grain',
         '패브릭': 'woven fabric upholstery',
-        '아크레': 'fine premium fabric with smooth weave',
+        '아크레': 'fine premium fabric with smooth weave (Alloso ACRE article)',
+        '단테': 'rich hi-end leather (Alloso DANTE article)',
+        '베지탄': 'natural vegetable-tanned leather with rich character (Alloso VEGETAN article)',
+        '드리밍 헤비': 'premium full-grain leather with heavy hand (Alloso DREAMING HEAVY article)',
+        '노르딕': 'Aquaclean waterproof easy-care fabric (Alloso NORDIC article)',
       };
       for (const [k, v] of Object.entries(matHints)) {
         if (instruction.includes(k)) enrichment += ` (${k} = ${v})`;
