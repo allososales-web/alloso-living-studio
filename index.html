@@ -1565,7 +1565,7 @@ body.sb-mobile-open .sidebar-backdrop{display:block;opacity:1;}
         <img id="chatAttachImg" alt="첨부 이미지">
         <div class="chat-attach-info">
           <div class="chat-attach-label">이미지 첨부됨</div>
-          <div class="chat-attach-hint">바꿀 소재·컬러를 입력해 주세요 (예: "온드로 바꿔줘")</div>
+          <div class="chat-attach-hint">바꿀 소재·컬러·시리즈를 입력 (예: "온드로 바꿔줘" / "비하르로 바꿔줘")</div>
         </div>
         <button class="chat-attach-x" onclick="clearAttachment()" aria-label="첨부 제거">×</button>
       </div>
@@ -3316,7 +3316,7 @@ function showAttachmentPreview(dataUrl){
   document.getElementById('chatUpload').classList.add('has-image');
   // 입력창 포커스 + 안내 placeholder
   const ta = document.getElementById('chatTa');
-  if (ta && !ta.value) ta.placeholder = '예: "온드로 바꿔줘" / "부클레 위브 클라우드로"';
+  if (ta && !ta.value) ta.placeholder = '예: "온드로 바꿔줘" · "비하르로 바꿔줘" · "온드 비하르로"';
   ta.focus();
 }
 
@@ -3387,18 +3387,27 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
     if (data.error) throw new Error(data.error);
     if (!data.image) throw new Error('이미지 응답이 비어있어요');
 
-    const target = data.target || userInstruction || '변환 결과';
+    const target = data.target || data.target_series || userInstruction || '변환 결과';
+    const isSeriesSwap = data.mode === 'swap_series';
+    const modeLabel = isSeriesSwap ? '시리즈 변경' : '소재 변경';
+    const modeTag = isSeriesSwap ? 'series' : 'swap';
+    const headerMsg = isSeriesSwap
+      ? `${escHtml(data.target_series)} 시리즈로 변경해드렸어요.${Array.isArray(data.target_color) ? ` 컬러: ${escHtml(data.target_color.join(', '))}` : ' 컬러는 원본 유지.'}`
+      : `"${escHtml(target)}" 으로 변환해드렸어요.`;
+    const hintMsg = isSeriesSwap
+      ? '매장 영업 활용 가능. 다른 시리즈로 다시 시도하려면 이미지를 새로 첨부해 주세요.'
+      : '매장 영업 활용 가능. 다른 컬러로 다시 시도하려면 이미지를 새로 첨부해 주세요.';
     const loadingEl = document.getElementById(loadingId);
     if (loadingEl) {
       loadingEl.innerHTML = `
-        <div style="line-height:1.5;margin-bottom:8px;">"${escHtml(target)}" 으로 변환해드렸어요.</div>
+        <div style="line-height:1.5;margin-bottom:8px;">${headerMsg}</div>
         <div class="imagine-box">
           <img class="imagine-result" src="${data.image}" alt="변환 결과">
           <div class="imagine-meta">
-            <span>변환: ${escHtml(target)}</span>
-            <span><span class="tag">swap</span><span class="tag">gemini</span></span>
+            <span>${modeLabel}: ${escHtml(isSeriesSwap ? data.target_series : target)}</span>
+            <span><span class="tag">${modeTag}</span><span class="tag">gemini</span></span>
           </div>
-          <div class="bundle-hint">매장 영업 활용 가능. 다른 컬러로 다시 시도하려면 이미지를 새로 첨부해 주세요.</div>
+          <div class="bundle-hint">${hintMsg}</div>
         </div>`;
     }
     scrollMsgs();
