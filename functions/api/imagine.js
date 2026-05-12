@@ -170,13 +170,19 @@ async function listFolder(env, folder) {
 
 function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredMaterial, preferredSize }) {
   let score = 0;
-  if (name.includes(preferredAngle)) score += 50;
-  else if (name.includes('측면')) score += 30;
-  else if (name.includes('정면')) score += 20;
-  else if (name.includes('부감')) score += 10;
-  if (preferredColor && name.includes(preferredColor)) score += 100;
-  if (preferredSize && name.includes(preferredSize)) score += 80;
-  if (preferredMaterial && name.includes(preferredMaterial)) score += 40;
+  // R2 파일명은 필드 구분이 _, 사이즈 내부는 공백 가능. 일관 비교 위해 _를 공백으로 정규화
+  const normName = name.replace(/_/g, ' ');
+  if (normName.includes(preferredAngle)) score += 50;
+  else if (normName.includes('측면')) score += 30;
+  else if (normName.includes('정면')) score += 20;
+  else if (normName.includes('부감')) score += 10;
+  if (preferredColor && normName.includes(preferredColor)) score += 100;
+  if (preferredSize) {
+    // 사이즈는 토큰 분리해서 모든 토큰이 파일명에 있어야 매칭 인정
+    const tokens = preferredSize.split(/\s+/).filter(Boolean);
+    if (tokens.length > 0 && tokens.every(t => normName.includes(t))) score += 80;
+  }
+  if (preferredMaterial && normName.includes(preferredMaterial)) score += 40;
   return score;
 }
 
@@ -384,10 +390,15 @@ export async function onRequestPost(context) {
         || (moodKey && SCENE_LIBRARY[moodKey])
         || SCENE_LIBRARY[spaceSize === 'wide' ? '_wide' : '_narrow'];
 
-      // 카테고리별 영문 용어
-      const termFor = (cat) => {
+      // 카테고리별 영문 용어 (사이즈 인지 — 1인/단일 변형은 armchair로 처리)
+      const termFor = (cat, size) => {
+        // 사이즈가 단일 좌석을 명시하면 sofa로 보내지 않고 armchair
+        if (size) {
+          if (size === '1인' || size === '단일' || size === '하이백 1인') return 'single armchair (a one-seater lounge chair, NOT a multi-seat sofa)';
+          if (size === '1인 와이드' || size === '1인 라운지') return 'wide single armchair (one-seater)';
+        }
         switch (cat) {
-          case 'lounge_chair': return 'lounge chair';
+          case 'lounge_chair': return 'lounge chair (one-seater)';
           case 'chair': return 'armchair';
           case 'pouf': case 'stool': return 'small leather cube-shaped pouf/ottoman (NOT a sofa)';
           case 'daybed': return 'daybed';
@@ -399,13 +410,16 @@ export async function onRequestPost(context) {
       // 제품 리스트 (참조 이미지 순서대로)
       const productList = refs.map((r, i) => {
         const sizeText = r.sizeKo ? `${r.sizeKo} ` : '';
-        return `(reference image ${i + 1}) the alloso ${r.seriesKo} ${sizeText}${termFor(r.category)} in ${r.colorKo} color`;
+        return `(reference image ${i + 1}) the alloso ${r.seriesKo} ${sizeText}${termFor(r.category, r.sizeKo)} in ${r.colorKo} color`;
       }).join('; ');
 
-      // 배치 가이드
+      // 배치 가이드 — 1인 변형은 라운지 체어 역할로
+      const singleSeats = refs.filter(r => r.sizeKo && ['1인', '단일', '하이백 1인', '1인 와이드', '1인 라운지'].includes(r.sizeKo));
+      const mainSofas = sofas.filter(r => !singleSeats.includes(r));
       const placement = [];
-      if (sofas.length) placement.push(`anchor the largest sofa as the primary visual element at the center or rear of the space`);
-      if (chairs.length) placement.push(`angle the lounge chair as an accent piece at one side, facing the sofa to create a conversational grouping`);
+      if (mainSofas.length) placement.push(`anchor the largest multi-seat sofa as the primary visual element at the center or rear of the space`);
+      if (chairs.length) placement.push(`angle the lounge chair as an accent piece at one side, facing the main sofa`);
+      if (singleSeats.length) placement.push(`place the single armchair (one-seater, NOT a sofa) as an accent piece adjacent to the main sofa — keep it visually distinct as a one-seater chair`);
       if (poufs.length) placement.push(`place the small leather pouf flexibly near the sofa as additional informal seating — keep it as a small floor cube, not a large sofa`);
       if (tables.length) placement.push(`place the coffee table in front of the main sofa as the central piece`);
       if (daybeds.length) placement.push(`place the daybed against a wall or in a window alcove`);
@@ -465,6 +479,8 @@ export async function onRequestPost(context) {
             code: r.code,
             filename: r.filename,
             thumbnailUrl: r.thumbnailUrl,
+            // TODO: 알로소 정식 제품 URL 패턴 확정되면 교체. 임시로 검색 페이지로 안내
+            productPageUrl: `https://alloso.co.kr/search?q=${encodeURIComponent(r.seriesKo)}`,
             placement,
           };
         }),
