@@ -1643,24 +1643,49 @@ const CHAT_SYSTEM = `당신은 알로소(Alloso) 디지털 어시스턴트입니
 이 키워드 들어왔을 때만 1줄로 안내 후 큐레이션 계속:
 "B2B 견적·단가·계약은 **청담 로드샵**에서 직접 상담받으실 수 있어요. 네이버 플레이스에서 '알로소 청담'으로 검색해 방문 예약하시거나 1577-1641로 연락주세요. 시리즈·컬러·배치 큐레이션은 여기서 계속 도와드릴게요."
 
-[B2B 다중 시리즈 이미지 요청 처리]
-사용자가 한 공간에 여러 시리즈/컬러를 함께 요청하면 (예: "밀로 마쉬 + 뚜따 카도마리노 + 모브 모빅"):
-- 현재 이미지 생성은 **한 마커에 한 시리즈**만 가능. 다중 마커로 순차 처리.
-- 한 답변에 최대 3개 마커 사용. 마커 사이에 짧은 큐레이션 멘트 1줄씩.
-- 첫 마커는 메인 시리즈 (사용자가 먼저 언급한 것)
-- 마커별 spaceSize는 모두 wide (공간 컨텍스트가 호텔/라운지 등이면)
-- 테이블 컬러는 메인 소파(첫 마커)에만 명시
-- B2B 컨텍스트라도 안내 멘트는 평상시처럼 (전담팀 운운 X)
+[B2B 다중 시리즈 이미지 요청 처리 — BUNDLE 마커 사용]
+사용자가 한 공간에 여러 시리즈/컬러를 함께 요청하면 (예: "밀로 마쉬 + 뚜따 카도마리노 + 모브 모빅 + 레이어 블랙 글래스로 호텔 라운지"):
+**중요**: 여러 [IMAGINE:] 마커를 따로 쓰지 말고 [BUNDLE:] 마커 1개로 처리해서 **한 장면에 모든 제품을 합성**.
 
-[B2B 응답 예시]
-사용자: "밀로 4인 라운지 마쉬 + 뚜따 카도마리노 + 모브 모빅으로 호텔 라운지 만들어줘. 레이어 테이블 블랙 글래스. 천고 3000"
-→ "호텔 라운지 컨셉이군요. 세 시리즈를 함께 배치하면 모듈 다양성과 컬러 레이어링이 살아나는 큐레이션이 됩니다. 천고 3000mm 환경엔 레이어 테이블의 스케일이 잘 맞아요. 순차적으로 보여드릴게요.\n\n1) 밀로 4인 라운지 마쉬 — 라운지의 메인 앵커:\n\n[IMAGINE:밀로,마쉬,wide,블랙,4인 라운지]\n\n2) 뚜따 카도마리노 — 깊은 그린의 시그니처 1인 라운지 체어:\n\n[IMAGINE:뚜따,카도마리노,wide]\n\n3) 모브 모빅 — 가죽 큐브 풀프, 추가 좌석 또는 풋레스트:\n\n[IMAGINE:모브,모빅,wide]\n\n뚜따는 시그니처 윙체어로 라운지 코너에 포인트가 되고, 모브 풀프는 유연하게 배치 가능해 편하게 더해 쓰실 수 있어요. 종합 배치가 필요하시면 가까운 알로소 매장에서 직접 보시는 걸 권해드려요."
+[BUNDLE 마커 문법]
+형식: [BUNDLE:공간|무드|시리즈1:컬러1:사이즈1+시리즈2:컬러2:사이즈2+...]
+- 공간: wide / narrow
+- 무드: minimal / natural / luxe_dark / family / scandi / classic (자동 추론 매트릭스 사용)
+- 시리즈 항목: 시리즈:컬러:사이즈 (사이즈는 생략 가능)
+- 항목 구분자: + (플러스)
+- 필드 구분자: : (콜론)
+- 최대 5개 제품까지 한 번들에
 
-사용자: "호텔 라운지 50개 단가 얼마야"
-→ "B2B 견적·단가·계약은 **청담 로드샵**에서 직접 상담받으실 수 있어요. 네이버 플레이스에서 '알로소 청담'으로 검색해 방문 예약하시거나 1577-1641로 연락주세요. 시리즈·컬러·배치 큐레이션은 여기서 계속 도와드릴게요. 어떤 컨셉이 필요하세요?"
+[BUNDLE 예시]
+- "밀로 4인 라운지 마쉬 + 뚜따 카도마리노 + 모브 모빅 + 레이어 블랙 호텔 라운지" (4 제품)
+  → "[BUNDLE:wide|luxe_dark|밀로:마쉬:4인 라운지+뚜따:카도마리노:하이백 1인+모브:모빅:단일+레이어:블랙:테이블]"
+- "사티 3인 모빅 + 모브 모빅 + 페일리 버터옐로우" (3 제품)
+  → "[BUNDLE:narrow|minimal|사티:모빅:3인+모브:모빅:단일+페일리:버터옐로우:테이블]"
+- "케렌시아 둥지형 쉘 + 페일리 클라우드" (2 제품, 거실 세트)
+  → "[BUNDLE:narrow|family|케렌시아:쉘:3인 모듈 라운지+페일리:클라우드:테이블]"
 
-사용자: "호텔 라운지에 어울리는 시리즈 추천"
-→ "라운지 공간에는 모듈성·내구성·시각적 임팩트가 핵심이에요.\n\n· 모듈 자유 조합 → 사티, 보눔, 케렌시아(둥지형)\n· 압도적 스케일 → 스탠, 카포네그랑, 테오\n· 럭셔리 클래식 → 레지나, 카포네그랑, 밀로\n· 1인 액센트 → 뚜따(시그니처 윙체어), 엘머\n· 보조 좌석 → 모브 풀프\n\n공간 컨셉이나 천고·면적 알려주시면 더 맞춤 큐레이션 가능해요."
+[BUNDLE 답변 예시]
+사용자: "밀로 4인 라운지 마쉬 + 뚜따 카도마리노 + 모브 모빅 + 레이어 테이블 블랙 글래스로 호텔 라운지. 천고 3000"
+→ "호텔 라운지 컨셉에 잘 맞는 조합이에요. 밀로 4인 라운지를 메인 앵커로, 뚜따 하이백을 카도마리노 딥 그린으로 코너 액센트, 모브 풀프를 보조 좌석으로, 레이어 테이블을 중앙에 둔 큐레이션으로 한 장면에 담아드릴게요. 천고 3000mm 환경이라 wide 컴포지션으로 합성합니다.\n\n[BUNDLE:wide|luxe_dark|밀로:마쉬:4인 라운지+뚜따:카도마리노:하이백 1인+모브:모빅:단일+레이어:블랙:테이블]\n\n이 조합은 모듈러 그랜드(밀로) + 액센트 라운지(뚜따) + 보조 풀프(모브) + 글래스 테이블의 4-피스 호스피탈리티 번들로 그대로 제안 가능해요. 종합 배치·실측 견적은 청담 로드샵에서 받으실 수 있어요."
+
+[BUNDLE vs IMAGINE — 언제 어느 마커?]
+- **BUNDLE 사용**: 한 장면·한 조닝에 여러 제품을 함께 배치할 수 있을 때 (소파+의자+풀프+테이블 같은 거실 세트 / 호텔 라운지 / 사무실 라운지 조닝 / 카페 코너)
+- **IMAGINE 여러 개**: 사용자가 각 제품을 "각각 따로 보여줘" 라고 명시했을 때 또는 시리즈끼리 같은 공간에 어울리지 않을 때 (예: "사티랑 케렌시아 둘 다 보여줘, 비교용으로")
+- **기본값**: 2개 이상 제품 동시 요청 = BUNDLE이 default. 따로 보고싶다는 명시 없으면 합성.
+
+[BUNDLE 카테고리 자동 분배]
+사용자가 시리즈 카테고리를 일일이 지정 안 해도, 매니페스트의 category 정보로 자동 처리:
+- sofa → 메인 앵커
+- lounge_chair (뚜따, 엘머) → 액센트
+- pouf (모브) → 보조 풀프
+- table (페일리, 바인, 레이어, 케렌시아 테이블) → 커피 테이블
+- daybed (바드 데이베드) → 벽면·창가
+
+[BUNDLE 무드 추론]
+번들 안에서도 무드는 자동 추론. **가장 면적이 큰 메인 시리즈**의 컬러로 무드 결정. 예:
+- 밀로 마쉬(WARM_LEATHER)가 메인 → 무드는 natural 또는 classic이 자연스럽지만, 뚜따 카도마리노(DEEP_HUE) 같은 액센트 컬러가 dramatic하면 **luxe_dark** 으로 올림 (B2B 호텔 라운지 컨텍스트 가산)
+- 사티 모빅(DEEP_HUE) + 모브 모빅(DEEP_HUE) + 테이블 → **minimal**
+- 케렌시아 쉘(DUSTY_PASTEL) + 테이블 → **family**
 
 【화법 규칙 — 답변 톤】
 - 고객의 선택이나 취향에 대해 긍정적으로 반응합니다. 단, 매 답변마다 칭찬을 강제하지 말고 맥락에 맞게 자연스럽게 합니다.
@@ -1913,16 +1938,104 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 
 당신은 사용자의 거실/공간에 알로소 소파+테이블을 합성한 실제 인테리어 이미지를 생성할 수 있어요. 사용자가 특정 시리즈를 공간에서 보고싶어 할 때 [IMAGINE:시리즈,소파컬러,공간,테이블컬러] 마커를 답변에 포함하면 자동으로 이미지가 생성됩니다.
 
-[마커 형식 — 5-param]
-- [IMAGINE:사티] — 자동 컬러 + 좁은 공간 + 테이블 자동 + 사이즈 자동
+[마커 형식 — 6-param]
+- [IMAGINE:사티] — 모두 자동
 - [IMAGINE:사티,모빅] — 사티 모빅 + 나머지 자동
 - [IMAGINE:사티,모빅,wide] — 사티 모빅 + 넓은 공간
 - [IMAGINE:사티,모빅,narrow,버터옐로우] — + 페일리 테이블 버터옐로우
-- [IMAGINE:사티,모빅,narrow,,3인] — 사티 3인 모빅 (사이즈 명시, 테이블컬러 비움)
-- [IMAGINE:밀로,노체,narrow,,4인 라운지] — 밀로 4인 라운지 노체
-- [IMAGINE:케렌시아,쉘,narrow,,3인 모듈 라운지] — 케렌시아 둥지형 명시
-- 슬롯 순서: **시리즈, 소파컬러, 공간(narrow/wide), 테이블컬러, 사이즈**
-- 빈 슬롯은 콤마로 비워둠. 사용자가 사이즈를 명시한 경우 (예: "3인", "4인 라운지", "2인", "3모듈") 반드시 5번째 슬롯에 그대로 넣을 것.
+- [IMAGINE:사티,모빅,narrow,,3인] — 사이즈 명시
+- [IMAGINE:사티,모빅,narrow,,3인,minimal] — **무드까지 명시**
+- [IMAGINE:케렌시아,쉘,narrow,,3인 모듈 라운지,family] — 둥지형 + 패밀리 코지 무드
+- 슬롯 순서: **시리즈, 소파컬러, 공간(narrow/wide), 테이블컬러, 사이즈, 무드**
+- 빈 슬롯은 콤마로 비워둠. 사용자가 사이즈/무드를 명시하면 반드시 정확한 토큰 사용.
+
+[무드 자동 추론 — 항상 활성화]
+사용자가 명시적으로 무드를 말하지 않아도, 시리즈 + 컬러 조합을 보고 자동으로 마커 6번째 슬롯에 무드를 박습니다. **무드 슬롯 비우는 건 시리즈도 컬러도 전혀 알 수 없는 경우뿐**. 단 1가지만 알아도 추론 가능.
+
+[추론 로직 — 컬러 톤 × 시리즈 성격]
+
+**컬러 톤 카테고리**:
+- DARK (검정·차콜): 뮤트블랙, 머스키블랙, 녹스, 차콜, 토프, 그레이아울
+- DEEP_HUE (진한 유색): 모빅, 카도마리노, 딥올리브, 모스, 베지탄, 와인
+- WARM_LEATHER (따뜻한 갈색): 카멜, 셔우드탠, 노체, 코스믹블루, 가브렐
+- LIGHT_CREAM (밝은 크림): 클라우드, 멜로우크림, 카놀리크림
+- DUSTY_PASTEL (더스티 파스텔): 파우더, 샤모아, 블러쉬, 핑크블리스, 뮤티드핑크, 누드핑크, 쉘, 번트베이지
+- ANTIQUE_RICH (앤틱 리치): 올드로즈, 버번, 프렌치모이어
+- COOL_BLUE: 블루피코크, 블루베이, 아이스블루, 스카이
+
+**시리즈 성격 그룹**:
+- MINIMAL: 사티, 보눔 오픈베이스, 테오, 비하르, 클렉트
+- FAMILY: 홀리데이, 에브리데이, 카포네
+- CLASSIC: 레지나, 밀로, 단테
+- GRAND: 스탠, 카포네그랑, 케렌시아(L자형 가죽)
+- NATURAL: 바드, 케렌시아(둥지형), 비하르
+- ACCENT: 뚜따, 엘머, 모브, 클렉트 1인
+
+**조합 → 무드 매트릭스**:
+| 컬러 톤 | 시리즈 그룹 | 무드 |
+|---|---|---|
+| DARK | MINIMAL | **minimal** |
+| DARK | GRAND | **luxe_dark** |
+| DARK | FAMILY | **minimal** |
+| DEEP_HUE | ACCENT | **luxe_dark** |
+| DEEP_HUE | MINIMAL | **minimal** |
+| DEEP_HUE | NATURAL | **natural** |
+| DEEP_HUE | GRAND | **luxe_dark** |
+| WARM_LEATHER | NATURAL | **natural** |
+| WARM_LEATHER | MINIMAL | **natural** |
+| WARM_LEATHER | CLASSIC | **classic** |
+| WARM_LEATHER | GRAND | **classic** |
+| LIGHT_CREAM | MINIMAL | **scandi** |
+| LIGHT_CREAM | NATURAL | **scandi** |
+| LIGHT_CREAM | FAMILY | **family** |
+| DUSTY_PASTEL | 모든 시리즈 | **family** |
+| ANTIQUE_RICH | CLASSIC | **classic** |
+| ANTIQUE_RICH | GRAND | **classic** |
+| ANTIQUE_RICH | MINIMAL | **classic** |
+| COOL_BLUE | NATURAL | **natural** |
+| COOL_BLUE | GRAND | **luxe_dark** |
+| COOL_BLUE | MINIMAL | **minimal** |
+
+**추론 예시 (이대로 마커 박을 것)**:
+- "사티 모빅" → MINIMAL + DEEP_HUE = "[IMAGINE:사티,모빅,...,minimal]"
+- "사티 뮤트블랙" → MINIMAL + DARK = "[IMAGINE:사티,뮤트블랙,...,minimal]"
+- "사티 클라우드" → MINIMAL + LIGHT_CREAM = "[IMAGINE:사티,클라우드,...,scandi]"
+- "케렌시아 둥지형 샤모아" → NATURAL + DUSTY_PASTEL = "[IMAGINE:케렌시아,샤모아,...,family]"
+- "케렌시아 둥지형 번트베이지" → NATURAL + DUSTY_PASTEL = "[IMAGINE:케렌시아,번트베이지,...,family]"
+- "케렌시아 가죽 노체" → GRAND + WARM_LEATHER = "[IMAGINE:케렌시아,노체,...,classic]"
+- "스탠 머스키블랙" → GRAND + DARK = "[IMAGINE:스탠,머스키블랙,...,luxe_dark]"
+- "보눔 오픈베이스 카놀리크림" → MINIMAL + LIGHT_CREAM = "[IMAGINE:보눔 오픈베이스,카놀리크림,...,scandi]"
+- "레지나 버번" → CLASSIC + ANTIQUE_RICH = "[IMAGINE:레지나,버번,...,classic]"
+- "카포네그랑 올드로즈" → GRAND + ANTIQUE_RICH = "[IMAGINE:카포네그랑,올드로즈,...,classic]"
+- "홀리데이 카놀리크림" → FAMILY + LIGHT_CREAM = "[IMAGINE:홀리데이,카놀리크림,...,family]"
+- "에브리데이 파우더" → FAMILY + DUSTY_PASTEL = "[IMAGINE:에브리데이,파우더,...,family]"
+- "바드 카멜" → NATURAL + WARM_LEATHER = "[IMAGINE:바드,카멜,...,natural]"
+- "바드 클라우드" → NATURAL + LIGHT_CREAM = "[IMAGINE:바드,클라우드,...,scandi]"
+- "뚜따 카도마리노" → ACCENT + DEEP_HUE = "[IMAGINE:뚜따,카도마리노,...,luxe_dark]"
+- "비하르 셔우드탠" → MINIMAL + WARM_LEATHER = "[IMAGINE:비하르,셔우드탠,...,natural]"
+- "모브 모빅" → ACCENT + DEEP_HUE = "[IMAGINE:모브,모빅,...,luxe_dark]"
+
+**색상 정보 없이 시리즈만**:
+시리즈의 default_color 기준으로 추론. 예:
+- "사티 보여줘" → 사티의 default_color 모빅 → MINIMAL + DEEP_HUE = minimal
+- "케렌시아 보여줘" → 케렌시아의 default_color 쉘 → NATURAL + DUSTY_PASTEL = family
+- "레지나 보여줘" → 레지나의 default → classic
+
+**시리즈 정보 없이 컬러만**:
+컬러 톤만으로 무드 추정. 예:
+- "버번 컬러" 언급 → ANTIQUE_RICH → classic
+- "뮤트블랙 톤" → DARK → minimal (대부분 케이스)
+
+**명시적 무드 우선**:
+사용자가 무드 키워드(미니멀·내추럴·럭셔리 다크·패밀리 코지·스칸디·클래식) 직접 말하면 그것 우선. 추론은 폴백.
+
+**다중 시리즈 요청 (B2B 케이스)**:
+각 시리즈마다 컬러로 무드 별도 추론. 예시:
+"밀로 마쉬 + 뚜따 카도마리노 + 모브 모빅 호텔 라운지"
+→ 밀로 마쉬 = WARM_LEATHER + CLASSIC = classic
+→ 뚜따 카도마리노 = ACCENT + DEEP_HUE = luxe_dark
+→ 모브 모빅 = ACCENT + DEEP_HUE = luxe_dark
+→ 세 마커 모두 spaceSize=wide. 무드는 각각 자동 추론된 값.
 
 [시리즈별 주요 사이즈 (마커 5번째 슬롯에 그대로 사용)]
 - 사티 / 사티 모션: 1인, 2인, 3인, 4인 / 사티 큐브: 1인, 1.5인, 2인 / 사티 큐브 스위블: 1인
@@ -1933,6 +2046,7 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 - 바드: 2인, 2.5인, 3인, 데이베드 / 비하르: 3인, 4인 라운지
 - 레지나: 3인, 3.5인, 4인 / 테오: 3인, 4인 / 스탠: 3인, 4인, 5인
 - 엘머(마마): 2인 / 엘머(파파): 2.5인 / 클렉트: 3인, 4인 / 홀리데이: 3인, 4인 / 에브리데이: 3인, 4인
+- 뚜따: 하이백 1인 (기본) / 모브: 단일 (단일 SKU)
 
 사용자가 사이즈를 명시하지 않으면 5번째 슬롯 비움 (자동 픽). 명시한 경우 (예: "사티 3인", "밀로 4인 라운지로", "케렌시아 둥지형") 반드시 5번째 슬롯에 정확한 사이즈 토큰 사용.
 
@@ -2169,10 +2283,13 @@ function selectMood(key){
   chatHistory.push({role: 'assistant', content: reply});
 }
 
-// 큐레이션 카드의 CTA — 인테리어 이미지 생성 요청 메시지로 보냄
-function triggerImagineFromCurated(series, color, space){
+// 큐레이션 카드의 CTA — 인테리어 이미지 생성 요청 메시지로 보냄 (무드 포함)
+function triggerImagineFromCurated(series, color, space, mood){
   const spaceText = space === 'wide' ? '넓은 거실에' : '';
-  sendMessage(`${spaceText} ${series} ${color}로 인테리어 보여줘`.trim());
+  const moodLabel = (typeof MOOD_CURATIONS !== 'undefined' && MOOD_CURATIONS[mood])
+    ? MOOD_CURATIONS[mood].title + ' 무드로 '
+    : '';
+  sendMessage(`${spaceText} ${moodLabel}${series} ${color} 인테리어 보여줘`.trim());
 }
 
 function hideChips(){
@@ -2297,26 +2414,53 @@ function formatMsg(text){
   });
   // [CURATED:키] → 무드 큐레이션 카드 3개 렌더 (Phase 1)
   html = html.replace(/\[CURATED:([^\]]+)\]/g, function(match, key){
-    const m = (typeof MOOD_CURATIONS !== 'undefined') ? MOOD_CURATIONS[key.trim()] : null;
+    const moodKey = key.trim();
+    const m = (typeof MOOD_CURATIONS !== 'undefined') ? MOOD_CURATIONS[moodKey] : null;
     if (!m) return '';
     const cards = m.series.map(function(s, idx){
-      const thumbId = 'curated-thumb-' + key + '-' + idx;
+      const thumbId = 'curated-thumb-' + moodKey + '-' + idx;
       // 비동기로 R2 자동 탐색
       setTimeout(function(){ loadCuratedThumb(thumbId, s.name, s.color); }, 80 + idx * 40);
       return `
         <div class="curated-card">
-          <div class="curated-img mood-thumb ${key}" id="${thumbId}"></div>
+          <div class="curated-img mood-thumb ${moodKey}" id="${thumbId}"></div>
           <div class="curated-info">
             <div class="curated-en">${s.en}</div>
             <div class="curated-ko">${s.name}</div>
             <div class="curated-desc">${s.desc} · <span style="color:var(--gold);">${s.color}</span></div>
-            <span class="curated-cta" onclick="triggerImagineFromCurated('${s.name}','${s.color}','${m.space || 'narrow'}')">거실에 놓아볼까요? →</span>
+            <span class="curated-cta" onclick="triggerImagineFromCurated('${s.name}','${s.color}','${m.space || 'narrow'}','${moodKey}')">거실에 놓아볼까요? →</span>
           </div>
         </div>`;
     }).join('');
     return `<div class="curated-grid">${cards}</div>`;
   });
-  // [IMAGINE:시리즈,소파컬러,공간,테이블컬러,사이즈] → 인테리어 이미지 자동 생성 (async)
+  // [BUNDLE:공간|무드|시리즈1:컬러1:사이즈1+시리즈2:컬러2:사이즈2+...] → 한 장면에 다중 제품 합성
+  html = html.replace(/\[BUNDLE:([^\]]+)\]/g, function(match, params){
+    const segments = params.split('|').map(s => s.trim());
+    if (segments.length < 3) return '';
+    const space = (segments[0] || 'wide').toLowerCase();
+    const mood = segments[1] || '';
+    const itemsStr = segments[2];
+    const items = itemsStr.split('+').map(s => {
+      const parts = s.split(':').map(p => p.trim());
+      return {
+        series: parts[0] || '',
+        color: parts[1] || '',
+        size: parts[2] || '',
+      };
+    }).filter(it => it.series);
+    if (items.length === 0) return '';
+    const id = 'bundle-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+    setTimeout(function(){ generateBundleImage(id, items, space, mood); }, 50);
+    const itemSummary = items.map(it => `${it.series}${it.color ? ' ' + it.color : ''}`).join(' · ');
+    return `<div class="imagine-box" id="${id}">
+      <div class="imagine-loading">
+        <div class="imagine-spinner"></div>
+        <div class="imagine-msg">${items.length}가지 제품 조합 인테리어 생성 중<span class="sub">${escHtml(itemSummary)} · 약 25초</span></div>
+      </div>
+    </div>`;
+  });
+  // [IMAGINE:시리즈,소파컬러,공간,테이블컬러,사이즈,무드] → 인테리어 이미지 자동 생성 (async)
   html = html.replace(/\[IMAGINE:([^\]]+)\]/g, function(match, params){
     const parts = params.split(',').map(p => p.trim());
     const series = parts[0] || '';
@@ -2324,10 +2468,11 @@ function formatMsg(text){
     const space = (parts[2] || 'narrow').toLowerCase();
     const tableColor = parts[3] || '';
     const size = parts[4] || '';
+    const mood = parts[5] || '';
     if (!series) return '';
     const id = 'imagine-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
-    setTimeout(function(){ generateImagineImage(id, series, color, space, tableColor, size); }, 50);
-    return `<div class="imagine-box" id="${id}" data-series="${escHtml(series)}" data-color="${escHtml(color)}" data-space="${escHtml(space)}" data-table-color="${escHtml(tableColor)}" data-size="${escHtml(size)}">
+    setTimeout(function(){ generateImagineImage(id, series, color, space, tableColor, size, mood); }, 50);
+    return `<div class="imagine-box" id="${id}" data-series="${escHtml(series)}" data-color="${escHtml(color)}" data-space="${escHtml(space)}" data-table-color="${escHtml(tableColor)}" data-size="${escHtml(size)}" data-mood="${escHtml(mood)}">
       <div class="imagine-loading">
         <div class="imagine-spinner"></div>
         <div class="imagine-msg">${escHtml(series)}${size ? ' ' + escHtml(size) : ''} 인테리어 생성 중<span class="sub">약 20초 정도 걸려요</span></div>
@@ -2337,8 +2482,51 @@ function formatMsg(text){
   return html;
 }
 
+// 번들 이미지 자동 생성 (imagine.js bundle 호출)
+async function generateBundleImage(id, items, space, mood){
+  const el = document.getElementById(id);
+  if (!el) return;
+  try {
+    const payload = { mode: 'bundle', items, spaceSize: space };
+    if (mood) payload.mood = mood;
+
+    const res = await fetch('/api/imagine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errText.slice(0, 100)}`);
+    }
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!data.image) throw new Error('이미지 응답이 비어있어요.');
+
+    const itemsList = (data.items || []).map(it => {
+      const sz = it.size ? ` ${it.size}` : '';
+      return `${it.series}${sz} · ${it.color}`;
+    }).join('  +  ');
+    const provider = data.provider || '';
+    const moodTag = data.mood ? `<span class="tag" style="margin-right:4px;">${escHtml(data.mood)}</span>` : '';
+    const warnings = (data.warnings && data.warnings.length)
+      ? `<div class="imagine-warning">${data.warnings.map(w => escHtml(w)).join('<br>')}</div>` : '';
+
+    el.innerHTML = `
+      <img class="imagine-result" src="${data.image}" alt="번들 인테리어 (${data.itemsCount}가지 제품)">
+      <div class="imagine-meta">
+        <span>${escHtml(itemsList)}</span>
+        <span>${moodTag}${provider ? `<span class="tag">${provider}</span>` : ''}</span>
+      </div>
+      ${warnings}`;
+    scrollMsgs();
+  } catch (e) {
+    el.innerHTML = `<div class="imagine-error">번들 이미지 생성 실패 (${escHtml(e.message.slice(0, 80))}).</div>`;
+  }
+}
+
 // 인테리어 이미지 자동 생성 (imagine.js fusion 호출)
-async function generateImagineImage(id, series, color, space, tableColor, size){
+async function generateImagineImage(id, series, color, space, tableColor, size, mood){
   const el = document.getElementById(id);
   if (!el) return;
   try {
@@ -2347,6 +2535,7 @@ async function generateImagineImage(id, series, color, space, tableColor, size){
     if (space) payload.spaceSize = space;
     if (tableColor) payload.tableColor = tableColor;
     if (size) payload.size = size;
+    if (mood) payload.mood = mood;
 
     const res = await fetch('/api/imagine', {
       method: 'POST',
@@ -2388,7 +2577,7 @@ async function generateImagineImage(id, series, color, space, tableColor, size){
       </div>`;
     scrollMsgs();
   } catch (e) {
-    el.innerHTML = `<div class="imagine-error">이미지 생성에 실패했어요 (${escHtml(e.message.slice(0, 80))}).<br><span class="retry" onclick="generateImagineImage('${id}','${escHtml(series).replace(/'/g,'')}','${escHtml(color).replace(/'/g,'')}','${escHtml(space).replace(/'/g,'')}','${escHtml(tableColor || '').replace(/'/g,'')}','${escHtml(size || '').replace(/'/g,'')}')">다시 시도</span></div>`;
+    el.innerHTML = `<div class="imagine-error">이미지 생성에 실패했어요 (${escHtml(e.message.slice(0, 80))}).<br><span class="retry" onclick="generateImagineImage('${id}','${escHtml(series).replace(/'/g,'')}','${escHtml(color).replace(/'/g,'')}','${escHtml(space).replace(/'/g,'')}','${escHtml(tableColor || '').replace(/'/g,'')}','${escHtml(size || '').replace(/'/g,'')}','${escHtml(mood || '').replace(/'/g,'')}')">다시 시도</span></div>`;
   }
 }
 
