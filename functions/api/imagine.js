@@ -345,20 +345,21 @@ export async function onRequestPost(context) {
       stage = 'swap_enrich';
       let enrichment = '';
       const lower = instruction.toLowerCase();
-      // 컬러 매핑 (manifest의 COLOR_DESC_MAP을 참조할 수도 있지만 일단 일반 매핑)
+      // 컬러 매핑 — 알로소 공식 컬러 데이터 기준 정확하게
       const colorHints = {
-        '온드': 'warm cream-beige leather with subtle natural grain, soft pearl ivory tone',
+        '온드': 'soft pearl ivory leather, warm cream-beige with subtle natural grain — NOT pure white',
         '마쉬': 'rich warm tan leather with golden-brown undertones',
-        '노체': 'deep dark walnut leather with rich brown depth',
-        '카도마리노': 'deep forest green leather with subtle olive undertones',
-        '쉘': 'soft warm cream fabric, off-white with subtle warmth',
+        '노체': 'deep dark walnut brown leather with rich saturated brown depth',
+        '카도마리노': 'deep forest green leather with subtle olive undertones — NOT wine, NOT red',
+        '쉘': 'soft warm cream fabric, off-white with subtle warmth — NOT pure white',
         '클라우드': 'pale soft cloud-grey fabric, cool light grey',
-        '모빅': 'deep charcoal grey, almost black with subtle warmth',
+        '모빅': 'JET TRUE BLACK leather, deep pure black, near-pure carbon black with very subtle natural leather grain — STRICTLY NOT grey, NOT charcoal, NOT dark brown. This is a saturated true black like a black leather jacket.',
         '파우더': 'soft powdery beige, pale dusty pink-cream',
         '버터옐로우': 'warm soft butter-yellow, pale creamy yellow',
         '조이풀옐로우': 'cheerful golden mustard yellow, warm saturated tone',
         '블루베이': 'soft dusty pale blue with subtle grey undertone',
         '샤모아': 'warm chamois beige, soft tan',
+        '단테': 'rich dark leather (Alloso 단테 article — hi-end leather grade)',
       };
       for (const [k, v] of Object.entries(colorHints)) {
         if (lower.includes(k.toLowerCase()) || instruction.includes(k)) {
@@ -368,7 +369,7 @@ export async function onRequestPost(context) {
       // 소재 키워드
       const matHints = {
         '부클레': 'boucle weave fabric with textured nubby surface',
-        '가죽': 'smooth leather upholstery with subtle grain',
+        '가죽': 'smooth leather upholstery with subtle natural grain',
         '패브릭': 'woven fabric upholstery',
         '아크레': 'fine premium fabric with smooth weave',
       };
@@ -378,17 +379,22 @@ export async function onRequestPost(context) {
 
       stage = 'swap_gemini';
       const swapPrompt = [
-        `You are editing a photograph of furniture. Change ONLY the upholstery material and/or color of the furniture in this image based on the user's instruction:`,
-        `"${instruction}"${enrichment}`,
-        `STRICT PRESERVATION RULES:`,
-        `1. Keep the EXACT same furniture shape, silhouette, proportions, and dimensions.`,
-        `2. Keep the SAME number and arrangement of cushions and pillows.`,
-        `3. Keep the SAME camera angle, perspective, and framing.`,
-        `4. Keep the SAME lighting direction, intensity, and color temperature.`,
-        `5. Keep the SAME background, walls, floor, side tables, lamps, plants, and ALL surrounding elements completely unchanged.`,
-        `6. Keep the SAME shadows and reflections, only adjust them subtly to match the new material's reflectivity if needed.`,
-        `ONLY change: the surface material and/or color of the main upholstered furniture (sofa, chair, etc).`,
-        `Maintain photorealistic quality and resolution matching the original photograph. Output a single photorealistic edited image.`,
+        `═══ PHOTO RETOUCH TASK — NOT a furniture regeneration ═══`,
+        `You are performing a precise color/material recolor edit on this photograph.`,
+        `User's instruction: "${instruction}"${enrichment}`,
+        `THIS IS A SURFACE RECOLOR ONLY. Treat this as Photoshop "Replace Color" on the upholstery surface — the underlying furniture geometry must remain pixel-identical.`,
+        `MUST REMAIN ABSOLUTELY IDENTICAL TO THE ORIGINAL IMAGE (do NOT change these even by 1 pixel):`,
+        `1. The EXACT furniture silhouette, shape, geometry, dimensions, proportions, contours.`,
+        `2. The EXACT number of cushions, their individual shape, their position, their arrangement, their creases and folds.`,
+        `3. The EXACT armrest design, leg/base design, frame structure, stitching pattern.`,
+        `4. The EXACT camera angle, perspective, framing, crop, focal length.`,
+        `5. The EXACT lighting direction, intensity, color temperature, shadows, highlights, and reflections.`,
+        `6. The EXACT background, walls, floor, side tables, lamps, decorative objects, plants — every other element must be untouched.`,
+        `7. The EXACT image resolution and photographic quality of the original.`,
+        `ONLY CHANGE: the surface color and/or material texture of the main upholstered fabric/leather areas of the furniture. Adjust shadow tones subtly to match the new material's reflectivity, but do not change shadow shape or position.`,
+        `Target appearance for the upholstery surface: ${instruction}${enrichment ? ' — refer to the color enrichment notes above for accuracy' : ''}.`,
+        `If the user names a specific Alloso color (e.g. 모빅, 카도마리노), match that exact color description STRICTLY. Do not approximate or shift toward similar colors.`,
+        `Output a single photorealistic image that looks like a Photoshop color-replace edit of the original — same room, same furniture geometry, same lighting, only the upholstery surface re-colored.`,
       ].join(' ');
 
       let resultBase64;
