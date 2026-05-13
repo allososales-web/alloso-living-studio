@@ -1231,11 +1231,32 @@ body.sb-mobile-open .sidebar-backdrop{display:block;opacity:1;}
 .bundle-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);line-height:1.5;}
 /* ── Imagine Box (AI 이미지 생성) ── */
 .imagine-box{margin:10px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card);}
-.imagine-loading{padding:32px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;}
-.imagine-spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:imagine-spin .8s linear infinite;}
+.imagine-loading{
+  padding:28px 18px 22px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  background:linear-gradient(135deg,rgba(217,184,121,0.04) 0%,rgba(217,184,121,0.08) 100%);
+  border:1.5px dashed rgba(217,184,121,0.45);
+  border-radius:10px;
+  position:relative;
+  margin:2px;
+}
+.imagine-loading::before{
+  content:'PROCESSING · 작업 중';
+  position:absolute;top:9px;left:13px;
+  font-family:'Josefin Sans',sans-serif;font-size:9px;font-weight:600;
+  letter-spacing:.18em;color:var(--gold);
+}
+.imagine-spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:imagine-spin .8s linear infinite;margin-top:8px;}
 @keyframes imagine-spin{to{transform:rotate(360deg);}}
-.imagine-msg{font-size:11.5px;color:var(--muted);letter-spacing:.04em;line-height:1.55;}
-.imagine-msg .sub{display:block;font-size:10px;color:var(--muted);margin-top:3px;opacity:.7;}
+.imagine-msg{font-size:11.5px;color:var(--accent);letter-spacing:.04em;line-height:1.55;font-weight:500;}
+.imagine-msg .sub{display:block;font-size:10px;color:var(--muted);margin-top:3px;opacity:.75;font-weight:300;}
+/* 챗봇이 사용자에게 옵션 묻는 박스 — 로딩과 명확히 구분 */
+.choice-box{padding:14px 16px 14px 18px;background:rgba(255,255,255,0.7);border-left:3px solid var(--gold);border-radius:4px;margin:6px 2px 4px;}
+.choice-box-label{font-family:'Josefin Sans',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.16em;color:var(--gold);margin-bottom:7px;text-transform:uppercase;}
+.choice-box-q{font-size:12.5px;color:var(--accent);line-height:1.5;margin-bottom:10px;font-weight:500;}
+.choice-box-options{display:flex;flex-wrap:wrap;gap:7px;}
+.choice-box-opt{padding:7px 14px;background:var(--card2);border:1px solid var(--border);border-radius:18px;font-size:11.5px;color:var(--accent);cursor:pointer;transition:all .15s;}
+.choice-box-opt:hover{border-color:var(--gold);background:rgba(217,184,121,0.08);}
 .imagine-result{display:block;width:100%;height:auto;background:var(--bg2);}
 .imagine-meta{padding:9px 14px;background:rgba(0,0,0,.03);border-top:1px solid var(--border);font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;}
 .imagine-meta .tag{color:var(--gold);}
@@ -2543,33 +2564,93 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 → 모브 모빅 = ACCENT + DEEP_HUE = luxe_dark
 → 세 마커 모두 spaceSize=wide. 무드는 각각 자동 추론된 값.
 
-[시리즈별 주요 사이즈 (마커 5번째 슬롯에 그대로 사용)]
-- 사티 / 사티 모션: 1인, 2인, 3인, 4인 / 사티 큐브: 1인, 1.5인, 2인 / 사티 큐브 스위블: 1인
-- **밀로: 1인 와이드, 2.5인, 3인, 4인, 3인 라운지, 4인 라운지, 와이드 코너 (코너 변형은 와이드 코너 하나뿐)**
-- **케렌시아: 1인 (단독 체어), 2인, 3인 모듈 라운지 (둥지형 기본), 3모듈 라운지 (L자형), 오토만**
-- 보눔 풀베이스: 2인, 3인, 4인 / 보눔 오픈베이스: 2인, 3인, 4인
-- 카포네: 3인, 4인, 5인 / 카포네 그랑: 4인 섹셔널, 5인 섹셔널
-- 바드: 2인, 2.5인, 3인, 데이베드 / 비하르: 3인, 4인 라운지
-- 레지나: 3인, 3.5인, 4인 / 테오: 3인, 4인 / 스탠: 3인, 4인, 5인
-- 엘머(마마): 2인 / 엘머(파파): 2.5인 / 클렉트: 3인, 4인 / 홀리데이: 3인, 4인 / 에브리데이: 3인, 4인
-- 뚜따: 하이백 1인 (기본) / 모브: 단일 (단일 SKU)
+[보눔 풀베이스 ↔ 오픈베이스 disambiguation — 사양 자동 분기]
+사용자가 "보눔"만 말하고 사이즈를 지정하면:
+- **풀베이스 전용 사이즈** (3인 라운지, 3인 터미널, 4인 라운지) 명시 → 묻지 말고 **보눔 풀베이스 자동 선택**
+- 양쪽 둘 다 있는 사이즈 (4인, 3인, 1인) 명시 → **사용자에게 물어보기**: "풀베이스(다리 미노출)와 오픈베이스(다리 노출) 중 어느 쪽 보여드릴까요?"
+- 사이즈 미명시 → 풀베이스 기본 + 마지막에 "오픈베이스도 보고 싶으시면 알려주세요"
 
-[사이즈 스마트 치환 — 사용자 요청이 정확한 사양과 불일치할 때]
-사용자가 그 시리즈에 없는 사이즈를 말하면, **거절하지 말고 가장 가까운 변형으로 자연스럽게 안내**하면서 진행:
+예시:
+- "보눔 3인 라운지 모빅" → 자동 풀베이스 → "[IMAGINE:보눔 풀베이스,모빅,wide,,3인 라운지]"
+- "보눔 3인 모빅" → 양쪽 다 가능 → 묻기 (풀베이스/오픈베이스?)
+- "보눔 모빅" → 풀베이스 기본 → "[IMAGINE:보눔 풀베이스,모빅,wide,,4인 라운지]" + 끝에 안내
 
-밀로 치환 가이드 (밀로엔 "코너 라운지"가 없고 "와이드 코너" 하나뿐):
-- "밀로 코너 라운지" / "밀로 코너" / "밀로 L자" / "밀로 L자 라운지" → **와이드 코너** 로 치환
-- 답변 예: "밀로의 코너 변형은 와이드 코너 하나예요. 와이드 코너로 보여드릴게요."
+[시리즈별 정확한 사이즈 — 마스터 가격표 rev.26.3 기준 (manifest.series[X].available_sizes와 동기화)]
+- 사티: 1인, 3인, 3.5인, 4인
+- 사티 모션: 1인, 3인, 유닛
+- 사티 큐브: 1인, 1.5인, 2인, 1인 스위블 (※ 1인 스위블 = 별도 시리즈 '사티 큐브 스위블'과 동일)
+- 사티 큐브 스위블: 1인
+- 케렌시아: 1인 (단독 체어), 모듈 3인, 3모듈 라운지 (L자형), 싱글라운지, 코너 라운지, 오토만
+- 바드: 3인, 데이베드 좌/우, 싱글 베드 좌/우, 오토만
+- 보눔 풀베이스: 4인 라운지, 4인, **3인 라운지**, **3인 터미널**, 코너, 오토만, 암리스, 1인 좌/우 — 풀베이스 **전용**: 4인 라운지, 3인 라운지, 3인 터미널, 코너, 암리스, 1인 좌/우
+- 보눔 오픈베이스: 4인, 3인, 1인 — 풀베이스에도 같은 사이즈 변형 있어 사용자 확인 필요
+- 엘머: 마마, 마마+오토만 SET, 오토만
+- 엘머 파파: 파파, 오토만
+- 홀리데이: 4인 오픈롱거, 4인 오픈쇼터, 오토만, 코너라운지
+- 홀리데이 미니: 3인 오픈 쇼터, 4인, 싱글베드, 오토만
+- 에브리데이: 1인, 3인, 3.5인, 4인
+- 카포네: 3인, 4인, 오토만
+- 카포네 그랑: 4인 섹셔널, 5인 섹셔널, 3인, 4인, 코너
+- 스탠: 3인, 4인, 4인 코너, 4인 퍼니싱, 5인, 와이드 코너
+- **밀로: 1인 와이드, 2.5인, 3인, 4인, 3인 라운지, 4인 라운지, 와이드 코너 (밀로 코너 변형은 와이드 코너 하나뿐)**
+- 비하르: 3인, 1인 좌/우, 4인 + 암리스, 4인 라운지, 와이드 1인 좌/우, 와이드 4인, 와이드 4인 라운지
+- 테오: 3인, 4인 라운지, 4인 터미널, 와이드 4인, 와이드 코너
+- 레지나: 1인, 3인, 3.5인, 4인, 오토만
+- 클렉트: 3인, 4인, 와이드 코너, 코너
+- 디토: 다이닝, 로우백, 하이백
+- 뚜따: 하이백 1인 (기본), 암체어, 오토만
+- 라임: 리클라이너 스트라이프, 리클라이너 플레인
+- 베르디: 암체어
+- 모브: 단일 (단일 SKU)
+- 디딤소반: 별도 가격표 확인 필요
 
-케렌시아 치환 가이드 (모듈 vs 단독 체어 헷갈리기 쉬움):
-- "케렌시아 싱글", "케렌시아 단일", "케렌시아 1인 모듈" → **1인** (단독 체어) 로 치환
-- "케렌시아 둥지형", "케렌시아 둥지", "케렌시아 라운지" → **3인 모듈 라운지**
-- "케렌시아 L자", "케렌시아 L자형" → **3모듈 라운지**
-- "케렌시아 싱글 라운지" → 모듈 조합용 → **3인 모듈 라운지** 권유
+[모듈형 시리즈 인식 — 사용자 빈번한 표현 변환]
 
-이외 시리즈: 사용자 요청 사이즈가 available_sizes에 없으면 가장 가까운 변형 1개 추천하면서 진행. 절대 그냥 다른 사이즈 픽해서 들고오지 말 것 — 사용자에게 어떤 사이즈로 갈지 명시.
+**밀로** (모듈형, 코너 = 와이드 코너 하나):
+- "밀로 코너 라운지" / "밀로 코너" / "밀로 L자" / "밀로 L자 라운지" → **와이드 코너**
+- "밀로 3인 라운지" / "밀로 3인L" → **3인 라운지**
+- "밀로 4인 라운지" / "밀로 4인L" → **4인 라운지**
+- "밀로 1인" → **1인 와이드** (밀로엔 일반 1인이 없음, 1인 와이드만)
 
-사용자가 사이즈를 명시하지 않으면 5번째 슬롯 비움 (자동 픽). 명시한 경우 (예: "사티 3인", "밀로 4인 라운지로", "케렌시아 둥지형") 반드시 5번째 슬롯에 정확한 사이즈 토큰 사용. **밀로 "코너 라운지"는 "와이드 코너"로, 케렌시아 모호한 단일 표현은 적절히 치환해서 슬롯에 박을 것.**
+**케렌시아** (모듈형, 단독체어 vs 모듈 구분):
+- "케렌시아 싱글" / "케렌시아 단일" / "케렌시아 1인 모듈" → **1인** (단독 체어)
+- "케렌시아 둥지형" / "케렌시아 둥지" / "케렌시아 라운지" / "케렌시아 3인 모듈" → **모듈 3인**
+- "케렌시아 L자" / "케렌시아 L자형" / "케렌시아 3모듈" → **3모듈 라운지**
+- "케렌시아 싱글 라운지" → **싱글라운지**
+
+**보눔 풀베이스** (모듈형 — 풀베이스 전용 사이즈):
+- "보눔 3인 라운지" / "보눔 3인L" → 자동 **보눔 풀베이스 3인 라운지** (풀베이스만 보유, 묻지 않음)
+- "보눔 3인 터미널" → 자동 **보눔 풀베이스 3인 터미널**
+- "보눔 4인 라운지" → 자동 **보눔 풀베이스 4인 라운지**
+- "보눔 코너" / "보눔 암리스" / "보눔 1인 좌" / "보눔 1인 우" → 자동 **보눔 풀베이스**
+- "보눔 3인" / "보눔 4인" / "보눔 1인" (양쪽 다 있음) → **사용자에게 물어보기**: "풀베이스(다리 미노출)와 오픈베이스(다리 노출) 중 어느 쪽 보여드릴까요?"
+
+**스탠** (모듈형, 코너 변형 다양):
+- "스탠 코너" → 사이즈 묻기 ("4인 코너 / 와이드 코너 중 어느 쪽?")
+- "스탠 와이드" → **와이드 코너**
+
+**홀리데이** (오픈롱거/오픈쇼터 구분):
+- "홀리데이 4인 라운지" / "홀리데이 라운지" → **4인 오픈롱거** (체어즈)
+- "홀리데이 4인 쇼터" → **4인 오픈쇼터**
+- "홀리데이 미니 3인" → **홀리데이 미니 3인 오픈 쇼터**
+
+**카포네** vs **카포네 그랑** (별도 시리즈):
+- "카포네 3인" / "카포네 4인" → 카포네
+- "카포네 4인 섹셔널" / "카포네 5인 섹셔널" / "카포네 코너" → **카포네 그랑**
+
+**비하르** (와이드 변형):
+- "비하르 와이드 4인" → **와이드 4인** 또는 **와이드 4인 라운지**
+- "비하르 1인 좌" → **1인 좌/우**
+- "비하르 4인 라운지" → **4인 라운지**
+
+[사이즈 스마트 치환 — 사용자 요청 미일치 시]
+사용자가 그 시리즈에 없는 사이즈를 말하면, **거절하지 말고 가장 가까운 변형으로 자연스럽게 안내**하면서 진행. 절대 그냥 다른 사이즈 픽해서 들고오지 말 것 — 어떤 사이즈로 치환할지 명시.
+
+답변 예시:
+- "밀로 코너 라운지로 보여줘" → "밀로의 코너 변형은 와이드 코너 하나예요. 와이드 코너로 보여드릴게요. [IMAGINE:밀로,...,와이드 코너]"
+- "보눔 풀베이스 2인" → "보눔 풀베이스에 2인 사양이 없어요. 가까운 사이즈로 1인 좌/우 또는 3인 라운지가 있는데, 어느 쪽 보여드릴까요?"
+
+사용자가 사이즈를 명시하지 않으면 5번째 슬롯 비움 (자동 픽). 명시한 경우 반드시 위 표의 정확한 사이즈 토큰 사용. 모듈형 시리즈는 위 변환 룰을 무조건 따를 것.
 
 [색상 자연어 → 알로소 컬러명 매핑 (반드시 변환)]
 사용자가 일반 색상 단어로 말하면 알로소 컬러명으로 정확히 변환해서 마커에 넣으세요:
@@ -2805,7 +2886,9 @@ function showMoodboardModal(item){
     ? `${item.itemsCount || (item.items?.length || 0)}가지 알로소 제품 조합`
     : (item.series || 'ALLOSO') + (item.color ? ' · ' + item.color : '');
   const productsHtml = (item.items || []).map(it => {
-    const url = it.productPageUrl || `https://alloso.co.kr/search?q=${encodeURIComponent(it.series||'')}`;
+    const articleEntry = (typeof ARTICLES !== 'undefined' && ARTICLES[it.series]) || null;
+    let url = articleEntry?.url || it.productPageUrl || `https://alloso.co.kr/search?q=${encodeURIComponent(it.series||'')}`;
+    if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
     return `
       <a class="bundle-prod-card" href="${escHtml(url)}" target="_blank" rel="noopener">
         ${it.thumbnailUrl ? `<div class="bp-thumb"><img src="${escHtml(it.thumbnailUrl)}" onerror="this.style.opacity='0.3'"></div>` : '<div class="bp-thumb"></div>'}
@@ -3067,6 +3150,28 @@ function bookmarkBundle(elId, btnEl){
     itemsCount: data.itemsCount,
     mood: data.mood,
     spaceSize: data.spaceSize,
+  });
+  btnEl.classList.add('saved');
+  btnEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+  btnEl.title = '저장됨';
+}
+
+// Swap 결과 북마크 (swap_material / swap_series / add_product)
+function bookmarkSwap(elId, btnEl){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (btnEl.classList.contains('saved')) return;
+  let data;
+  try { data = JSON.parse(el.dataset.swapData || '{}'); }
+  catch(e){ return; }
+  const img = el.querySelector('.imagine-result');
+  const imageSrc = img ? img.src : '';
+  addToMoodboard({
+    type: data.mode || 'swap',
+    image: imageSrc,
+    series: data.target,
+    color: data.color,
+    mood: data.modeLabel,
   });
   btnEl.classList.add('saved');
   btnEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
@@ -3389,43 +3494,74 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
 
     const target = data.target || data.target_series || userInstruction || '변환 결과';
     const isSeriesSwap = data.mode === 'swap_series';
-    const modeLabel = isSeriesSwap ? '시리즈 변경' : '소재 변경';
-    const modeTag = isSeriesSwap ? 'series' : 'swap';
-    const headerMsg = isSeriesSwap
-      ? `${escHtml(data.target_series)} 시리즈로 변경해드렸어요.${Array.isArray(data.target_color) ? ` 컬러: ${escHtml(data.target_color.join(', '))}` : ' 컬러는 원본 유지.'}`
-      : `"${escHtml(target)}" 으로 변환해드렸어요.`;
+    const isAddProduct = data.mode === 'add_product';
+    const isSeriesOp = isSeriesSwap || isAddProduct;
+    let modeLabel, modeTag, headerMsg, hintMsg;
+    if (isAddProduct) {
+      modeLabel = '제품 추가';
+      modeTag = 'add';
+      const posInfo = data.position_hints ? ` (${data.position_hints.length > 0 ? '위치 지정' : '자동 배치'})` : '';
+      headerMsg = `${escHtml(data.target_series)} (${escHtml(data.target_category)})${posInfo} 를 공간에 추가했어요.${Array.isArray(data.target_color) ? ` 기존 가구 컬러: ${escHtml(data.target_color.join(', '))}` : ' 기존 가구는 유지.'}`;
+      hintMsg = '매장 영업 활용 가능. 다른 제품을 추가하거나 위치를 바꾸려면 이미지를 새로 첨부해 주세요.';
+    } else if (isSeriesSwap) {
+      modeLabel = '시리즈 교체';
+      modeTag = 'swap-series';
+      headerMsg = `${escHtml(data.target_series)} 시리즈로 변경해드렸어요.${Array.isArray(data.target_color) ? ` 컬러: ${escHtml(data.target_color.join(', '))}` : ' 컬러는 원본 유지.'}`;
+      hintMsg = '매장 영업 활용 가능. 다른 시리즈로 다시 시도하려면 이미지를 새로 첨부해 주세요.';
+    } else {
+      modeLabel = '소재 변경';
+      modeTag = 'swap';
+      headerMsg = `"${escHtml(target)}" 으로 변환해드렸어요.`;
+      hintMsg = '매장 영업 활용 가능. 다른 컬러로 다시 시도하려면 이미지를 새로 첨부해 주세요.';
+    }
     // 칩/시리즈 reference 정보 (정확도 디버깅용)
     let refInfo = '';
     if (data.chip) {
-      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(217,184,121,0.04);">
-        ✓ 컬러 reference 사용: <strong>${escHtml(data.chip.colorKo)}</strong> (코드 ${escHtml(data.chip.code)} · ${escHtml(data.chip.article)} 아티클)
+      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(120,180,120,0.08);">
+        ✓ 컬러 reference 사용: <strong style="color:var(--accent);">${escHtml(data.chip.colorKo)}</strong> (코드 ${escHtml(data.chip.code)} · ${escHtml(data.chip.article)} 아티클)
       </div>`;
-    } else if (isSeriesSwap && data.ref_used) {
+    } else if (isSeriesOp && data.ref_used) {
       const refName = data.ref_used.split('/').pop().replace(/\.[^.]+$/, '');
-      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(217,184,121,0.04);">
-        ✓ 시리즈 reference: <strong>${escHtml(refName)}</strong>
+      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(120,180,120,0.08);">
+        ✓ ${isAddProduct ? '제품' : '시리즈'} reference: <strong style="color:var(--accent);">${escHtml(refName)}</strong>
       </div>`;
-    } else if (!isSeriesSwap) {
-      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(255,200,200,0.08);">
-        ⚠ 컬러 칩 reference 없음 — 텍스트 묘사로 추론 (정확도 제한). manifest에 code가 등록되지 않은 컬러일 수 있어요.
+    } else if (!isSeriesOp) {
+      const errDetail = data.chip_error ? `<br><span style="opacity:0.7;">사유: ${escHtml(data.chip_error)}</span>` : '';
+      const attemptedKey = data.chip_attempted_key ? `<br><span style="opacity:0.7;font-family:monospace;font-size:9.5px;">시도한 키: ${escHtml(data.chip_attempted_key)}</span>` : '';
+      const matchedInfo = (data.matched_colors && data.matched_colors.length > 0) ? `<br><span style="opacity:0.7;">매칭된 컬러: ${escHtml(data.matched_colors.join(', '))}</span>` : '';
+      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(220,150,100,0.1);line-height:1.5;">
+        ⚠ 컬러 칩 reference 없음 — 텍스트 묘사로만 추론 (정확도 제한)${errDetail}${matchedInfo}${attemptedKey}
       </div>`;
     }
-    const hintMsg = isSeriesSwap
-      ? '매장 영업 활용 가능. 다른 시리즈로 다시 시도하려면 이미지를 새로 첨부해 주세요.'
-      : '매장 영업 활용 가능. 다른 컬러로 다시 시도하려면 이미지를 새로 첨부해 주세요.';
     const loadingEl = document.getElementById(loadingId);
     if (loadingEl) {
+      const swapId = 'swap-result-' + Date.now();
       loadingEl.innerHTML = `
         <div style="line-height:1.5;margin-bottom:8px;">${headerMsg}</div>
-        <div class="imagine-box">
-          <img class="imagine-result" src="${data.image}" alt="변환 결과">
+        <div class="imagine-box" id="${swapId}">
+          <div class="bundle-image-wrap">
+            <img class="imagine-result" src="${data.image}" alt="변환 결과">
+            <button class="bundle-bookmark" onclick="bookmarkSwap('${swapId}', this)" title="무드보드에 저장" aria-label="저장">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+          </div>
           <div class="imagine-meta">
-            <span>${modeLabel}: ${escHtml(isSeriesSwap ? data.target_series : target)}</span>
+            <span>${modeLabel}: ${escHtml(isSeriesOp ? data.target_series : target)}</span>
             <span><span class="tag">${modeTag}</span><span class="tag">gemini</span></span>
           </div>
           ${refInfo}
-          <div class="bundle-hint">${hintMsg}</div>
+          <div class="bundle-hint">${hintMsg} · ♥ 클릭 시 무드보드 저장</div>
         </div>`;
+      // 북마크용 데이터 저장
+      const boxEl = document.getElementById(swapId);
+      if (boxEl) {
+        boxEl.dataset.swapData = JSON.stringify({
+          mode: data.mode,
+          target: data.target_series || data.target || target,
+          color: Array.isArray(data.target_color) ? data.target_color.join(', ') : (data.target_color || ''),
+          modeLabel,
+        });
+      }
     }
     scrollMsgs();
   } catch(e) {
@@ -3629,9 +3765,13 @@ async function generateBundleImage(id, items, space, mood){
     const warningsHtml = (data.warnings && data.warnings.length)
       ? `<div class="imagine-warning">${data.warnings.map(w => escHtml(w)).join('<br>')}</div>` : '';
 
-    // 하단 제품 카드 리스트 — 클릭 시 알로소 제품 페이지로 이동
+    // 하단 제품 카드 리스트 — ARTICLES의 정식 URL 우선, 없으면 fallback
     const productCardsHtml = (data.items || []).map(item => {
-      const url = item.productPageUrl || `https://alloso.co.kr/?q=${encodeURIComponent(item.series)}`;
+      const articleEntry = (typeof ARTICLES !== 'undefined' && ARTICLES[item.series]) || null;
+      // 우선순위: ARTICLES.url (정식) > productPageUrl (서버 임시) > 검색 fallback
+      let url = articleEntry?.url || item.productPageUrl || `https://alloso.co.kr/?q=${encodeURIComponent(item.series||'')}`;
+      // http 누락 보정
+      if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
       const subNote = item.sizeSubstituted && item.requestedSize
         ? `<div class="bp-note">요청 "${escHtml(item.requestedSize)}" → ${escHtml(item.size)}</div>` : '';
       return `
