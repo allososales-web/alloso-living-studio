@@ -421,7 +421,7 @@ export async function onRequestPost(context) {
       if (targetSeries && targetSeriesFolder && env.PRODUCTS) {
         stage = 'swap_series_fetch';
         const refColor = matchedColors[0] || null; // 새 컬러 명시 있으면 우선, 없으면 default
-        const seriesPick = await findBestReference(env, `products/${targetSeriesFolder}/`, {
+        const seriesPick = await findBestReference(env, targetSeriesFolder, {
           preferredColor: refColor,
           preferredAngle: '측면',
         });
@@ -487,28 +487,35 @@ export async function onRequestPost(context) {
         });
       }
 
-      // ── 컬러 칩 이미지 자동 fetch (시각 reference) ──
+      // ── 컬러 칩 이미지 자동 fetch (R2 binding 직접 호출 — 외부 URL fetch 보다 안정적) ──
       stage = 'swap_chip_fetch';
-      const TEXTURES_BASE = 'https://pub-e6e05583aaab430fa1f84b922d9f7da7.r2.dev/textures/alloso-textures-512/';
       let chipBase64 = null;
       let chipMeta = null;
-      const matchedColorKo = matchedColors[0]; // 첫 매칭 컬러 우선
+      let chipAttemptedKey = null;
+      let chipFetchError = null;
+      const matchedColorKo = matchedColors[0];
       if (matchedColorKo && manifest.colors?.[matchedColorKo]?.code) {
         const code = manifest.colors[matchedColorKo].code;
         const article = manifest.colors[matchedColorKo].article || '';
-        try {
-          const chipRes = await fetch(`${TEXTURES_BASE}${code}.jpg`);
-          if (chipRes.ok) {
-            const buf = await chipRes.arrayBuffer();
-            const bytes = new Uint8Array(buf);
-            let binary = '';
-            for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-            chipBase64 = btoa(binary);
-            chipMeta = { code, article, colorKo: matchedColorKo };
+        chipAttemptedKey = `textures/alloso-textures-512/${code}.jpg`;
+        if (env.PRODUCTS) {
+          try {
+            chipBase64 = await fetchR2AsBase64(env, chipAttemptedKey);
+            if (chipBase64) {
+              chipMeta = { code, article, colorKo: matchedColorKo, key: chipAttemptedKey };
+            } else {
+              chipFetchError = `R2 키 없음: ${chipAttemptedKey}`;
+            }
+          } catch (e) {
+            chipFetchError = `R2 에러: ${e.message.slice(0, 80)}`;
           }
-        } catch (e) {
-          // 칩 fetch 실패 — 텍스트 묘사로 fallback
+        } else {
+          chipFetchError = 'PRODUCTS binding 미설정';
         }
+      } else if (matchedColorKo) {
+        chipFetchError = `${matchedColorKo}에 code 없음 (manifest 갱신 필요)`;
+      } else {
+        chipFetchError = '컬러 매칭 안 됨';
       }
 
       stage = 'swap_gemini';
@@ -554,7 +561,11 @@ export async function onRequestPost(context) {
         mode: 'swap_material',
         target: instruction,
         enrichment: enrichment.trim() || null,
-        chip: chipMeta,  // 사용된 칩 정보 (디버깅용)
+        chip: chipMeta,                  // 칩 fetch 성공 시 메타
+        chip_attempted_key: chipAttemptedKey,   // 시도한 R2 키
+        chip_fetched: !!chipBase64,             // 성공 여부 (true/false)
+        chip_error: chipFetchError,             // 실패 사유 (있으면)
+        matched_colors: matchedColors,          // instruction에서 매칭된 컬러
         provider: 'gemini',
         image: `data:image/png;base64,${resultBase64}`,
       });
