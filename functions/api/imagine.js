@@ -851,6 +851,7 @@ export async function onRequestPost(context) {
       const folder = resolved.folder;
       const spaceSize = body.spaceSize || 'narrow';
       const tableColorInput = body.tableColor || null;
+      const tableSeriesInput = body.tableSeries || null; // 사용자 명시 테이블 시리즈
 
       // 1. 소파 레퍼런스 자동 탐색 — manifest의 default_* 활용
       stage = 'list_sofa_folder';
@@ -884,13 +885,30 @@ export async function onRequestPost(context) {
         (resolvedColor && manifest.colors?.[resolvedColor]?.desc_en) ||
         resolvedColor || 'natural';
 
-      // 2. 테이블 페어링
+      // 2. 테이블 페어링 — tableSeries 명시되면 그쪽 우선, 없으면 default paired_table
       stage = 'select_table';
       let pairedTable = null;
       let tableMeta = null;
+      let tableSeriesResolved = null;
       if (includeTable) {
-        tableMeta = selectPairedTable(manifest, resolved, spaceSize);
-        if (tableMeta) pairedTable = tableMeta.table;
+        if (tableSeriesInput) {
+          // 사용자가 테이블 시리즈를 명시한 경우
+          tableSeriesResolved = resolveSeries(tableSeriesInput, manifest);
+          if (tableSeriesResolved && !tableSeriesResolved.is_brand_group && tableSeriesResolved.category !== 'discontinued') {
+            pairedTable = tableSeriesResolved.info;
+            tableMeta = {
+              table: pairedTable,
+              name: tableSeriesResolved.resolved,
+              reason: 'user_specified',
+              placement: 'beside the sofa as a complementary set',
+            };
+          }
+        }
+        // 폴백: default paired_table
+        if (!pairedTable) {
+          tableMeta = selectPairedTable(manifest, resolved, spaceSize);
+          if (tableMeta) pairedTable = tableMeta.table;
+        }
       }
 
       // 3. 테이블 레퍼런스 자동 탐색
@@ -1003,6 +1021,8 @@ export async function onRequestPost(context) {
         spaceSize,
         mood: mood || null,
         tableColor: tableColorInput,
+        tableSeriesInput: tableSeriesInput,
+        tableSeriesResolved: tableSeriesResolved?.resolved || null,
         sofaSelectedSize: body.size || resolved.info?.default_size || null,
         sofaSelectedMaterial: body.material || resolved.info?.default_material || null,
         provider,
