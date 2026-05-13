@@ -2815,28 +2815,76 @@ const MOOD_CURATIONS = {
 
 // ══ Sidebar + 무드보드 (Model B) ══
 const MOODBOARD_KEY = 'alloso_moodboard_v1';
+const MOODBOARD_IMG_PREFIX = 'alloso_mb_img_'; // 큰 이미지는 별도 키로 저장 (quota 분산)
 const SIDEBAR_KEY = 'alloso_sidebar_collapsed';
 
 function getMoodboard(){
   try { return JSON.parse(localStorage.getItem(MOODBOARD_KEY) || '[]'); }
   catch(e){ return []; }
 }
+// 메타데이터(가벼움)와 이미지(무거움)를 분리 저장해서 localStorage quota 초과를 방지
+// items에는 imageRef(키 이름)만, 실제 base64는 MOODBOARD_IMG_PREFIX + id 에 따로 저장
 function saveMoodboard(items){
-  try { localStorage.setItem(MOODBOARD_KEY, JSON.stringify(items)); }
-  catch(e){ console.warn('localStorage write failed', e); }
+  try {
+    localStorage.setItem(MOODBOARD_KEY, JSON.stringify(items));
+    return true;
+  } catch(e){
+    console.warn('localStorage write failed', e);
+    return false;
+  }
+}
+function saveMoodboardImage(id, dataUrl){
+  if (!dataUrl) return false;
+  try {
+    localStorage.setItem(MOODBOARD_IMG_PREFIX + id, dataUrl);
+    return true;
+  } catch(e) {
+    // quota 초과 시 가장 오래된 무드보드 이미지부터 삭제하며 재시도
+    const items = getMoodboard();
+    const sorted = [...items].sort((a,b) => (a.savedAt||0) - (b.savedAt||0));
+    for (const old of sorted) {
+      if (old.id === id) continue;
+      try {
+        localStorage.removeItem(MOODBOARD_IMG_PREFIX + old.id);
+        localStorage.setItem(MOODBOARD_IMG_PREFIX + id, dataUrl);
+        return true;
+      } catch(e2){ /* 계속 시도 */ }
+    }
+    return false;
+  }
+}
+function getMoodboardImage(id){
+  try { return localStorage.getItem(MOODBOARD_IMG_PREFIX + id) || ''; }
+  catch(e){ return ''; }
 }
 function addToMoodboard(payload){
   const items = getMoodboard();
   const id = 'mb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
-  items.unshift({ ...payload, id, savedAt: Date.now() });
-  if (items.length > 30) items.length = 30;
-  saveMoodboard(items);
+  // 이미지 분리 — payload.image는 base64, 따로 저장
+  const imageData = payload.image || '';
+  const lightPayload = { ...payload };
+  delete lightPayload.image; // 메타에서 이미지 제거 (대용량)
+  items.unshift({ ...lightPayload, id, savedAt: Date.now(), hasImage: !!imageData });
+  if (items.length > 30) {
+    // 30개 초과 시 가장 오래된 항목의 이미지도 정리
+    const dropped = items.slice(30);
+    for (const d of dropped) {
+      try { localStorage.removeItem(MOODBOARD_IMG_PREFIX + d.id); } catch(e){}
+    }
+    items.length = 30;
+  }
+  const metaOk = saveMoodboard(items);
+  const imgOk = imageData ? saveMoodboardImage(id, imageData) : true;
   renderMoodboardSidebar();
+  if (!metaOk || !imgOk) {
+    alert('무드보드 저장 공간이 가득 찼어요. 기존 항목을 삭제해 주세요.');
+  }
   return id;
 }
 function removeFromMoodboard(id){
   const items = getMoodboard().filter(i => i.id !== id);
   saveMoodboard(items);
+  try { localStorage.removeItem(MOODBOARD_IMG_PREFIX + id); } catch(e){}
   renderMoodboardSidebar();
 }
 function renderMoodboardSidebar(){
@@ -2854,7 +2902,8 @@ function renderMoodboardSidebar(){
       ? `${item.itemsCount || (item.items?.length || 0)}가지 조합`
       : (item.series || '인테리어') + (item.color ? ' · ' + item.color : '');
     const subText = [item.mood, item.spaceSize].filter(Boolean).join(' · ') || '저장';
-    const thumb = item.image ? `style="background-image:url('${item.image.replace(/'/g, "\\'")}');"` : '';
+    const imgData = item.hasImage ? getMoodboardImage(item.id) : (item.image || '');
+    const thumb = imgData ? `style="background-image:url('${imgData.replace(/'/g, "\\'")}');"` : '';
     return `
       <div class="sb-mb-item" onclick="openMoodboardItem('${item.id}')">
         <div class="sb-mb-thumb" ${thumb}></div>
@@ -2887,7 +2936,7 @@ function showMoodboardModal(item){
     : (item.series || 'ALLOSO') + (item.color ? ' · ' + item.color : '');
   const productsHtml = (item.items || []).map(it => {
     const articleEntry = (typeof ARTICLES !== 'undefined' && ARTICLES[it.series]) || null;
-    let url = articleEntry?.url || it.productPageUrl || `https://alloso.co.kr/search?q=${encodeURIComponent(it.series||'')}`;
+    let url = articleEntry?.url || it.productPageUrl || `https://www.alloso.co.kr/collection/list`;
     if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
     return `
       <a class="bundle-prod-card" href="${escHtml(url)}" target="_blank" rel="noopener">
@@ -2901,6 +2950,7 @@ function showMoodboardModal(item){
       </a>`;
   }).join('');
   const savedAtStr = item.savedAt ? new Date(item.savedAt).toLocaleDateString('ko-KR') : '';
+  const modalImg = item.hasImage ? getMoodboardImage(item.id) : (item.image || '');
   modal.innerHTML = `
     <div class="mb-modal">
       <div class="mb-modal-header">
@@ -2908,7 +2958,7 @@ function showMoodboardModal(item){
         <button class="mb-modal-close" onclick="closeMoodboardModal()">×</button>
       </div>
       <div class="mb-modal-body">
-        ${item.image ? `<img class="mb-modal-img" src="${item.image}" alt="저장된 인테리어">` : ''}
+        ${modalImg ? `<img class="mb-modal-img" src="${modalImg}" alt="저장된 인테리어">` : ''}
         <div style="margin-top:12px;font-size:10.5px;color:var(--muted);letter-spacing:.02em;">
           ${[item.mood, item.spaceSize, savedAtStr ? '저장: ' + savedAtStr : ''].filter(Boolean).join(' · ')}
         </div>
