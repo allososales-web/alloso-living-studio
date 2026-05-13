@@ -400,6 +400,7 @@ export async function onRequestPost(context) {
       stage = 'swap_series_detect';
       let targetSeries = null;
       let targetSeriesFolder = null;
+      let targetSeriesData = null;
       const seriesEntries = Object.entries(manifest.series || {});
       // 긴 시리즈명 우선 매칭 ("사티 큐브 스위블" 먼저, "사티" 나중)
       seriesEntries.sort((a, b) => b[0].length - a[0].length);
@@ -411,10 +412,31 @@ export async function onRequestPost(context) {
           if (cand && cand.length >= 2 && instruction.includes(cand)) {
             targetSeries = seriesKo;
             targetSeriesFolder = seriesData.folder;
+            targetSeriesData = seriesData;
             break;
           }
         }
         if (targetSeries) break;
+      }
+
+      // ── 사이즈 추출 (instruction에서) ──
+      // available_sizes + size_aliases 키를 길이 내림차순으로 매칭 (와이드 코너가 코너보다 먼저)
+      let targetSize = null;
+      if (targetSeriesData) {
+        const sizePool = [];
+        for (const s of (targetSeriesData.available_sizes || [])) sizePool.push({ key: s, val: s });
+        for (const [alias, real] of Object.entries(targetSeriesData.size_aliases || {})) {
+          sizePool.push({ key: alias, val: real });
+        }
+        sizePool.sort((a, b) => b.key.length - a.key.length);
+        for (const { key, val } of sizePool) {
+          if (key.length >= 2 && instruction.includes(key)) {
+            targetSize = val;
+            break;
+          }
+        }
+        // 사이즈 못 찾으면 default_size 폴백
+        if (!targetSize && targetSeriesData.default_size) targetSize = targetSeriesData.default_size;
       }
 
       // === 시리즈 swap 분기: 사용자 사진 + 타겟 시리즈 누끼를 Gemini로 합성 ===
@@ -424,6 +446,8 @@ export async function onRequestPost(context) {
         const seriesPick = await findBestReference(env, targetSeriesFolder, {
           preferredColor: refColor,
           preferredAngle: '측면',
+          preferredSize: targetSize,
+          preferredMaterial: targetSeriesData?.default_material || null,
         });
 
         if (!seriesPick) {
@@ -442,15 +466,18 @@ export async function onRequestPost(context) {
 
         // 컬러 명시 유무에 따라 prompt 분기
         const colorClause = matchedColors.length > 0
-          ? `Change BOTH the furniture shape (to match IMAGE 2's ${targetSeries}) AND the upholstery color (to: ${matchedColors.join(', ')}${enrichment})`
+          ? `Change BOTH the furniture shape (to match IMAGE 2's ${targetSeries}) AND the upholstery color (to: ${matchedColors.join(', ')}${enrichment}). CRITICAL: respect the exact tone described — if the color is described as soft, muted, light, cream, pastel, or milk-tea, the result must stay in that range; do not darken or oversaturate.`
           : `Keep the EXACT original color/material of the existing furniture in IMAGE 1 (do not change the color). Only change the furniture SHAPE/STYLE to match IMAGE 2's ${targetSeries}.`;
 
         stage = 'swap_series_gemini';
+        const sizeClause = targetSize
+          ? ` (specifically the "${targetSize}" configuration/variant — match the exact module count, seat count, and form factor of IMAGE 2)`
+          : '';
         const seriesSwapPrompt = [
           `═══ PRODUCT REPLACEMENT TASK — Alloso furniture swap ═══`,
           `IMAGE 1 = source photograph showing existing furniture in a room context.`,
-          `IMAGE 2 = reference cutout of Alloso ${targetSeries} (the target product to place into the room).`,
-          `Task: Replace the main upholstered furniture in IMAGE 1 with the Alloso ${targetSeries} shown in IMAGE 2.`,
+          `IMAGE 2 = reference cutout of Alloso ${targetSeries}${sizeClause} (the target product to place into the room).`,
+          `Task: COMPLETELY REPLACE the main upholstered furniture in IMAGE 1 with the Alloso ${targetSeries} shown in IMAGE 2. The original furniture must DISAPPEAR — do not keep it, do not blend it. The new furniture's silhouette, structure, module arrangement, and overall form MUST be derived from IMAGE 2, not IMAGE 1.`,
           ``,
           `MUST PRESERVE from IMAGE 1 (do not change):`,
           `- The room, walls, floor, lighting, all surrounding objects (lamps, tables, plants, decor).`,
@@ -458,7 +485,7 @@ export async function onRequestPost(context) {
           `- The natural light direction, intensity, color temperature, shadows on surrounding elements.`,
           `- The general placement zone and approximate scale where the furniture sits.`,
           ``,
-          `MUST CHANGE: the furniture itself — replace it with the EXACT silhouette, shape, proportions, cushion arrangement, armrest design, and leg/base structure of IMAGE 2's ${targetSeries}.`,
+          `MUST CHANGE: the furniture itself — replace it with the EXACT silhouette, shape, proportions, module count, cushion arrangement, armrest design, and leg/base structure of IMAGE 2's ${targetSeries}. If IMAGE 2 is a corner sofa, the result MUST be a corner sofa. If IMAGE 2 is a 4-seater lounge, the result MUST have that exact configuration. Do not retain ANY structural element from the original furniture in IMAGE 1.`,
           ``,
           `COLOR HANDLING: ${colorClause}.`,
           ``,
@@ -480,8 +507,10 @@ export async function onRequestPost(context) {
         return json({
           mode: 'swap_series',
           target_series: targetSeries,
+          target_size: targetSize,
           target_color: matchedColors.length > 0 ? matchedColors : 'preserved from IMAGE 1',
           ref_used: seriesPick.key,
+          ref_filename: seriesPick.name,
           provider: 'gemini',
           image: `data:image/png;base64,${resultBase64}`,
         });
@@ -543,7 +572,7 @@ export async function onRequestPost(context) {
         `7. The EXACT image resolution and photographic quality of the original.`,
         `ONLY CHANGE: the surface color and/or material texture of the main upholstered fabric/leather areas of the furniture in IMAGE 1.`,
         chipBase64
-          ? `Match IMAGE 2's color and material texture EXACTLY. Sample the swatch carefully — match its hue, saturation, value, warmth, and surface texture precisely. Do not approximate.`
+          ? `Match IMAGE 2's color and material texture EXACTLY. Sample the swatch carefully — match its hue, saturation, value, warmth, and surface texture precisely. Do not approximate. CRITICAL: Do NOT darken, intensify, or oversaturate the swatch color. If the swatch shows a soft, muted, light, or pastel tone, the result must remain soft, muted, light, or pastel — do not push toward deep/saturated/dark variants. Color values (hue, saturation, lightness) must be sampled directly from the swatch pixels, not estimated from the color name.`
           : `Target appearance for the upholstery: ${instruction}${enrichment ? ' — refer to the color enrichment notes above for accuracy' : ''}. Match the specified Alloso color STRICTLY.`,
         `Adjust shadow tones subtly to match the new material's reflectivity, but do not change shadow shape or position.`,
         `Output a single photorealistic image that looks like a Photoshop color-replace edit of IMAGE 1 — same room, same furniture geometry, same lighting, only the upholstery surface re-colored to match the target.`,
@@ -633,6 +662,7 @@ export async function onRequestPost(context) {
           category: itemResolved.info?.category || 'sofa',
           features: itemResolved.info?.features || [],
           code: itemResolved.info?.code || '',
+          categoryNo: itemResolved.info?.category_no || null,
           filename: pick.name,
           thumbnailUrl: keyToPublicUrl(manifest, pick.key),
         });
@@ -744,8 +774,10 @@ export async function onRequestPost(context) {
             code: r.code,
             filename: r.filename,
             thumbnailUrl: r.thumbnailUrl,
-            // TODO: 알로소 정식 제품 URL 패턴 확정되면 교체. 임시로 검색 페이지로 안내
-            productPageUrl: `https://alloso.co.kr/search?q=${encodeURIComponent(r.seriesKo)}`,
+            // 알로소 정식 컬렉션 상세 페이지 URL — manifest의 category_no 사용
+            productPageUrl: r.categoryNo
+              ? `https://www.alloso.co.kr/collection/detail?categoryNo=${r.categoryNo}`
+              : `https://www.alloso.co.kr/collection/list`,
             placement,
           };
         }),
