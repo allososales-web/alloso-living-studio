@@ -245,10 +245,26 @@ async function findBestReference(env, folder, opts = {}) {
     score: scoreFile(f.key, opts),
   }));
   scored.sort((a, b) => b.score - a.score);
-  // 디버그용: 상위 5개 후보를 결과에 첨부
+  // 디버그용: 상위 5개 + 사이즈 토큰별 카운트 + 요청 사이즈 매칭 파일들
+  const sizeCounts = {};
+  const matchingSize = [];
+  if (opts.preferredSize) {
+    const tokens = opts.preferredSize.split(/\s+/).filter(Boolean);
+    for (const s of scored) {
+      const norm = s.name.replace(/_/g, ' ');
+      // 모든 N인 토큰 카운트
+      const sizeMatches = norm.match(/(\d+(?:\.\d+)?)인/g) || [];
+      for (const sm of sizeMatches) sizeCounts[sm] = (sizeCounts[sm] || 0) + 1;
+      // 요청 사이즈 매칭
+      if (tokens.every(t => norm.includes(t))) matchingSize.push({ name: s.name, score: s.score });
+    }
+  }
   scored[0]._debug = {
     total_files: files.length,
     top5: scored.slice(0, 5).map(s => ({ name: s.name, score: s.score })),
+    size_counts: sizeCounts,
+    matching_size_count: matchingSize.length,
+    matching_size_sample: matchingSize.slice(0, 3),
     opts: { ...opts },
   };
   return scored[0];
