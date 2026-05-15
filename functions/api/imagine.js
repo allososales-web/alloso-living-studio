@@ -501,8 +501,20 @@ export async function onRequestPost(context) {
           : `Keep the EXACT original color/material of the existing furniture in IMAGE 1 (do not change the color). Only change the furniture SHAPE/STYLE to match IMAGE 2's ${targetSeries}.`;
 
         stage = 'swap_series_gemini';
+        // 사이즈 매칭 실패 + 1인 누끼만 있는 경우 → Gemini에 모듈 확장 지시
+        let sizeExpansionClause = '';
+        if (!sizeMatchOk && targetSize) {
+          const targetSeats = targetSize.match(/(\d+(?:\.\d+)?)인/)?.[1];
+          const refSeats = seriesPick.name.match(/(\d+(?:\.\d+)?)인/)?.[1];
+          if (targetSeats && refSeats && parseFloat(targetSeats) > parseFloat(refSeats)) {
+            const refIsModular = ['사티', '케렌시아', '밀로', '보눔 풀베이스', '보눔 오픈베이스', '비하르', '스탠', '카포네 그랑'].includes(targetSeries);
+            if (refIsModular) {
+              sizeExpansionClause = ` IMPORTANT: IMAGE 2 shows the ${refSeats}-seat version, but the FINAL result must be the ${targetSeats}-seat configuration. Extend it by REPEATING/TILING the same module/cushion shown in IMAGE 2 horizontally to form ${targetSeats} identical seat modules in a row. Keep the cushion proportions, material, color, and frame identical — just replicate the module ${targetSeats} times side-by-side as a modular sofa. ${targetSize.includes('라운지') ? `Add a lounge/chaise extension on one end.` : ''}${targetSize.includes('코너') || targetSize.includes('L자') ? `Arrange in an L-shape corner.` : ''}`;
+            }
+          }
+        }
         const sizeClause = targetSize
-          ? ` (specifically the "${targetSize}" configuration/variant — match the exact module count, seat count, and form factor of IMAGE 2)`
+          ? ` (specifically the "${targetSize}" configuration/variant — match the exact module count, seat count, and form factor)${sizeExpansionClause}`
           : '';
         const seriesSwapPrompt = [
           `═══ PRODUCT REPLACEMENT TASK — Alloso furniture swap ═══`,
