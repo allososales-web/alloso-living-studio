@@ -200,7 +200,20 @@ function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredM
   if (preferredSize) {
     // 사이즈는 토큰 분리해서 모든 토큰이 파일명에 있어야 매칭 인정
     const tokens = preferredSize.split(/\s+/).filter(Boolean);
-    if (tokens.length > 0 && tokens.every(t => normName.includes(t))) score += 80;
+    if (tokens.length > 0 && tokens.every(t => normName.includes(t))) {
+      score += 200; // 사이즈 매칭이 가장 중요 — 다른 점수보다 압도적으로 크게
+    } else {
+      // 사이즈 명시했는데 매칭 실패 — 파일명에 다른 N인 사이즈가 박혀있으면 강하게 감점
+      // (예: 4인 요청했는데 파일명에 "1인"이 있으면 -150 → 매칭된 4인 파일에 절대 밀림)
+      const otherSizes = ['1인', '2인', '2.5인', '3인', '3.5인', '4인', '5인', '6인'];
+      const requestedSeats = preferredSize.match(/(\d+(?:\.\d+)?)인/)?.[0];
+      for (const o of otherSizes) {
+        if (o !== requestedSeats && normName.includes(o)) {
+          score -= 150;
+          break;
+        }
+      }
+    }
   }
   if (preferredMaterial && normName.includes(preferredMaterial)) score += 40;
   return score;
@@ -458,6 +471,18 @@ export async function onRequestPost(context) {
           }, 404);
         }
 
+        // 사이즈 매칭 검증 — 사용자가 사이즈 명시했는데 결과 파일에 그 토큰이 없으면 경고
+        let sizeMatchOk = true;
+        let sizeMatchNote = null;
+        if (targetSize) {
+          const tokens = targetSize.split(/\s+/).filter(Boolean);
+          const normPickName = seriesPick.name.replace(/_/g, ' ');
+          if (!tokens.every(t => normPickName.includes(t))) {
+            sizeMatchOk = false;
+            sizeMatchNote = `요청 사이즈: "${targetSize}" — R2에 정확히 매칭되는 누끼가 없어서 가장 가까운 "${seriesPick.name}" 사용`;
+          }
+        }
+
         stage = 'swap_series_b64';
         const seriesBase64 = await fetchR2AsBase64(env, seriesPick.key);
         if (!seriesBase64) {
@@ -508,6 +533,8 @@ export async function onRequestPost(context) {
           mode: 'swap_series',
           target_series: targetSeries,
           target_size: targetSize,
+          size_match_ok: sizeMatchOk,
+          size_match_note: sizeMatchNote,
           target_color: matchedColors.length > 0 ? matchedColors : 'preserved from IMAGE 1',
           ref_used: seriesPick.key,
           ref_filename: seriesPick.name,
@@ -702,10 +729,55 @@ export async function onRequestPost(context) {
         }
       };
 
-      // 제품 리스트 (참조 이미지 순서대로)
+      // 사이즈를 시각적 단서로 번역 (모듈 개수, 좌석 수, 형태)
+      const sizeVisualHint = (sizeKo, category) => {
+        if (!sizeKo) return '';
+        // 모듈/좌석 개수 추출 (3인, 4인, 2.5인 등)
+        const seatMatch = sizeKo.match(/(\d+(?:\.\d+)?)인/);
+        const seats = seatMatch ? seatMatch[1] : null;
+        let hint = '';
+        if (seats && (category === 'sofa' || !category)) {
+          hint += ` with exactly ${seats} cushion modules / seats in a row`;
+          if (sizeKo.includes('라운지')) hint += ` and an extended lounge/chaise section on one side`;
+          if (sizeKo.includes('코너') || sizeKo.includes('L자')) hint += ` arranged in an L-shape corner configuration`;
+        }
+        if (sizeKo.includes('와이드')) hint += ` (wider seat depth than standard)`;
+        if (sizeKo.includes('하이백')) hint += ` (with a tall high backrest)`;
+        return hint;
+      };
+
+      // 카테고리별 절대 스케일 가드 (실제 가구 치수 기반)
+      const scaleGuard = (cat, sizeKo) => {
+        switch (cat) {
+          case 'pouf': case 'stool':
+            return 'maximum 45cm tall, roughly cube-shaped, knee-high or lower — NEVER as large as a sofa or armchair';
+          case 'table':
+            // 사이드 테이블 vs 커피 테이블 구분
+            if (sizeKo && (sizeKo.includes('사이드') || sizeKo.includes('side'))) {
+              return 'narrow side table, knee to thigh height (~50-60cm), placed at the end of a sofa';
+            }
+            return 'low coffee table (~30-40cm tall), positioned in front of the main sofa';
+          case 'lounge_chair': case 'chair':
+            return 'single one-person lounge chair, smaller than the main sofa, distinctly armchair-scale';
+          case 'daybed':
+            return 'long, low daybed with one armrest or backrest, sofa-length but narrower';
+          default:
+            // sofa: 사이즈에 따른 폭 가이드
+            const seats = sizeKo?.match(/(\d+(?:\.\d+)?)인/)?.[1];
+            if (seats === '1' || sizeKo === '1인' || sizeKo === '단일') {
+              return 'single-seat armchair scale — smaller than a multi-seat sofa';
+            }
+            if (seats) return `multi-seat sofa with ${seats}-seater width`;
+            return 'main multi-seat sofa anchor';
+        }
+      };
+
+      // 제품 리스트 (참조 이미지 순서대로) — 사이즈 시각 단서까지 포함
       const productList = refs.map((r, i) => {
         const sizeText = r.sizeKo ? `${r.sizeKo} ` : '';
-        return `(reference image ${i + 1}) the alloso ${r.seriesKo} ${sizeText}${termFor(r.category, r.sizeKo)} in ${r.colorKo} color`;
+        const visualHint = sizeVisualHint(r.sizeKo, r.category);
+        const scale = scaleGuard(r.category, r.sizeKo);
+        return `(reference image ${i + 1}) the alloso ${r.seriesKo} ${sizeText}${termFor(r.category, r.sizeKo)} in ${r.colorKo} color${visualHint} — scale: ${scale}`;
       }).join('; ');
 
       // 배치 가이드 — 1인 변형은 라운지 체어 역할로
@@ -713,10 +785,10 @@ export async function onRequestPost(context) {
       const mainSofas = sofas.filter(r => !singleSeats.includes(r));
       const placement = [];
       if (mainSofas.length) placement.push(`anchor the largest multi-seat sofa as the primary visual element at the center or rear of the space`);
-      if (chairs.length) placement.push(`angle the lounge chair as an accent piece at one side, facing the main sofa`);
+      if (chairs.length) placement.push(`angle the lounge chair as an accent piece at one side, facing the main sofa — clearly armchair-scale (smaller than the sofa)`);
       if (singleSeats.length) placement.push(`place the single armchair (one-seater, NOT a sofa) as an accent piece adjacent to the main sofa — keep it visually distinct as a one-seater chair`);
-      if (poufs.length) placement.push(`place the small leather pouf flexibly near the sofa as additional informal seating — keep it as a small floor cube, not a large sofa`);
-      if (tables.length) placement.push(`place the coffee table in front of the main sofa as the central piece`);
+      if (poufs.length) placement.push(`place the small leather pouf on the floor near the sofa as additional informal seating — STRICTLY keep it as a low cube under 45cm tall, NEVER scale it up to sofa size, NEVER make it into a chair or sofa`);
+      if (tables.length) placement.push(`place the coffee table in front of the main sofa as the central piece, low (~30-40cm tall), proportional to the sofa width`);
       if (daybeds.length) placement.push(`place the daybed against a wall or in a window alcove`);
       const placementText = placement.length > 0 ? placement.join('; ') : 'arrange the pieces naturally to form a curated grouping';
 
@@ -725,8 +797,15 @@ export async function onRequestPost(context) {
         `Products to include in this order from reference images: ${productList}.`,
         `Setting: ${scene}.`,
         `Layout guidance: ${placementText}.`,
-        `CRITICAL preservation — each piece must remain visually IDENTICAL to its reference image: exact silhouette, structure, proportions, color, and material. Do NOT redesign, simplify, scale, or alter any piece. If a reference shows a chair, keep it a chair (NOT a sofa). If a pouf (small leather cube), keep it as a small floor cube (NOT a sofa). If a sofa, keep it a sofa with the same module count and form. Each reference number (1, 2, 3...) maps to a specific piece in the order listed above.`,
-        `The composition should look like a deliberately curated alloso showroom or hospitality grouping — a complete furniture set/bundle. All ${refs.length} pieces must be clearly visible, identifiable, and positioned naturally as if a professional designer staged them together.`,
+        `═══ CRITICAL — STRUCTURAL FIDELITY ═══`,
+        `Each piece MUST replicate its reference image's exact silhouette, geometry, module count, seat count, cushion arrangement, frame structure, leg/base design, and proportions. Do NOT substitute generic furniture from your training data; the reference images ARE the products. If reference image shows a modular box-shaped sofa with N separate cushion modules, the result MUST show exactly N cushion modules in that same box shape — not a generic sofa with rolled arms.`,
+        `═══ CATEGORY/SCALE RULES (DO NOT VIOLATE) ═══`,
+        `- If a reference is a pouf/ottoman: render as a SMALL floor cube (max 45cm), NEVER as a sofa or chair, NEVER scaled up to seat-back height.`,
+        `- If a reference is a table: render as the actual table type (coffee table ~35cm tall, side table ~55cm tall), proportional to the sofa, NEVER as a seat or block.`,
+        `- If a reference is a chair/armchair: render as a single one-seater, distinctly SMALLER than the main multi-seat sofa.`,
+        `- The main multi-seat sofa is the largest element; all accents (pouf, side table, armchair) are visibly smaller.`,
+        `Each reference number (1, 2, 3...) maps to the piece in the order listed above. Do NOT drop, merge, or omit any reference.`,
+        `The composition should look like a deliberately curated alloso showroom or hospitality grouping — a complete furniture set/bundle. All ${refs.length} pieces must be clearly visible, identifiable, and positioned naturally as if a professional designer staged them together with correct real-world scale relationships.`,
         PHOTOREAL_DIRECTIVE,
       ].join(' ');
 
@@ -973,9 +1052,25 @@ export async function onRequestPost(context) {
         }
       }
 
+      // 사이즈를 시각 단서로 변환 (예: "3인" → "exactly 3 cushion modules in a row")
+      const sofaSizeKo = body.size || resolved.info?.default_size || '';
+      const sofaSeatMatch = sofaSizeKo.match(/(\d+(?:\.\d+)?)인/);
+      const sofaSeats = sofaSeatMatch ? sofaSeatMatch[1] : null;
+      let sofaSizeHint = '';
+      if (sofaSeats && (resolved.info?.category === 'sofa' || !resolved.info?.category)) {
+        sofaSizeHint = ` configured with exactly ${sofaSeats} cushion modules / seats in a row`;
+        if (sofaSizeKo.includes('라운지')) sofaSizeHint += ` plus an extended lounge/chaise extension on one side`;
+        if (sofaSizeKo.includes('코너') || sofaSizeKo.includes('L자')) sofaSizeHint += ` arranged in an L-shape corner configuration`;
+      }
+      if (sofaSizeKo.includes('와이드')) sofaSizeHint += ` (wider seat depth than standard)`;
+      if (sofaSizeKo.includes('하이백')) sofaSizeHint += ` (with a tall high backrest)`;
+
       const fusionPrompt = [
-        `Place this exact ${seriesKo} ${categoryTerm} from the reference image into ${scene}.`,
-        `CRITICAL — preserve the exact silhouette, structure, proportions, and form factor of the ${categoryTerm} from the reference image. Do NOT redesign, simplify, restyle, scale up, or modify it into a different furniture type. If the reference is a chair, keep it a chair. If the reference is a pouf/ottoman, keep it a pouf (small cube-shaped). If the reference is a sofa, keep it a sofa.`,
+        `Place this exact ${seriesKo} ${categoryTerm}${sofaSizeHint} from the reference image into ${scene}.`,
+        `═══ CRITICAL — STRUCTURAL FIDELITY ═══`,
+        `Replicate the EXACT silhouette, geometry, module count, cushion arrangement, frame design, and proportions shown in the reference image. Do NOT substitute a generic sofa from your training data — the reference image IS the product. If the reference shows a modular box-shaped sofa with separate cushion modules, the result MUST show that exact modular box form (not a generic sofa with rolled arms or curved frame).`,
+        sofaSeats ? `The sofa must have EXACTLY ${sofaSeats} seat modules. Count them in the reference. Do not add or remove modules.` : '',
+        `If the reference is a chair, keep it a chair. If the reference is a pouf/ottoman, keep it a small floor cube (max 45cm tall, NEVER scaled up). If the reference is a sofa, keep its exact module/seat count.`,
         `The upholstery color must remain ${workingColorDescEn} as in the reference.`,
         tableText,
         PHOTOREAL_DIRECTIVE,
