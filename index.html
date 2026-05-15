@@ -3593,14 +3593,24 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
       </div>`;
     } else if (isSeriesOp && data.ref_used) {
       const refName = data.ref_used.split('/').pop().replace(/\.[^.]+$/, '');
+      // 디버그: R2 점수표 (사이즈 매칭 실패 시 자동 펼침)
+      let debugHtml = '';
+      if (data.ref_debug && data.ref_debug.top5) {
+        const optsStr = data.ref_debug.opts ? Object.entries(data.ref_debug.opts).filter(([k,v]) => v).map(([k,v]) => `${k}=${v}`).join(', ') : '';
+        const top5Html = data.ref_debug.top5.map(t => `<div style="font-family:monospace;font-size:10px;padding:2px 0;">${t.score >= 0 ? '✓' : '✗'} ${escHtml(t.name)} <span style="color:var(--accent);">+${t.score}</span></div>`).join('');
+        debugHtml = `<details style="margin-top:6px;font-size:10px;color:var(--muted);"><summary style="cursor:pointer;opacity:0.7;">R2 매칭 점수 (총 ${data.ref_debug.total_files}개 파일 중 상위 5)</summary>
+          <div style="padding:6px 0 4px;opacity:0.85;">요청: ${escHtml(optsStr)}</div>${top5Html}</details>`;
+      }
       // 사이즈 매칭 검증 결과
       if (data.size_match_ok === false && data.size_match_note) {
         refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(220,150,100,0.1);line-height:1.5;">
           ⚠ ${escHtml(data.size_match_note)}<br><span style="opacity:0.7;">사용된 누끼: <strong>${escHtml(refName)}</strong></span>
+          ${debugHtml}
         </div>`;
       } else {
         refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(120,180,120,0.08);">
           ✓ ${isAddProduct ? '제품' : '시리즈'} reference: <strong style="color:var(--accent);">${escHtml(refName)}</strong>${data.target_size ? ' · 사이즈: ' + escHtml(data.target_size) : ''}
+          ${debugHtml}
         </div>`;
       }
     } else if (!isSeriesOp) {
