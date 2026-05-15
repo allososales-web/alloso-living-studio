@@ -3593,13 +3593,29 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
       </div>`;
     } else if (isSeriesOp && data.ref_used) {
       const refName = data.ref_used.split('/').pop().replace(/\.[^.]+$/, '');
-      // 디버그: R2 점수표 (사이즈 매칭 실패 시 자동 펼침)
+      // 디버그: R2 점수표 + 사이즈 분포
       let debugHtml = '';
       if (data.ref_debug && data.ref_debug.top5) {
         const optsStr = data.ref_debug.opts ? Object.entries(data.ref_debug.opts).filter(([k,v]) => v).map(([k,v]) => `${k}=${v}`).join(', ') : '';
-        const top5Html = data.ref_debug.top5.map(t => `<div style="font-family:monospace;font-size:10px;padding:2px 0;">${t.score >= 0 ? '✓' : '✗'} ${escHtml(t.name)} <span style="color:var(--accent);">+${t.score}</span></div>`).join('');
+        const top5Html = data.ref_debug.top5.map(t => `<div style="font-family:monospace;font-size:10px;padding:2px 0;">${t.score >= 0 ? '✓' : '✗'} ${escHtml(t.name)} <span style="color:${t.score >= 0 ? 'var(--accent)' : '#c97'};">${t.score >= 0 ? '+' : ''}${t.score}</span></div>`).join('');
+        // 사이즈 분포 표시
+        let sizeDistHtml = '';
+        if (data.ref_debug.size_counts) {
+          const dist = Object.entries(data.ref_debug.size_counts).map(([sz, n]) => `${escHtml(sz)}: ${n}개`).join(' · ');
+          if (dist) sizeDistHtml = `<div style="padding:4px 0;opacity:0.85;">R2 사이즈 분포: ${dist}</div>`;
+        }
+        // 요청 사이즈 매칭 파일 표시
+        let matchSampleHtml = '';
+        if (data.ref_debug.matching_size_count !== undefined) {
+          if (data.ref_debug.matching_size_count === 0) {
+            matchSampleHtml = `<div style="padding:4px 0;color:#c97;">⚠ 요청 사이즈와 정확히 매칭되는 파일: <strong>0개</strong> (R2에 없거나 파일명 형식 다름)</div>`;
+          } else {
+            const sample = (data.ref_debug.matching_size_sample || []).map(t => `<div style="font-family:monospace;font-size:10px;padding:2px 0;opacity:0.9;">→ ${escHtml(t.name)} <span style="color:var(--accent);">${t.score >= 0 ? '+' : ''}${t.score}</span></div>`).join('');
+            matchSampleHtml = `<div style="padding:4px 0;color:var(--accent);">✓ 요청 사이즈 매칭 파일: <strong>${data.ref_debug.matching_size_count}개</strong></div>${sample}`;
+          }
+        }
         debugHtml = `<details style="margin-top:6px;font-size:10px;color:var(--muted);"><summary style="cursor:pointer;opacity:0.7;">R2 매칭 점수 (총 ${data.ref_debug.total_files}개 파일 중 상위 5)</summary>
-          <div style="padding:6px 0 4px;opacity:0.85;">요청: ${escHtml(optsStr)}</div>${top5Html}</details>`;
+          <div style="padding:6px 0 4px;opacity:0.85;">요청: ${escHtml(optsStr)}</div>${sizeDistHtml}${matchSampleHtml}<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);opacity:0.85;">상위 5위:</div>${top5Html}</details>`;
       }
       // 사이즈 매칭 검증 결과
       if (data.size_match_ok === false && data.size_match_note) {
