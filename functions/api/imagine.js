@@ -245,6 +245,12 @@ async function findBestReference(env, folder, opts = {}) {
     score: scoreFile(f.key, opts),
   }));
   scored.sort((a, b) => b.score - a.score);
+  // 디버그용: 상위 5개 후보를 결과에 첨부
+  scored[0]._debug = {
+    total_files: files.length,
+    top5: scored.slice(0, 5).map(s => ({ name: s.name, score: s.score })),
+    opts: { ...opts },
+  };
   return scored[0];
 }
 
@@ -538,6 +544,7 @@ export async function onRequestPost(context) {
           target_color: matchedColors.length > 0 ? matchedColors : 'preserved from IMAGE 1',
           ref_used: seriesPick.key,
           ref_filename: seriesPick.name,
+          ref_debug: seriesPick._debug || null,
           provider: 'gemini',
           image: `data:image/png;base64,${resultBase64}`,
         });
