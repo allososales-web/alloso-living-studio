@@ -3593,9 +3593,16 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
       </div>`;
     } else if (isSeriesOp && data.ref_used) {
       const refName = data.ref_used.split('/').pop().replace(/\.[^.]+$/, '');
-      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(120,180,120,0.08);">
-        ✓ ${isAddProduct ? '제품' : '시리즈'} reference: <strong style="color:var(--accent);">${escHtml(refName)}</strong>
-      </div>`;
+      // 사이즈 매칭 검증 결과
+      if (data.size_match_ok === false && data.size_match_note) {
+        refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(220,150,100,0.1);line-height:1.5;">
+          ⚠ ${escHtml(data.size_match_note)}<br><span style="opacity:0.7;">사용된 누끼: <strong>${escHtml(refName)}</strong></span>
+        </div>`;
+      } else {
+        refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(120,180,120,0.08);">
+          ✓ ${isAddProduct ? '제품' : '시리즈'} reference: <strong style="color:var(--accent);">${escHtml(refName)}</strong>${data.target_size ? ' · 사이즈: ' + escHtml(data.target_size) : ''}
+        </div>`;
+      }
     } else if (!isSeriesOp) {
       const errDetail = data.chip_error ? `<br><span style="opacity:0.7;">사유: ${escHtml(data.chip_error)}</span>` : '';
       const attemptedKey = data.chip_attempted_key ? `<br><span style="opacity:0.7;font-family:monospace;font-size:9.5px;">시도한 키: ${escHtml(data.chip_attempted_key)}</span>` : '';
