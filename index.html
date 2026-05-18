@@ -3468,21 +3468,52 @@ function handleFileSelect(e){
     e.target.value = '';
     return;
   }
-  if (file.size > 10 * 1024 * 1024) {
-    alert('이미지 크기는 10MB 이하만 가능해요. 사진을 줄여서 다시 시도해 주세요.');
+  if (file.size > 20 * 1024 * 1024) {
+    alert('이미지 크기는 20MB 이하만 가능해요. 사진을 줄여서 다시 시도해 주세요.');
     e.target.value = '';
     return;
   }
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    attachedImageData = ev.target.result;
+  // 큰 이미지는 자동으로 1600px로 리사이즈 (Gemini 처리 정확도 향상)
+  resizeImageToDataUrl(file, 1600, 0.85, function(dataUrl, finalSize){
+    attachedImageData = dataUrl;
     attachedImageName = file.name;
     showAttachmentPreview(attachedImageData);
-  };
-  reader.onerror = function(){
+    console.log(`이미지 업로드: 원본 ${(file.size/1024).toFixed(0)}KB → 리사이즈 후 ${(finalSize/1024).toFixed(0)}KB`);
+  }, function(err){
     alert('이미지를 읽을 수 없어요. 다른 파일로 시도해 주세요.');
     e.target.value = '';
+  });
+}
+
+// 이미지 리사이즈 헬퍼 — 너무 큰 사진은 가로/세로 최대 maxDim으로 줄임
+function resizeImageToDataUrl(file, maxDim, quality, onDone, onError){
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      let w = img.width, h = img.height;
+      // 이미 작으면 그대로
+      if (w <= maxDim && h <= maxDim) {
+        onDone(ev.target.result, file.size);
+        return;
+      }
+      // 긴 쪽을 maxDim으로
+      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      // JPEG로 압축 (원본이 PNG여도 JPEG가 훨씬 작음)
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      // 대략 크기 계산: base64 길이 * 0.75 ≈ byte
+      const approxSize = Math.round(dataUrl.length * 0.75);
+      onDone(dataUrl, approxSize);
+    };
+    img.onerror = function(){ onError && onError(new Error('Image decode failed')); };
+    img.src = ev.target.result;
   };
+  reader.onerror = function(){ onError && onError(new Error('File read failed')); };
   reader.readAsDataURL(file);
 }
 
