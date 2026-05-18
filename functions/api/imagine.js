@@ -183,9 +183,23 @@ function getVariantMention(manifest, seriesName) {
 async function listFolder(env, folder) {
   if (!env.PRODUCTS) return [];
   const prefix = `products/${folder}/`;
-  const result = await env.PRODUCTS.list({ prefix, limit: 100 });
-  const objects = result.objects || [];
-  return objects.filter(o => /\.(png|jpe?g|webp)$/i.test(o.key));
+  // R2 list는 한 번에 최대 1000개. 폴더에 1000개 넘으면 cursor로 다음 페이지 수집
+  const allObjects = [];
+  let cursor = undefined;
+  let safety = 0; // 무한 루프 방지
+  while (safety < 10) {
+    const opts = { prefix, limit: 1000 };
+    if (cursor) opts.cursor = cursor;
+    const result = await env.PRODUCTS.list(opts);
+    if (result.objects) allObjects.push(...result.objects);
+    if (result.truncated && result.cursor) {
+      cursor = result.cursor;
+      safety++;
+    } else {
+      break;
+    }
+  }
+  return allObjects.filter(o => /\.(png|jpe?g|webp)$/i.test(o.key));
 }
 
 function scoreFile(name, { preferredColor, preferredAngle = '측면', preferredMaterial, preferredSize }) {
