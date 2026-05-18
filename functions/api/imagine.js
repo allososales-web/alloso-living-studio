@@ -548,21 +548,26 @@ export async function onRequestPost(context) {
           : '';
         const colorInstruction = matchedColors.length > 0
           ? `Color: ${matchedColors.join(', ')}.`
-          : `Keep the original upholstery color from IMAGE 1.`;
+          : `Keep the original upholstery color from IMAGE 2's existing sofa.`;
 
+        // 누끼를 IMAGE 1으로 (Gemini는 첫 번째 이미지를 메인 콘텐츠로 인식)
+        // 원본 사진을 IMAGE 2로 (환경/배경 컨텍스트)
         const seriesSwapPrompt = [
-          `Take IMAGE 2 (a cutout of Alloso ${targetSeries}${targetSize ? ' ' + targetSize : ''}) and place it into the room shown in IMAGE 1.`,
-          `Remove the sofa that is currently in IMAGE 1 entirely. Replace it with the exact sofa from IMAGE 2 — same silhouette, same module count, same proportions as IMAGE 2.`,
-          `Keep everything else in IMAGE 1 unchanged: walls, floor, ceiling, lighting, decor, camera angle, perspective.`,
+          `IMAGE 1 = Alloso ${targetSeries}${targetSize ? ' ' + targetSize : ''} (product cutout — this is the sofa to render).`,
+          `IMAGE 2 = a room photograph showing the target environment.`,
+          `Generate the room from IMAGE 2 with the existing sofa removed and replaced by the Alloso ${targetSeries} from IMAGE 1.`,
+          `The output sofa must be the ${targetSeries} shown in IMAGE 1 — same silhouette, same module count, same modular boxy form, same proportions, same details. Do not draw a generic sofa.`,
+          `Keep everything else from IMAGE 2 unchanged: walls, floor, ceiling, lighting, decor, camera angle, perspective.`,
           colorInstruction,
-          `Do not add cushions, pillows, books, or any new objects.`,
-          `Photorealistic editorial interior shot.`,
+          `Do not add cushions, pillows, books, or new objects.`,
+          `Photorealistic editorial interior photograph.`,
         ].filter(Boolean).join(' ');
 
         let resultBase64;
         let geminiCallSuccess = false;
         try {
-          resultBase64 = await callGemini(env, [base64, seriesBase64], seriesSwapPrompt);
+          // 누끼를 IMAGE 1로, 원본 사진을 IMAGE 2로 (Gemini는 첫 이미지를 더 중요하게 처리)
+          resultBase64 = await callGemini(env, [seriesBase64, base64], seriesSwapPrompt);
           if (!resultBase64) throw new Error('Gemini returned no image data');
           geminiCallSuccess = true;
         } catch (e) {
