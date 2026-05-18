@@ -546,44 +546,33 @@ export async function onRequestPost(context) {
         const sizeClause = targetSize
           ? ` (specifically the "${targetSize}" configuration/variant — match the exact module count, seat count, and form factor)${sizeExpansionClause}`
           : '';
+        const colorInstruction = matchedColors.length > 0
+          ? `Color: ${matchedColors.join(', ')}.`
+          : `Keep the original upholstery color from IMAGE 1.`;
+
         const seriesSwapPrompt = [
-          `═══ FURNITURE REPLACEMENT TASK (NOT enhancement, NOT redecoration) ═══`,
-          ``,
-          `You are given TWO images:`,
-          `• IMAGE 1 = a room with an existing sofa/furniture inside it.`,
-          `• IMAGE 2 = a cutout/product shot of an Alloso ${targetSeries}${sizeClause}.`,
-          ``,
-          `═══ YOUR TASK ═══`,
-          `Produce IMAGE 1's room, but with the existing sofa COMPLETELY DELETED and the Alloso ${targetSeries} from IMAGE 2 placed in the exact same spot.`,
-          ``,
-          `Think of it like this: the original sofa in IMAGE 1 has been physically removed from the room, carried out, and a brand-new Alloso ${targetSeries} (the one shown in IMAGE 2) has been delivered and placed in its position. You are photographing the result.`,
-          ``,
-          `═══ STRICT RULES ═══`,
-          `1. The sofa in IMAGE 1 must NOT appear in the output. Not its shape, not its silhouette, not its proportions. It is GONE.`,
-          `2. The new sofa's shape MUST match IMAGE 2 exactly: same module count, same cushion arrangement, same armrest design, same backrest height, same leg/base structure, same overall silhouette as IMAGE 2.`,
-          `3. The Alloso ${targetSeries} has a very specific look — modular boxy form factor with separate cushion modules. Do NOT generate a generic sofa shape. The reference IS the product.`,
-          `4. DO NOT add cushions, throw pillows, blankets, books, magazines, decor items, or any objects that weren't in IMAGE 1. If IMAGE 1 had no cushions on the sofa, the result should also have no cushions.`,
-          `5. DO NOT modify anything else in the room — walls, floor, ceiling fan, doors, lighting fixtures, side tables, plants, electronics, and all decor must stay EXACTLY as in IMAGE 1.`,
-          ``,
-          `═══ PRESERVE FROM IMAGE 1 (DO NOT TOUCH) ═══`,
-          `Room walls, floor, ceiling, all lighting fixtures and their light direction/intensity, all background objects, the camera angle and perspective, the framing and crop. The empty space around the sofa stays empty.`,
-          ``,
-          `═══ COLOR ═══`,
-          `${colorClause}`,
-          ``,
-          `═══ SCALE ═══`,
-          `The new ${targetSeries} should fit naturally in the same area the original sofa occupied. Match the perspective and lighting of IMAGE 1's room so the new sofa looks like it was photographed there originally.`,
-          ``,
-          PHOTOREAL_DIRECTIVE,
-        ].filter(Boolean).join('\n');
+          `Take IMAGE 2 (a cutout of Alloso ${targetSeries}${targetSize ? ' ' + targetSize : ''}) and place it into the room shown in IMAGE 1.`,
+          `Remove the sofa that is currently in IMAGE 1 entirely. Replace it with the exact sofa from IMAGE 2 — same silhouette, same module count, same proportions as IMAGE 2.`,
+          `Keep everything else in IMAGE 1 unchanged: walls, floor, ceiling, lighting, decor, camera angle, perspective.`,
+          colorInstruction,
+          `Do not add cushions, pillows, books, or any new objects.`,
+          `Photorealistic editorial interior shot.`,
+        ].filter(Boolean).join(' ');
 
         let resultBase64;
+        let geminiCallSuccess = false;
         try {
           resultBase64 = await callGemini(env, [base64, seriesBase64], seriesSwapPrompt);
           if (!resultBase64) throw new Error('Gemini returned no image data');
+          geminiCallSuccess = true;
         } catch (e) {
           return json({ error: 'Series swap failed', detail: e.message, stage }, 500);
         }
+
+        // 결과 이미지가 원본과 동일 크기인지 확인 (Gemini가 passthrough했을 가능성)
+        const sourceLen = base64.length;
+        const resultLen = resultBase64.length;
+        const passthroughSuspect = Math.abs(sourceLen - resultLen) < 100; // 거의 동일한 바이트면 의심
 
         return json({
           mode: 'swap_series',
@@ -595,6 +584,13 @@ export async function onRequestPost(context) {
           ref_used: seriesPick.key,
           ref_filename: seriesPick.name,
           ref_debug: seriesPick._debug || null,
+          gemini_debug: {
+            prompt_length: seriesSwapPrompt.length,
+            source_image_b64_len: base64.length,
+            ref_image_b64_len: seriesBase64.length,
+            result_b64_len: resultBase64.length,
+            passthrough_suspect: passthroughSuspect,
+          },
           provider: 'gemini',
           image: `data:image/png;base64,${resultBase64}`,
         });
