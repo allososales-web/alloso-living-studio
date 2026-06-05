@@ -492,7 +492,17 @@ body{
 .op-body{flex:1;overflow-y:auto;background:var(--bg);}
 .op-body::-webkit-scrollbar{width:3px;}
 .op-body::-webkit-scrollbar-thumb{background:var(--border2);}
-.op-inner{padding:20px 17px 32px;display:flex;flex-direction:column;gap:18px;}
+.op-inner{padding:20px 17px 32px;display:flex;flex-direction:column;gap:18px;max-width:780px;margin:0 auto;width:100%;}
+/* 와이드 화면에서 FAQ 카테고리 카드 grid 배치 */
+@media (min-width: 700px){
+  .op-inner{padding:24px 28px 40px;}
+  .faq-group{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 12px;}
+  .faq-group-title{grid-column:1/-1;}
+  .care-hero-title{font-size:24px;}
+}
+@media (min-width: 1000px){
+  .faq-group{grid-template-columns:repeat(3,1fr);}
+}
 
 /* ══ CARE STYLES ══ */
 .care-hero{
@@ -2179,28 +2189,9 @@ const CHAT_SYSTEM = `당신은 알로소(Alloso) 디지털 어시스턴트입니
 천고·면적 알려주시면 더 맞춤 큐레이션 가능해요."
 
 [BUNDLE vs IMAGINE — 언제 어느 마커?]
-- **BUNDLE 사용 (강제)**: 사용자가 **2개 이상의 시리즈명**을 한 메시지에 명시한 경우. 한 장면·한 조닝에 여러 제품을 함께 배치할 수 있을 때 (소파+의자+푸프+테이블 같은 거실 세트 / 호텔 라운지 / 사무실 라운지 조닝 / 카페 코너)
-- **IMAGINE 사용**: 단일 시리즈만 명시되었을 때. 사용자가 테이블 컬러는 말해도 테이블 **시리즈명**을 말하지 않은 경우.
+- **BUNDLE 사용**: 한 장면·한 조닝에 여러 제품을 함께 배치할 수 있을 때 (소파+의자+푸프+테이블 같은 거실 세트 / 호텔 라운지 / 사무실 라운지 조닝 / 카페 코너)
 - **IMAGINE 여러 개**: 사용자가 각 제품을 "각각 따로 보여줘" 라고 명시했을 때 또는 시리즈끼리 같은 공간에 어울리지 않을 때
 - **기본값**: 2개 이상 제품 동시 요청 = BUNDLE이 default. 따로 보고싶다는 명시 없으면 합성.
-
-[⚠️ 핵심 라우팅 룰 — 절대 어기지 말 것]
-사용자가 **테이블 시리즈명(페일리/바인/레이어/케렌시아 테이블)을 명시**하면 IMAGINE의 tableColor 슬롯에 색만 넣지 말고 **반드시 BUNDLE 마커로 처리**. 페일리/바인/레이어는 R2에 정식 누끼 자료가 있는 독립 시리즈 제품이므로, 색상 텍스트로 묘사하면 AI가 generic 골드 테이블을 그려버려서 실제 페일리/바인/레이어 형태가 안 나옴.
-
-❌ WRONG: 사용자 "보눔 3인 라운지 모빅 + 페일리 옐로우 보여줘"
-   → [IMAGINE:보눔 풀베이스,모빅,wide,버터옐로우,3인 라운지]  ← 페일리 시리즈 누끼 누락
-
-✅ CORRECT: 사용자 "보눔 3인 라운지 모빅 + 페일리 옐로우 보여줘"
-   → [BUNDLE:wide|minimal|보눔 풀베이스:모빅:3인 라운지+페일리:버터옐로우:테이블]
-   → 답변: "보눔 3인 라운지를 모빅 톤으로, 페일리 테이블을 버터옐로우로 매칭해서 합성할게요. 잠시만 기다려주세요 (약 25초). [BUNDLE:...]"
-
-같은 케이스들:
-- "사티 1인 + 바인 테이블" → [BUNDLE:narrow|...|사티::1인+바인::테이블]
-- "케렌시아 + 레이어 블랙 테이블" → [BUNDLE:narrow|...|케렌시아::3모듈 라운지+레이어:블랙:테이블]
-- "밀로 + 페일리 옐로우" → [BUNDLE:narrow|...|밀로::3인+페일리:버터옐로우:테이블]
-
-[IMAGINE은 언제? — 테이블 시리즈명 없을 때만]
-사용자가 "사티 모빅 보여줘" / "사티 모빅 narrow에 테이블도 옐로우 톤으로" 처럼 테이블 **시리즈명** 명시 없이 테이블 컬러만 말하면 IMAGINE 사용. fusion 모드가 manifest의 default paired_table을 자동 매칭함.
 
 [BUNDLE 카테고리 자동 분배]
 매니페스트 category 정보로 자동:
@@ -2484,18 +2475,16 @@ A: 받으시고 7일 이내 가능, 사용 흔적이 없어야 반품이 정상 
 
 당신은 사용자의 거실/공간에 알로소 소파+테이블을 합성한 실제 인테리어 이미지를 생성할 수 있어요. 사용자가 특정 시리즈를 공간에서 보고싶어 할 때 [IMAGINE:시리즈,소파컬러,공간,테이블컬러] 마커를 답변에 포함하면 자동으로 이미지가 생성됩니다.
 
-[마커 형식 — 7-param]
+[마커 형식 — 6-param]
 - [IMAGINE:사티] — 모두 자동
 - [IMAGINE:사티,모빅] — 사티 모빅 + 나머지 자동
 - [IMAGINE:사티,모빅,wide] — 사티 모빅 + 넓은 공간
-- [IMAGINE:사티,모빅,narrow,버터옐로우] — + 페일리 테이블 버터옐로우 (default 테이블 시리즈 = 페일리)
+- [IMAGINE:사티,모빅,narrow,버터옐로우] — + 페일리 테이블 버터옐로우
 - [IMAGINE:사티,모빅,narrow,,3인] — 사이즈 명시
 - [IMAGINE:사티,모빅,narrow,,3인,minimal] — **무드까지 명시**
 - [IMAGINE:케렌시아,쉘,narrow,,3인 모듈 라운지,family] — 둥지형 + 패밀리 코지 무드
-- [IMAGINE:사티,모빅,narrow,블랙,3인,minimal,레이어] — 테이블 시리즈도 명시 (7번째 슬롯)
-- 슬롯 순서: **시리즈, 소파컬러, 공간(narrow/wide), 테이블컬러, 사이즈, 무드, 테이블시리즈**
-- 빈 슬롯은 콤마로 비워둠. 사용자가 사이즈/무드/테이블시리즈를 명시하면 반드시 정확한 토큰 사용.
-- ⚠️ 사용자가 테이블 시리즈명(페일리/바인/레이어/케렌시아 테이블)을 명시했으면 **BUNDLE 마커 우선**. IMAGINE 7번째 슬롯은 시리즈 명시가 약한 경우(예: "사티 + 어울리는 테이블")에만 사용.
+- 슬롯 순서: **시리즈, 소파컬러, 공간(narrow/wide), 테이블컬러, 사이즈, 무드**
+- 빈 슬롯은 콤마로 비워둠. 사용자가 사이즈/무드를 명시하면 반드시 정확한 토큰 사용.
 
 [무드 자동 추론 — 항상 활성화]
 사용자가 명시적으로 무드를 말하지 않아도, 시리즈 + 컬러 조합을 보고 자동으로 마커 6번째 슬롯에 무드를 박습니다. **무드 슬롯 비우는 건 시리즈도 컬러도 전혀 알 수 없는 경우뿐**. 단 1가지만 알아도 추론 가능.
@@ -2836,76 +2825,28 @@ const MOOD_CURATIONS = {
 
 // ══ Sidebar + 무드보드 (Model B) ══
 const MOODBOARD_KEY = 'alloso_moodboard_v1';
-const MOODBOARD_IMG_PREFIX = 'alloso_mb_img_'; // 큰 이미지는 별도 키로 저장 (quota 분산)
 const SIDEBAR_KEY = 'alloso_sidebar_collapsed';
 
 function getMoodboard(){
   try { return JSON.parse(localStorage.getItem(MOODBOARD_KEY) || '[]'); }
   catch(e){ return []; }
 }
-// 메타데이터(가벼움)와 이미지(무거움)를 분리 저장해서 localStorage quota 초과를 방지
-// items에는 imageRef(키 이름)만, 실제 base64는 MOODBOARD_IMG_PREFIX + id 에 따로 저장
 function saveMoodboard(items){
-  try {
-    localStorage.setItem(MOODBOARD_KEY, JSON.stringify(items));
-    return true;
-  } catch(e){
-    console.warn('localStorage write failed', e);
-    return false;
-  }
-}
-function saveMoodboardImage(id, dataUrl){
-  if (!dataUrl) return false;
-  try {
-    localStorage.setItem(MOODBOARD_IMG_PREFIX + id, dataUrl);
-    return true;
-  } catch(e) {
-    // quota 초과 시 가장 오래된 무드보드 이미지부터 삭제하며 재시도
-    const items = getMoodboard();
-    const sorted = [...items].sort((a,b) => (a.savedAt||0) - (b.savedAt||0));
-    for (const old of sorted) {
-      if (old.id === id) continue;
-      try {
-        localStorage.removeItem(MOODBOARD_IMG_PREFIX + old.id);
-        localStorage.setItem(MOODBOARD_IMG_PREFIX + id, dataUrl);
-        return true;
-      } catch(e2){ /* 계속 시도 */ }
-    }
-    return false;
-  }
-}
-function getMoodboardImage(id){
-  try { return localStorage.getItem(MOODBOARD_IMG_PREFIX + id) || ''; }
-  catch(e){ return ''; }
+  try { localStorage.setItem(MOODBOARD_KEY, JSON.stringify(items)); }
+  catch(e){ console.warn('localStorage write failed', e); }
 }
 function addToMoodboard(payload){
   const items = getMoodboard();
   const id = 'mb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
-  // 이미지 분리 — payload.image는 base64, 따로 저장
-  const imageData = payload.image || '';
-  const lightPayload = { ...payload };
-  delete lightPayload.image; // 메타에서 이미지 제거 (대용량)
-  items.unshift({ ...lightPayload, id, savedAt: Date.now(), hasImage: !!imageData });
-  if (items.length > 30) {
-    // 30개 초과 시 가장 오래된 항목의 이미지도 정리
-    const dropped = items.slice(30);
-    for (const d of dropped) {
-      try { localStorage.removeItem(MOODBOARD_IMG_PREFIX + d.id); } catch(e){}
-    }
-    items.length = 30;
-  }
-  const metaOk = saveMoodboard(items);
-  const imgOk = imageData ? saveMoodboardImage(id, imageData) : true;
+  items.unshift({ ...payload, id, savedAt: Date.now() });
+  if (items.length > 30) items.length = 30;
+  saveMoodboard(items);
   renderMoodboardSidebar();
-  if (!metaOk || !imgOk) {
-    alert('무드보드 저장 공간이 가득 찼어요. 기존 항목을 삭제해 주세요.');
-  }
   return id;
 }
 function removeFromMoodboard(id){
   const items = getMoodboard().filter(i => i.id !== id);
   saveMoodboard(items);
-  try { localStorage.removeItem(MOODBOARD_IMG_PREFIX + id); } catch(e){}
   renderMoodboardSidebar();
 }
 function renderMoodboardSidebar(){
@@ -2923,8 +2864,7 @@ function renderMoodboardSidebar(){
       ? `${item.itemsCount || (item.items?.length || 0)}가지 조합`
       : (item.series || '인테리어') + (item.color ? ' · ' + item.color : '');
     const subText = [item.mood, item.spaceSize].filter(Boolean).join(' · ') || '저장';
-    const imgData = item.hasImage ? getMoodboardImage(item.id) : (item.image || '');
-    const thumb = imgData ? `style="background-image:url('${imgData.replace(/'/g, "\\'")}');"` : '';
+    const thumb = item.image ? `style="background-image:url('${item.image.replace(/'/g, "\\'")}');"` : '';
     return `
       <div class="sb-mb-item" onclick="openMoodboardItem('${item.id}')">
         <div class="sb-mb-thumb" ${thumb}></div>
@@ -2957,7 +2897,7 @@ function showMoodboardModal(item){
     : (item.series || 'ALLOSO') + (item.color ? ' · ' + item.color : '');
   const productsHtml = (item.items || []).map(it => {
     const articleEntry = (typeof ARTICLES !== 'undefined' && ARTICLES[it.series]) || null;
-    let url = articleEntry?.url || it.productPageUrl || `https://www.alloso.co.kr/collection/list`;
+    let url = articleEntry?.url || it.productPageUrl || `https://alloso.co.kr/search?q=${encodeURIComponent(it.series||'')}`;
     if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
     return `
       <a class="bundle-prod-card" href="${escHtml(url)}" target="_blank" rel="noopener">
@@ -2971,7 +2911,6 @@ function showMoodboardModal(item){
       </a>`;
   }).join('');
   const savedAtStr = item.savedAt ? new Date(item.savedAt).toLocaleDateString('ko-KR') : '';
-  const modalImg = item.hasImage ? getMoodboardImage(item.id) : (item.image || '');
   modal.innerHTML = `
     <div class="mb-modal">
       <div class="mb-modal-header">
@@ -2979,7 +2918,7 @@ function showMoodboardModal(item){
         <button class="mb-modal-close" onclick="closeMoodboardModal()">×</button>
       </div>
       <div class="mb-modal-body">
-        ${modalImg ? `<img class="mb-modal-img" src="${modalImg}" alt="저장된 인테리어">` : ''}
+        ${item.image ? `<img class="mb-modal-img" src="${item.image}" alt="저장된 인테리어">` : ''}
         <div style="margin-top:12px;font-size:10.5px;color:var(--muted);letter-spacing:.02em;">
           ${[item.mood, item.spaceSize, savedAtStr ? '저장: ' + savedAtStr : ''].filter(Boolean).join(' · ')}
         </div>
@@ -3468,52 +3407,21 @@ function handleFileSelect(e){
     e.target.value = '';
     return;
   }
-  if (file.size > 20 * 1024 * 1024) {
-    alert('이미지 크기는 20MB 이하만 가능해요. 사진을 줄여서 다시 시도해 주세요.');
+  if (file.size > 10 * 1024 * 1024) {
+    alert('이미지 크기는 10MB 이하만 가능해요. 사진을 줄여서 다시 시도해 주세요.');
     e.target.value = '';
     return;
   }
-  // 큰 이미지는 자동으로 1600px로 리사이즈 (Gemini 처리 정확도 향상)
-  resizeImageToDataUrl(file, 1600, 0.85, function(dataUrl, finalSize){
-    attachedImageData = dataUrl;
-    attachedImageName = file.name;
-    showAttachmentPreview(attachedImageData);
-    console.log(`이미지 업로드: 원본 ${(file.size/1024).toFixed(0)}KB → 리사이즈 후 ${(finalSize/1024).toFixed(0)}KB`);
-  }, function(err){
-    alert('이미지를 읽을 수 없어요. 다른 파일로 시도해 주세요.');
-    e.target.value = '';
-  });
-}
-
-// 이미지 리사이즈 헬퍼 — 너무 큰 사진은 가로/세로 최대 maxDim으로 줄임
-function resizeImageToDataUrl(file, maxDim, quality, onDone, onError){
   const reader = new FileReader();
   reader.onload = function(ev){
-    const img = new Image();
-    img.onload = function(){
-      let w = img.width, h = img.height;
-      // 이미 작으면 그대로
-      if (w <= maxDim && h <= maxDim) {
-        onDone(ev.target.result, file.size);
-        return;
-      }
-      // 긴 쪽을 maxDim으로
-      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-      else { w = Math.round(w * maxDim / h); h = maxDim; }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      // JPEG로 압축 (원본이 PNG여도 JPEG가 훨씬 작음)
-      const dataUrl = canvas.toDataURL('image/jpeg', quality);
-      // 대략 크기 계산: base64 길이 * 0.75 ≈ byte
-      const approxSize = Math.round(dataUrl.length * 0.75);
-      onDone(dataUrl, approxSize);
-    };
-    img.onerror = function(){ onError && onError(new Error('Image decode failed')); };
-    img.src = ev.target.result;
+    attachedImageData = ev.target.result;
+    attachedImageName = file.name;
+    showAttachmentPreview(attachedImageData);
   };
-  reader.onerror = function(){ onError && onError(new Error('File read failed')); };
+  reader.onerror = function(){
+    alert('이미지를 읽을 수 없어요. 다른 파일로 시도해 주세요.');
+    e.target.value = '';
+  };
   reader.readAsDataURL(file);
 }
 
@@ -3624,51 +3532,9 @@ async function executeImageSwap(sourceDataUrl, userInstruction){
       </div>`;
     } else if (isSeriesOp && data.ref_used) {
       const refName = data.ref_used.split('/').pop().replace(/\.[^.]+$/, '');
-      // 디버그: R2 점수표 + 사이즈 분포
-      let debugHtml = '';
-      if (data.ref_debug && data.ref_debug.top5) {
-        const optsStr = data.ref_debug.opts ? Object.entries(data.ref_debug.opts).filter(([k,v]) => v).map(([k,v]) => `${k}=${v}`).join(', ') : '';
-        const top5Html = data.ref_debug.top5.map(t => `<div style="font-family:monospace;font-size:10px;padding:2px 0;">${t.score >= 0 ? '✓' : '✗'} ${escHtml(t.name)} <span style="color:${t.score >= 0 ? 'var(--accent)' : '#c97'};">${t.score >= 0 ? '+' : ''}${t.score}</span></div>`).join('');
-        // 사이즈 분포 표시
-        let sizeDistHtml = '';
-        if (data.ref_debug.size_counts) {
-          const dist = Object.entries(data.ref_debug.size_counts).map(([sz, n]) => `${escHtml(sz)}: ${n}개`).join(' · ');
-          if (dist) sizeDistHtml = `<div style="padding:4px 0;opacity:0.85;">R2 사이즈 분포: ${dist}</div>`;
-        }
-        // 요청 사이즈 매칭 파일 표시
-        let matchSampleHtml = '';
-        if (data.ref_debug.matching_size_count !== undefined) {
-          if (data.ref_debug.matching_size_count === 0) {
-            matchSampleHtml = `<div style="padding:4px 0;color:#c97;">⚠ 요청 사이즈와 정확히 매칭되는 파일: <strong>0개</strong> (R2에 없거나 파일명 형식 다름)</div>`;
-          } else {
-            const sample = (data.ref_debug.matching_size_sample || []).map(t => `<div style="font-family:monospace;font-size:10px;padding:2px 0;opacity:0.9;">→ ${escHtml(t.name)} <span style="color:var(--accent);">${t.score >= 0 ? '+' : ''}${t.score}</span></div>`).join('');
-            matchSampleHtml = `<div style="padding:4px 0;color:var(--accent);">✓ 요청 사이즈 매칭 파일: <strong>${data.ref_debug.matching_size_count}개</strong></div>${sample}`;
-          }
-        }
-        debugHtml = `<details style="margin-top:6px;font-size:10px;color:var(--muted);"><summary style="cursor:pointer;opacity:0.7;">R2 매칭 점수 (총 ${data.ref_debug.total_files}개 파일 중 상위 5)</summary>
-          <div style="padding:6px 0 4px;opacity:0.85;">요청: ${escHtml(optsStr)}</div>${sizeDistHtml}${matchSampleHtml}<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);opacity:0.85;">상위 5위:</div>${top5Html}</details>`;
-      }
-      // Gemini 통신 디버그
-      if (data.gemini_debug) {
-        const g = data.gemini_debug;
-        const kb = n => (n/1024).toFixed(1) + 'KB';
-        const passthrough = g.passthrough_suspect ? `<div style="color:#e57; font-weight:bold; padding:3px 0;">⚠ Gemini가 원본 이미지를 그대로 출력했을 가능성 (결과 크기 ≈ 입력 크기)</div>` : '';
-        debugHtml += `<details style="margin-top:4px;font-size:10px;color:var(--muted);"><summary style="cursor:pointer;opacity:0.7;">Gemini 통신</summary>
-          <div style="padding:6px 0;font-family:monospace;">prompt 길이: ${g.prompt_length}자<br>원본 사진: ${kb(g.source_image_b64_len)}<br>레퍼런스 누끼: ${kb(g.ref_image_b64_len)}<br>결과 이미지: ${kb(g.result_b64_len)}</div>${passthrough}
-        </details>`;
-      }
-      // 사이즈 매칭 검증 결과
-      if (data.size_match_ok === false && data.size_match_note) {
-        refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(220,150,100,0.1);line-height:1.5;">
-          ⚠ ${escHtml(data.size_match_note)}<br><span style="opacity:0.7;">사용된 누끼: <strong>${escHtml(refName)}</strong></span>
-          ${debugHtml}
-        </div>`;
-      } else {
-        refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(120,180,120,0.08);">
-          ✓ ${isAddProduct ? '제품' : '시리즈'} reference: <strong style="color:var(--accent);">${escHtml(refName)}</strong>${data.target_size ? ' · 사이즈: ' + escHtml(data.target_size) : ''}
-          ${debugHtml}
-        </div>`;
-      }
+      refInfo = `<div style="font-size:10.5px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--border);background:rgba(120,180,120,0.08);">
+        ✓ ${isAddProduct ? '제품' : '시리즈'} reference: <strong style="color:var(--accent);">${escHtml(refName)}</strong>
+      </div>`;
     } else if (!isSeriesOp) {
       const errDetail = data.chip_error ? `<br><span style="opacity:0.7;">사유: ${escHtml(data.chip_error)}</span>` : '';
       const attemptedKey = data.chip_attempted_key ? `<br><span style="opacity:0.7;font-family:monospace;font-size:9.5px;">시도한 키: ${escHtml(data.chip_attempted_key)}</span>` : '';
@@ -3861,7 +3727,7 @@ function formatMsg(text){
       </div>
     </div>`;
   });
-  // [IMAGINE:시리즈,소파컬러,공간,테이블컬러,사이즈,무드,테이블시리즈] → 인테리어 이미지 자동 생성 (async)
+  // [IMAGINE:시리즈,소파컬러,공간,테이블컬러,사이즈,무드] → 인테리어 이미지 자동 생성 (async)
   html = html.replace(/\[IMAGINE:([^\]]+)\]/g, function(match, params){
     const parts = params.split(',').map(p => p.trim());
     const series = parts[0] || '';
@@ -3870,11 +3736,10 @@ function formatMsg(text){
     const tableColor = parts[3] || '';
     const size = parts[4] || '';
     const mood = parts[5] || '';
-    const tableSeries = parts[6] || '';
     if (!series) return '';
     const id = 'imagine-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
-    setTimeout(function(){ generateImagineImage(id, series, color, space, tableColor, size, mood, tableSeries); }, 50);
-    return `<div class="imagine-box" id="${id}" data-series="${escHtml(series)}" data-color="${escHtml(color)}" data-space="${escHtml(space)}" data-table-color="${escHtml(tableColor)}" data-size="${escHtml(size)}" data-mood="${escHtml(mood)}" data-table-series="${escHtml(tableSeries)}">
+    setTimeout(function(){ generateImagineImage(id, series, color, space, tableColor, size, mood); }, 50);
+    return `<div class="imagine-box" id="${id}" data-series="${escHtml(series)}" data-color="${escHtml(color)}" data-space="${escHtml(space)}" data-table-color="${escHtml(tableColor)}" data-size="${escHtml(size)}" data-mood="${escHtml(mood)}">
       <div class="imagine-loading">
         <div class="imagine-spinner"></div>
         <div class="imagine-msg">${escHtml(series)}${size ? ' ' + escHtml(size) : ''} 인테리어 생성 중<span class="sub">약 20초 정도 걸려요</span></div>
@@ -3960,7 +3825,7 @@ async function generateBundleImage(id, items, space, mood){
 }
 
 // 인테리어 이미지 자동 생성 (imagine.js fusion 호출)
-async function generateImagineImage(id, series, color, space, tableColor, size, mood, tableSeries){
+async function generateImagineImage(id, series, color, space, tableColor, size, mood){
   const el = document.getElementById(id);
   if (!el) return;
   try {
@@ -3970,7 +3835,6 @@ async function generateImagineImage(id, series, color, space, tableColor, size, 
     if (tableColor) payload.tableColor = tableColor;
     if (size) payload.size = size;
     if (mood) payload.mood = mood;
-    if (tableSeries) payload.tableSeries = tableSeries;
 
     const res = await fetch('/api/imagine', {
       method: 'POST',
