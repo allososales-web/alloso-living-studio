@@ -572,7 +572,7 @@ export async function onRequestPost(context) {
         : '';
 
       const swapPrompt = [
-        `═══ PHOTO RETOUCH TASK — NOT a furniture regeneration ═══`,
+        `CRITICAL: This is a SELECTIVE PIXEL RECOLORING task only — NOT image generation, NOT scene reconstruction, NOT composition change. Treat this exactly like Photoshop "Hue/Saturation > Colorize" on a selection mask. The output pixel grid must be structurally identical to IMAGE 1.`,
         chipBase64
           ? `You are performing a precise material/color recolor edit. IMAGE 1 is the source photograph. IMAGE 2 is the exact color swatch to match.`
           : `You are performing a precise color/material recolor edit on this photograph.`,
