@@ -583,7 +583,7 @@ export async function onRequestPost(context) {
         `1. The EXACT furniture silhouette, shape, geometry, dimensions, proportions, contours.`,
         `2. The EXACT number of cushions, their individual shape, their position, their arrangement, their creases and folds.`,
         `3. The EXACT armrest design, leg/base design, frame structure, stitching pattern.`,
-        `4. The EXACT camera angle, perspective, framing, crop, focal length.`,
+        `4. The EXACT camera angle, perspective, framing, crop, focal length — and the EXACT pixel position of the furniture within the frame. Do NOT shift, move, recompose, or offset the sofa or any object left, right, up, or down even by a single pixel. The furniture must occupy the same spatial position and the same area of the image as in IMAGE 1.`,
         `5. The EXACT lighting direction, intensity, color temperature, shadows, highlights, and reflections.`,
         `6. The EXACT background, walls, floor, side tables, lamps, decorative objects, plants — every other element must be untouched.`,
         `7. The EXACT image resolution and photographic quality of the original.`,
