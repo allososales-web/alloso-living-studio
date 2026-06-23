@@ -408,9 +408,9 @@ async function callGemini(env, imageBase64s, prompt) {
   // 환경변수 GEMINI_IMAGE_MODEL로 모델 교체 가능 (Cloudflare Pages 환경변수에서 설정)
   // 무료 옵션:
   //   gemini-2.5-flash-image       — 기존 (합성 약함)
-  //   gemini-2.5-flash-image-preview — 미리보기 (개선됨)
+  //   gemini-2.0-flash-exp — 미리보기 (개선됨)
   //   gemini-2.0-flash-exp-image-generation — 실험판 (다른 특성)
-  const model = env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image-preview';
+  const model = env.GEMINI_IMAGE_MODEL || 'gemini-2.0-flash-exp';
 
   const parts = [];
   for (const b64 of imageBase64s.filter(Boolean)) {
@@ -749,7 +749,7 @@ export async function onRequestPost(context) {
           ref_filename: seriesPick.name,
           ref_debug: seriesPick._debug || null,
           gemini_debug: {
-            model: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image-preview',
+            model: env.GEMINI_IMAGE_MODEL || 'gemini-2.0-flash-exp',
             prompt_length: seriesSwapPrompt.length,
             source_image_b64_len: base64.length,
             ref_image_b64_len: seriesBase64.length,
