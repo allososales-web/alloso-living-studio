@@ -266,7 +266,7 @@ async function callGemini(env, imageBase64s, prompt) {
   // gemini-2.5-flash-image       — 기존
   // gemini-2.5-flash-image-preview — 개선된 미리보기 버전 (기본값)
   // gemini-2.0-flash-exp-image-generation — 실험판
-  const model = env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image-preview';
+const model = env.GEMINI_IMAGE_MODEL || 'gemini-2.0-flash-exp-image-generation';
 
   const parts = [];
   for (const b64 of imageBase64s.filter(Boolean)) {
