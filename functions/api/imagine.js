@@ -592,7 +592,7 @@ export async function onRequestPost(context) {
           ? `Match IMAGE 2's color and material texture EXACTLY. Sample the swatch carefully — match its hue, saturation, value, warmth, and surface texture precisely. Do not approximate. CRITICAL: Do NOT darken, intensify, or oversaturate the swatch color. If the swatch shows a soft, muted, light, or pastel tone, the result must remain soft, muted, light, or pastel — do not push toward deep/saturated/dark variants. Color values (hue, saturation, lightness) must be sampled directly from the swatch pixels, not estimated from the color name.`
           : `Target appearance for the upholstery: ${instruction}${enrichment ? ' — refer to the color enrichment notes above for accuracy' : ''}. Match the specified Alloso color STRICTLY.`,
         `Adjust shadow tones subtly to match the new material's reflectivity, but do not change shadow shape or position.`,
-        `Output a single photorealistic image that looks like a Photoshop color-replace edit of IMAGE 1 — same room, same furniture geometry, same lighting, only the upholstery surface re-colored to match the target.`,
+        `OUTPUT REQUIREMENT: The result image must be pixel-for-pixel identical to IMAGE 1 except the upholstery color. Same canvas size, same sofa position, same background, same camera framing — if you shifted or recomposed anything, you have failed this task. Only the fabric/leather surface color changes.`,
       ].filter(Boolean).join(' ');
 
       let resultBase64;
